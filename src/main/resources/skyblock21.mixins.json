@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "com.skyblock21.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"BackgroundRendererMixin",
+		"MouseMixin",
+		"InGameHudMixin",
+		"HandledScreenMixin",
+		"accessors.MessageHandlerAccessor",
+		"accessors.PlayerListHudAccessor",
+		"accessors.ChatHudAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

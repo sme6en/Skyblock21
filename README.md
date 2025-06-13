@@ -1,9 +1,23 @@
-# Fabric Example Mod
+# Skyblock 21
+Hypixel Skyblock utility mod for Fabric 1.21.5
 
-## Setup
+## Features
 
-For setup instructions please see the [fabric documentation page](https://docs.fabricmc.net/develop/getting-started/setting-up-a-development-environment) that relates to the IDE that you are using.
+- **Galatea Island**
+  - Foraging whisper tracker (WIP)
+  - Tree chop progress overlay
+  - Heart of the forest overlay (WIP)
+- **Misc**
+  - Booster Cookie Reminder
+  - Scatha Spawn Alerts
+  - Mouse Lock
+  - Auto Copy RNG Messages
+  - SessionID Protection (WIP)
 
-## License
+## Commands
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+Use `/skyblock21` to open the config menu and `/skyblock gui` to edit the position and scale of each hud element.
+
+## Credits
+
+Skyblocker, SkyblockTweaks
