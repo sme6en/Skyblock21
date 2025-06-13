@@ -55,40 +55,14 @@ public class Skyblock21 implements ClientModInitializer {
                                .send(() -> MinecraftClient.getInstance()
                                                           .setScreen(Skyblock21ConfigManager.createGUI(null)));
                 return 1;
-            }));
-        });
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, commandRegistryAccess) -> {
-            dispatcher.register(literal("a123").executes((ctx) -> {
-//                                ScathaAlert.alert(true);
-
-                TabUtils.widgetLines.forEach((widget, strings) -> {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(widget.name()).append(": ");
-                    for (String line : strings) {
-                        sb.append(line).append(", ");
-                    }
-                    LOGGER.info(sb.toString());
-                });
-
+            }).then(literal("gui").executes((fabricClientCommandSourceCommandContext) -> {
                 MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
+                        .send(() -> MinecraftClient.getInstance()
+                                .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
                 return 1;
-            }));
+            })));
         });
 
-
-    }
-
-    private static void render(DrawContext context) {
-        int x = 40;
-        int y = 30;
-
-        MatrixStack ms = context.getMatrices();
-        ms.push();
-        context.drawTextWithBackground(MinecraftClient.getInstance().textRenderer, Text.literal("" + Utils.getLocation()
-                                                                                                          .name()), x, y, x + MinecraftClient.getInstance().textRenderer.getWidth("" + Utils.isOnSkyblock()), Color.green.getRGB());
     }
 
     public void tick(MinecraftClient client) {
@@ -129,6 +103,5 @@ public class Skyblock21 implements ClientModInitializer {
         registerCommands();
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> Skyblock21ConfigManager.save());
-        HudLayerRegistrationCallback.EVENT.register(d -> d.attachLayerAfter(IdentifiedLayer.OVERLAY_MESSAGE, Identifier.of("skyblock21", "debug_overlay"), ((context, tickCounter) -> render(context))));
     }
 }
