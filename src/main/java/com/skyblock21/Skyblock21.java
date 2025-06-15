@@ -3,16 +3,23 @@ package com.skyblock21;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skyblock21.config.Skyblock21ConfigManager;
-import com.skyblock21.events.ReceiveChatMessageEvent;
-import com.skyblock21.features.*;
+import com.skyblock21.config.persistent.PersistentData;
+import com.skyblock21.events.SkyblockEvents;
+import com.skyblock21.features.CookieGodPotReminder;
+import com.skyblock21.features.CopyToClipboardRNG;
+import com.skyblock21.features.MouseLock;
+import com.skyblock21.features.Scathas;
+import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
+import com.skyblock21.hud.elements.GalateaTrackerElement;
+import com.skyblock21.hud.elements.ScathaTrackerElement;
 import com.skyblock21.hud.elements.TestHudElement;
 import com.skyblock21.hud.elements.TreeProgressHudElement;
 import com.skyblock21.util.AutoUpdater;
-import com.skyblock21.util.Location;
+import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
 import com.skyblock21.util.tab.TabUtils;
 import net.fabricmc.api.ClientModInitializer;
@@ -20,19 +27,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.nio.file.Files;
 import java.util.Objects;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -49,18 +48,27 @@ public class Skyblock21 implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static void registerCommands() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, commandRegistryAccess) -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {
             dispatcher.register(literal("skyblock21").executes((ctx) -> {
                 MinecraftClient.getInstance()
                                .send(() -> MinecraftClient.getInstance()
                                                           .setScreen(Skyblock21ConfigManager.createGUI(null)));
                 return 1;
-            }).then(literal("gui").executes((fabricClientCommandSourceCommandContext) -> {
+            }).then(literal("gui").executes((ctx) -> {
                 MinecraftClient.getInstance()
-                        .send(() -> MinecraftClient.getInstance()
-                                .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
+                               .send(() -> MinecraftClient.getInstance()
+                                                          .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
+                return 1;
+            })).then(literal("resettracker").then(literal("scatha").executes(ctx -> {
+                Scathas.resetSession();
+                return 1;
+            })).then(literal("galatea")).executes((ctx) -> {
+                GalateaTracker.resetSession();
+                TextUtils.addMessage("Galatea tracker reset!", true, true);
                 return 1;
             })));
+
+            dispatcher.register(literal("s21").redirect(dispatcher.getRoot().getChild("skyblock21")));
         });
 
     }
@@ -71,8 +79,8 @@ public class Skyblock21 implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-//		AutoUpdater.onStartup();
-//		AutoUpdater.checkForUpdate();
+        AutoUpdater.checkForUpdate();
+        AutoUpdater.onStartup();
 
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
 
@@ -86,22 +94,32 @@ public class Skyblock21 implements ClientModInitializer {
         }));
 
         Skyblock21ConfigManager.load();
-        ReceiveChatMessageEvent.init();
+        PersistentData.init();
         Utils.init();
         TabUtils.init();
         CookieGodPotReminder.init();
-        ScathaAlert.init();
+        Scathas.init();
         CopyToClipboardRNG.init();
         MouseLock.init();
-        Debug.init();
+//        Debug.init();
         TreeProgress.init();
         HOTFOverlay.init();
+        GalateaTracker.init();
 
-        HudManager.register(new TestHudElement(100, 120));
+        HudManager.register(new TestHudElement(100, 50));
         HudManager.register(new TreeProgressHudElement(100, 190));
+        HudManager.register(new GalateaTrackerElement(10, 10));
+        HudManager.register(new ScathaTrackerElement(10, 60));
         HudManager.init();
         registerCommands();
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> Skyblock21ConfigManager.save());
+        SkyblockEvents.LOCATION_CHANGE.register((location -> {
+            PersistentData.save();
+        }));
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            Skyblock21ConfigManager.save();
+            PersistentData.save();
+        });
     }
 }

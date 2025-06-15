@@ -1,11 +1,14 @@
 package com.skyblock21.events;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 
+@Environment(EnvType.CLIENT)
 public class DrawSlotEvents {
 
     public static Event<OnDrawSlot> BEFORE_ITEM = EventFactory.createArrayBacked(OnDrawSlot.class, listeners -> (screenTitle, context, slot) -> {

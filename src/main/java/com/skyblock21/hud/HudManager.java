@@ -34,7 +34,7 @@ public class HudManager {
         Location location = Utils.getLocation();
         for (HudElement element : hudElements) {
             if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
-            element.render(drawContext);
+            element.render(drawContext,0,0);
         }
     }
 
@@ -47,7 +47,6 @@ public class HudManager {
     }
 
     public static void loadConfig() {
-        Skyblock21.LOGGER.info("Loading HUD config from {}", CONFIG_FILE);
         if (!Files.exists(CONFIG_FILE)) {
             saveConfig(); // Create default config file if you want
             return;
@@ -59,7 +58,6 @@ public class HudManager {
 
             for (HudElement element : hudElements) {
                 if (positions.has(element.getName())) {
-                    Skyblock21.LOGGER.info("Loading position for HUD element: {}", element.getName());
                     JsonObject obj = positions.getAsJsonObject(element.getName());
 
                     if (obj == null) {
@@ -74,6 +72,17 @@ public class HudManager {
                         element.setEnabled(obj.get("enabled").getAsBoolean());
                     } else {
                         element.setEnabled(true); // Default to enabled if not specified
+                    }
+                    if (obj.has("backgroundEnabled")) {
+                        element.setBackgroundEnabled(obj.get("backgroundEnabled").getAsBoolean());
+                    } else {
+                        element.setBackgroundEnabled(false); // Default to false if not specified
+                    }
+
+                    if (obj.has("backgroundOpacity")) {
+                        element.setBackgroundOpacity(obj.get("backgroundOpacity").getAsInt());
+                    } else {
+                        element.setBackgroundOpacity(40);
                     }
                 }
             }
@@ -94,6 +103,8 @@ public class HudManager {
             obj.addProperty("y", element.getY());
             obj.addProperty("scale", element.getScale());
             obj.addProperty("enabled", element.isEnabled());
+            obj.addProperty("backgroundEnabled", element.isBackgroundEnabled());
+            obj.addProperty("backgroundOpacity", element.getBackgroundOpacity());
             positions.add(element.getName(), obj);
         }
 

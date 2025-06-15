@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import static net.minecraft.text.Text.literal;
+
 /**
  * This class is used for advanced text transformation such as client-side item renaming.
  *
@@ -22,25 +24,25 @@ import java.util.Objects;
  */
 public class TextUtils {
     private static final CharList FORMAT_CODES = CharList.of('4', 'c', '6', 'e', '2', 'a','b', '3', '1', '9', 'd', '5', 'f', '7', '8', '0', 'r', 'k', 'l', 'm', 'n', 'o');
-    private static final String PREFIX = "§8[SkyBlock21] ";
+    private static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
 
     public static void addMessage(String message, boolean prefixed, boolean overlay) {
         if (MinecraftClient.getInstance().player == null) return;
 
-        message = prefixed ? PREFIX + message : message;
-        MinecraftClient.getInstance().player.sendMessage(fromLegacy(message), overlay);
+        MutableText text = prefixed ? literal(PREFIX).append(literal(message)) : literal(message);
+
+        MinecraftClient.getInstance().player.sendMessage(text, overlay);
     }
 
     public static void addMessageWithCommandButton(String message, boolean prefixed, String buttonText, String command) {
         if (MinecraftClient.getInstance().player == null) return;
 
-        message = prefixed ? PREFIX + message : message;
-        MutableText text = fromLegacy(message);
+        MutableText text = prefixed ? literal(PREFIX).append(literal(message)) : literal(message);
         buttonText = Objects.equals(buttonText, "") ? "[Click here]" : ("[" + buttonText + "]");
-        text.append(Text.literal(" ")
-                        .append(Text.literal(buttonText)
+        text.append(literal(" ")
+                        .append(literal(buttonText)
                                     .setStyle(Style.EMPTY.withColor(Formatting.GREEN)
-                                                         .withHoverEvent(new HoverEvent.ShowText(Text.literal(command)))
+                                                         .withHoverEvent(new HoverEvent.ShowText(literal(command)))
                                                          .withClickEvent(new ClickEvent.RunCommand(command)))));
         MinecraftClient.getInstance().player.sendMessage(text, false);
     }
@@ -65,7 +67,7 @@ public class TextUtils {
         for (int i = 0; i < legacy.length(); i++) {
             //If we've encountered a new formatting code then append the text from the previous "sequence" and reset state
             if (i != 0 && legacy.charAt(i - 1) == '§' && FORMAT_CODES.contains(Character.toLowerCase(legacy.charAt(i))) && !builder.isEmpty()) {
-                newText.append(Text.literal(builder.toString()).setStyle(Style.EMPTY
+                newText.append(literal(builder.toString()).setStyle(Style.EMPTY
                         .withColor(formatting)
                         .withBold(bold)
                         .withItalic(italic)
@@ -106,7 +108,7 @@ public class TextUtils {
 
             // We've read the last character so append the last text with all of the formatting
             if (i == legacy.length() - 1) {
-                newText.append(Text.literal(builder.toString()).setStyle(Style.EMPTY
+                newText.append(literal(builder.toString()).setStyle(Style.EMPTY
                         .withColor(formatting)
                         .withBold(bold)
                         .withItalic(italic)
@@ -147,7 +149,7 @@ public class TextUtils {
             for(int i = 0; i < textComponentCount; i++) {
                 String componentString = textComponents.get(i).getString();
                 if(componentString.contains(textToStylize) && replacementsMatched < replacementMatches) {
-                    newText.append(Text.literal(componentString).setStyle(newStyle));
+                    newText.append(literal(componentString).setStyle(newStyle));
                     replacementsMatched++;
                     continue;
                 }
@@ -155,7 +157,7 @@ public class TextUtils {
                 if(Arrays.stream(replaceableText).anyMatch(componentString::contains)) {
                     if(replacementText.isEmpty()) continue; //Avoid adding components which won't display
                     Style componentStyle = textComponents.get(i).getStyle();
-                    newText.append(Text.literal(componentString.replaceAll(replacementRegex, replacementText)).setStyle(componentStyle));
+                    newText.append(literal(componentString.replaceAll(replacementRegex, replacementText)).setStyle(componentStyle));
                     continue;
                 }
 
@@ -190,7 +192,7 @@ public class TextUtils {
             for(int i = 0; i < textComponentCount; i++) {
                 String componentString = textComponents.get(i).getString();
                 if(componentString.contains(textToStylize) && partsMatched < matches) {
-                    newText.append(Text.literal(componentString).setStyle(newStyle));
+                    newText.append(literal(componentString).setStyle(newStyle));
                     partsMatched++;
                     continue;
                 }
@@ -209,15 +211,15 @@ public class TextUtils {
      * @param text The text to be formatted into a rainbow gradient
      * @return A text object containing the {@code text} formatted into a rainbow gradient.
      */
-    public static Text rainbowify(@NotNull String text) {
+    public static MutableText rainbowify(@NotNull String text) {
         MutableText newText = Text.empty();
         float textLength = text.length();
         float next = Math.nextDown(1.0f) * textLength;
 
-        newText.append(Text.literal(String.valueOf(text.charAt(0))).withColor(Color.getHSBColor(Math.nextDown(1.0f), 1.0f, 1.0f).getRGB()));
+        newText.append(literal(String.valueOf(text.charAt(0))).withColor(Color.getHSBColor(Math.nextDown(1.0f), 1.0f, 1.0f).getRGB()));
         for(int i = 1; i < textLength; ++i) {
             float i2 = i; //For some reason Java doesn't like the direct reference
-            newText.append(Text.literal(String.valueOf(text.charAt(i))).withColor(Color.getHSBColor(i2 / next, 1.0f, 1.0f).getRGB()));
+            newText.append(literal(String.valueOf(text.charAt(i))).withColor(Color.getHSBColor(i2 / next, 1.0f, 1.0f).getRGB()));
         }
         return newText;
     }
@@ -236,10 +238,10 @@ public class TextUtils {
         MutableText newText = Text.empty();
         float next = Math.nextDown(1.0f) * totalTextLength;
 
-        newText.append(Text.literal(String.valueOf(text.charAt(0))).withColor(Color.getHSBColor(positionLeftOffAt / next, 1.0f, 1.0f).getRGB()));
+        newText.append(literal(String.valueOf(text.charAt(0))).withColor(Color.getHSBColor(positionLeftOffAt / next, 1.0f, 1.0f).getRGB()));
         for(int i = 1; i < text.length(); ++i) {
             float i2 = i + positionLeftOffAt; //For some reason Java doesn't like the direct reference
-            newText.append(Text.literal(String.valueOf(text.charAt(i))).withColor(Color.getHSBColor(i2 / next, 1.0f, 1.0f).getRGB()));
+            newText.append(literal(String.valueOf(text.charAt(i))).withColor(Color.getHSBColor(i2 / next, 1.0f, 1.0f).getRGB()));
         }
         return newText;
     }
@@ -251,7 +253,7 @@ public class TextUtils {
         MutableText text = Text.empty();
 
         orderedText.accept((index, style, codePoint) -> {
-            text.append(Text.literal(Character.toString(codePoint)).setStyle(style));
+            text.append(literal(Character.toString(codePoint)).setStyle(style));
 
             return true;
         });
@@ -283,7 +285,7 @@ public class TextUtils {
         MutableText text = Text.empty();
 
         orderedText.accept((index, style, codePoint) -> {
-            text.append(Text.literal(Character.toString(codePoint)).setStyle(style));
+            text.append(literal(Character.toString(codePoint)).setStyle(style));
 
             return true;
         });
@@ -359,7 +361,7 @@ public class TextUtils {
 			}*/
 
             current.asOrderedText().accept((index, style, codePoint) -> {
-                newComponents.add(Text.literal(Character.toString(codePoint)).setStyle(style));
+                newComponents.add(literal(Character.toString(codePoint)).setStyle(style));
 
                 return true;
             });
@@ -380,7 +382,7 @@ public class TextUtils {
 
         //Deconstruct the main text
         text.asOrderedText().accept((index, style, codePoint) -> {
-            newComponents.add(Text.literal(Character.toString(codePoint)).setStyle(style));
+            newComponents.add(literal(Character.toString(codePoint)).setStyle(style));
 
             return true;
         });
@@ -398,7 +400,7 @@ public class TextUtils {
             //The conversion to ordered text is the only way to efficiently traverse the replacement component
             //as it could have nesting layers or legacy formatting -- maybe we can cache this?
             current.asOrderedText().accept((index, style, codePoint) -> {
-                newComponents.add(Text.literal(Character.toString(codePoint)).setStyle(style));
+                newComponents.add(literal(Character.toString(codePoint)).setStyle(style));
 
                 return true;
             });
@@ -414,7 +416,7 @@ public class TextUtils {
         MutableText text = Text.empty();
 
         orderedText.accept((index, style, codePoint) -> {
-            text.append(Text.literal(Character.toString(codePoint)).setStyle(style));
+            text.append(literal(Character.toString(codePoint)).setStyle(style));
 
             return true;
         });
@@ -490,7 +492,7 @@ public class TextUtils {
      * Replaces the text's content while preserving the style and siblings.
      */
     public static MutableText withContent(Text original, String newContent) {
-        MutableText newText = Text.literal(newContent).setStyle(original.getStyle());
+        MutableText newText = literal(newContent).setStyle(original.getStyle());
 
         newText.getSiblings().addAll(original.getSiblings());
 

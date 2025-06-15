@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class CookieGodPotReminder {
 
-    private static final Pattern COOKIE_DURATION_REGEX = Pattern.compile("^(\\\\d+)\\\\s+(hours|seconds)");
+    private static final Pattern COOKIE_DURATION_REGEX = Pattern.compile("^(\\d+)\\s+(hours|seconds)");
 
     public static void init() {
         SkyblockEvents.JOIN.register(() -> {
@@ -29,19 +29,20 @@ public class CookieGodPotReminder {
         if (!Utils.isOnSkyblock()) return;
 
         String footerText = ((PlayerListHudAccessor) MinecraftClient.getInstance().inGameHud.getPlayerListHud()).getFooter().getString();
+        if (footerText == null || footerText.isEmpty() || !footerText.contains("Cookie Buff")) return;
 
-        int cookieIndex = footerText.indexOf("Booster Cookie");
-        String durationText = footerText.split("\n")[cookieIndex+1];
+        String durationText = footerText.split("\n")[6];
+
+        checked = true;
+
         Matcher matcher = COOKIE_DURATION_REGEX.matcher(durationText);
-
         if (footerText.contains("Not active! Obtain booster cookies from the community") && Skyblock21ConfigManager.get().general.boosterCookieReminder) {
             TextUtils.addMessageWithCommandButton("§cYou don't have an active Booster Cookie!", true, "§aClick here to go to lobby", "/warp hub");
         } else if (matcher.find() && Skyblock21ConfigManager.get().general.boosterCookieReminder) {
             int value = Integer.parseInt(matcher.group(1));
             String unit = matcher.group(2);
-
             if (unit.equals("seconds") || value < Skyblock21ConfigManager.get().general.boosterCookieReminderHours) {
-                TextUtils.addMessageWithCommandButton("§6Booster Cookie expires soon! ", true, "§аClick here to buy", "/bz booster");
+                TextUtils.addMessageWithCommandButton("§cBooster Cookie expires soon! ", true, "§аClick here to buy", "/bz booster");
             }
         }
 
@@ -62,7 +63,6 @@ public class CookieGodPotReminder {
         String footerText = ((PlayerListHudAccessor) MinecraftClient.getInstance().inGameHud.getPlayerListHud()).getFooter().getString();
 
         if (footerText.contains("Cookie Buff")) {
-            checked = true;
             checkCookieAndGodPotion();
         }
 

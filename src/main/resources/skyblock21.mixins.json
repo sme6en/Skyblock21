@@ -5,11 +5,12 @@
 	"client": [
 		"BackgroundRendererMixin",
 		"MouseMixin",
-		"InGameHudMixin",
 		"HandledScreenMixin",
+		"MessageHandlerMixin",
+		"YggdrasilServicesKeyInfoMixin",
 		"accessors.MessageHandlerAccessor",
 		"accessors.PlayerListHudAccessor",
-		"accessors.ChatHudAccessor"
+		"accessors.ChatHudAccessor",
 	],
 	"injectors": {
 		"defaultRequire": 1

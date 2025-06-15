@@ -1,6 +1,5 @@
 package com.skyblock21.hud;
 
-import com.skyblock21.util.Utils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -11,8 +10,8 @@ import java.awt.*;
 
 public class EditGuiScreen extends Screen {
 
-    protected final Screen parent;
     public static HudElement selectedElement = null;
+    protected final Screen parent;
 
     public EditGuiScreen(Screen parent) {
         super(Text.literal("Edit SkyBlock21 HUD"));
@@ -24,21 +23,18 @@ public class EditGuiScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
 
         for (HudElement element : HudManager.getElements()) {
-            if ((!element.isEnabled() && !element.isAllowedInLocation(Utils.getLocation())) || element.alwaysRenderDummy) {
-                MatrixStack matrices = context.getMatrices();
-                matrices.push();
-                matrices.translate(element.getX(), element.getY(), 0);
-                matrices.scale(element.getScale(), element.getScale(), 1);
-                element.renderBackground(context);
-                element.renderDummy(context);
-                matrices.pop();
-            } else {
-                element.render(context);
+            element.render(context, mouseX, mouseY);
+            if ((element.isMouseOver(mouseX, mouseY) || selectedElement == element) && element.isEnabled()) {
+                String text = element.getName() + " (" + (int) (element.getScale() * 100) + "%)";
+                context.drawTextWithShadow(textRenderer, text, element.getX(), element.getY() - textRenderer.fontHeight, new Color(255, 255, 255, 150).getRGB());
             }
         }
 
-        context.drawCenteredTextWithShadow(textRenderer, "SkyBlock21 HUD Editor", width / 2, (height / 2) - textRenderer.fontHeight - 5, Color.GREEN.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Right Click To Reset Position", width / 2, height / 2, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "§bSkyBlock§f21§r HUD Editor", width / 2, (height / 2) - textRenderer.fontHeight - 4, Color.GREEN.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Right Click to Reset Position", width / 2, height / 2, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Click \"B\" to Toggle Background", width / 2, (height / 2) + textRenderer.fontHeight + 4, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Scroll or \"-\"/\"+\" to increase size", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 2, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Ctrl + Scroll to increase background opacity", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 3, Color.GRAY.getRGB());
     }
 
     @Override
@@ -77,7 +73,9 @@ public class EditGuiScreen extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (HudElement element : HudManager.getElements()) {
             if (element.isMouseOver(mouseX, mouseY)) {
-                element.adjustScale((float) verticalAmount * 0.1f);
+                if (hasControlDown()) {
+                    element.setBackgroundOpacity(element.getBackgroundOpacity() + (int) verticalAmount);
+                } else element.adjustScale((float) verticalAmount * 0.1f);
                 return true;
             }
         }
@@ -114,6 +112,10 @@ public class EditGuiScreen extends Screen {
             }
             case GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_KP_SUBTRACT -> {
                 selectedElement.adjustScale(shift ? -0.1f : -0.05f);
+                return true;
+            }
+            case GLFW.GLFW_KEY_B -> {
+                selectedElement.setBackgroundEnabled(!selectedElement.isBackgroundEnabled());
                 return true;
             }
         }

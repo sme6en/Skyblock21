@@ -73,7 +73,7 @@ public class AutoUpdater {
                 System.out.println("[AutoUpdater] You're on the latest version.");
             }
         } catch (Exception e) {
-            System.err.println("[AutoUpdater] Failed to check for update: " + e.getMessage());
+            System.err.println("[AutoUpdater] Failed to check for update: " + e.getStackTrace());
         }
     }
 

@@ -29,4 +29,9 @@ public class TestHudElement extends HudElement {
     public int getHeight() {
         return MinecraftClient.getInstance().textRenderer.fontHeight + 4;
     }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

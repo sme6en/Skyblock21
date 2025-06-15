@@ -36,15 +36,13 @@ public class HOTFOverlay {
 
         // 49th slot
         Slot slot = screen.getScreenHandler().getSlot(49);
-        System.out.println("Slot: " + slot.getStack().getItemName());
         if (slot.getStack().isEmpty()) {
             return;
         }
-        //get last line
         Text lastLines = slot.getStack().getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).lines().getLast();
 
         if (WHISPER_PATTERN.matcher(lastLines.getString()).matches()) {
-            String amount = WHISPER_PATTERN.matcher(lastLines.getString()).group(1).replace(",", "");
+            String amount = lastLines.getString().replace("Forest Whispers: ", "").replace(",", "").trim();
             whisperAmount = Integer.parseInt(amount);
             System.out.println("Whisper Amount: " + whisperAmount);
         }
@@ -53,14 +51,14 @@ public class HOTFOverlay {
     private static void onDrawSlot(Text text, DrawContext drawContext, Slot slot) {
         List<Text> lines = slot.getStack().getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).lines();
 
-//        for (Text line : lines) {
-//            if (WHISPER_UPGRADE_PATTERN.matcher(line.getString()).find()) {
-//                String amount = WHISPER_UPGRADE_PATTERN.matcher(line.getString()).group(1).replace(",", "");
-//                int upgradeAmount = Integer.parseInt(amount);
-//                if (upgradeAmount <= whisperAmount) {
-//                    drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color.GREEN.getRGB());
-//                }
-//            }
-//        }
+        for (Text line : lines) {
+            if (WHISPER_UPGRADE_PATTERN.matcher(line.getString()).matches()) {
+                String amount = line.getString().replace(",", "").replace("Forest Whispers", "").trim();
+                int upgradeAmount = Integer.parseInt(amount);
+                if (upgradeAmount <= whisperAmount) {
+                    drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color.GREEN.getRGB());
+                }
+            }
+        }
     }
 }

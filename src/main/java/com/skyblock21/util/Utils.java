@@ -2,6 +2,9 @@ package com.skyblock21.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.util.UndashedUuid;
+import com.skyblock21.events.SkyblockEvents;
+import com.skyblock21.mixin.accessors.MessageHandlerAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.azureaaron.hmapi.data.rank.PackageRank;
@@ -13,47 +16,43 @@ import net.azureaaron.hmapi.network.packet.s2c.HelloS2CPacket;
 import net.azureaaron.hmapi.network.packet.s2c.HypixelS2CPacket;
 import net.azureaaron.hmapi.network.packet.v1.s2c.LocationUpdateS2CPacket;
 import net.azureaaron.hmapi.network.packet.v1.s2c.PlayerInfoS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.scoreboard.*;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.skyblock21.events.SkyblockEvents;
-import com.skyblock21.mixin.accessors.MessageHandlerAccessor;
-
-import com.mojang.util.UndashedUuid;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.scoreboard.*;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-
-import java.util.UUID;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.OptionalInt;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class Utils {
+    public static final String PROFILE_ID_PREFIX = "Profile ID: ";
+    /**
+     * @implNote The parent text will always be empty, the actual text content is inside the text's siblings.
+     */
+    public static final ObjectArrayList<Text> TEXT_SCOREBOARD = new ObjectArrayList<>();
+    public static final ObjectArrayList<String> STRING_SCOREBOARD = new ObjectArrayList<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
-
     private static final String PROFILE_PREFIX = "Profile: ";
     private static final String PROFILE_MESSAGE_PREFIX = "§aYou are playing on profile: §e";
-    public static final String PROFILE_ID_PREFIX = "Profile ID: ";
     private static final Pattern PURSE = Pattern.compile("(Purse|Piggy): (?<purse>[0-9,.]+)( \\((?<change>[+\\-][0-9,.]+)\\))?");
-
+    @NotNull
+    public static double purse = 0;
     private static boolean isOnHypixel = false;
     private static boolean isOnSkyblock = false;
-
     private static RankType rank = PackageRank.NONE;
     private static Location location = Location.UNKNOWN;
     private static Area area = Area.UNKNOWN;
-
     @NotNull
     private static String server = "";
     @NotNull
@@ -62,14 +61,6 @@ public class Utils {
     private static String locationRaw = "";
     @NotNull
     private static String map = "";
-    @NotNull
-    public static double purse = 0;
-
-    /**
-     * @implNote The parent text will always be empty, the actual text content is inside the text's siblings.
-     */
-    public static final ObjectArrayList<Text> TEXT_SCOREBOARD = new ObjectArrayList<>();
-    public static final ObjectArrayList<String> STRING_SCOREBOARD = new ObjectArrayList<>();
 
     public static boolean isOnHypixel() {
         return isOnHypixel;
@@ -318,7 +309,6 @@ public class Utils {
     }
 
     private static void onPacket(HypixelS2CPacket packet) {
-        System.out.println("Hypixel Packet ID: "+ packet.getId());
         switch (packet) {
             case HelloS2CPacket(var environment) -> {
 
@@ -327,10 +317,8 @@ public class Utils {
             }
 
             case LocationUpdateS2CPacket(var serverName, var serverType, var _lobbyName, var mode, var map) -> {
-                System.out.println("location update packet received: " + serverName + ", " + serverType + ", " + _lobbyName + ", " + mode + ", " + map);
                 Utils.server = serverName;
                 String previousServerType = Utils.gameType;
-                System.out.println("Prev: " + previousServerType);
                 Utils.gameType = serverType.orElse("");
                 Utils.locationRaw = mode.orElse("");
                 Utils.location = Location.from(locationRaw);
@@ -364,7 +352,8 @@ public class Utils {
                 LOGGER.error("Failed to update your current location! Some features of the mod may not work correctly :( - Error: {}", error);
             }
 
-            default -> {} //Do Nothing
+            default -> {
+            } //Do Nothing
         }
     }
 
@@ -453,6 +442,7 @@ public class Utils {
 
     /**
      * Parses an int from a string
+     *
      * @param input the string to parse
      * @return the int parsed or an empty optional if it failed
      * @implNote Does not log the exception if thrown
@@ -463,6 +453,21 @@ public class Utils {
         } catch (NumberFormatException e) {
             return OptionalInt.empty();
         }
+    }
+
+    public static String formatTime(long millis) {
+        Duration duration = Duration.ofMillis(millis);
+
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+
+        StringBuilder sb = new StringBuilder();
+        if (hours > 0) sb.append(String.format("%dh", hours));
+        if (minutes > 0) sb.append(String.format("%02dm", minutes));
+        sb.append(String.format("%02ds", seconds));
+
+        return sb.toString();
     }
 
 }
