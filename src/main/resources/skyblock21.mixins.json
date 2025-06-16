@@ -4,15 +4,21 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"BackgroundRendererMixin",
-		"MouseMixin",
+		"ClientWorldMixin",
 		"HandledScreenMixin",
 		"MessageHandlerMixin",
+		"MouseMixin",
 		"YggdrasilServicesKeyInfoMixin",
-		"accessors.MessageHandlerAccessor",
-		"accessors.PlayerListHudAccessor",
 		"accessors.ChatHudAccessor",
+		"accessors.MessageHandlerAccessor",
+		"accessors.PlayerListHudAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	}
+	},
+	"mixins": [
+		"ClientPlayerEntityMixin",
+		"ItemStackMixin",
+		"PlayerEntityMixin"
+	]
 }

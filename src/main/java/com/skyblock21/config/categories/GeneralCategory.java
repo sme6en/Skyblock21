@@ -1,13 +1,14 @@
 package com.skyblock21.config.categories;
 
 import com.skyblock21.config.Skyblock21Config;
+import com.skyblock21.config.Skyblock21ConfigManager;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
-import net.minecraft.text.Text;
 
 import static net.minecraft.text.Text.literal;
 
@@ -76,6 +77,25 @@ public class GeneralCategory {
                                                                                                           .yesNoFormatter()
                                                                                                           .coloured(true))
                                                              .build())
-                                               .build()).build();
+                                               .build()).group(OptionGroup.createBuilder()
+                                                                          .name(literal("Items"))
+                                                                          .option(Option.<Boolean>createBuilder()
+                                                                                        .name(literal("Prevent dropping starred items"))
+                                                                                        .description(OptionDescription.of(literal("Notifies you when your booster cookie is about to expire or has expired")))
+                                                                                        .binding(defaults.general.preventDroppingStarredItems,
+                                                                                                () -> config.general.preventDroppingStarredItems,
+                                                                                                newValue -> config.general.preventDroppingStarredItems = newValue)
+                                                                                        .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                                                     .yesNoFormatter()
+                                                                                                                                     .coloured(true))
+                                                                                        .build())
+                                                                          .option(Option.<Skyblock21Config.General.CompactStarMode>createBuilder()
+                                                                                                    .name(literal("Compact Stars style"))
+                                                                                                    .binding(defaults.general.compactStarMode,
+                                                                                                            () -> config.general.compactStarMode,
+                                                                                                            newValue -> config.general.compactStarMode = newValue)
+                                                                                                    .controller(Skyblock21ConfigManager::createEnumCyclingListController)
+                                                                                                    .build())
+                                                                          .build()).build();
     }
 }

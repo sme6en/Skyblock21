@@ -2,10 +2,12 @@ package com.skyblock21.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import dev.isxander.yacl3.api.Option;
 import com.skyblock21.config.categories.ForagingCategory;
 import com.skyblock21.config.categories.GeneralCategory;
 import com.skyblock21.config.categories.MiningCategory;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.loader.api.FabricLoader;
@@ -29,19 +31,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-record CodecTypeAdapter<T>(Codec<T> codec) implements JsonSerializer<T>, JsonDeserializer<T> {
-
-    @Override
-    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return codec.parse(JsonOps.INSTANCE, json).getOrThrow(JsonParseException::new);
-    }
-
-    @Override
-    public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context) {
-        return codec.encodeStart(JsonOps.INSTANCE, src).getOrThrow();
-    }
-}
-
 public class Skyblock21ConfigManager {
 
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("skyblock21.json");
@@ -51,7 +40,6 @@ public class Skyblock21ConfigManager {
                                                                                                                                            .setJson5(false)
                                                                                                                                            .appendGsonBuilder(builder -> builder
                                                                                                                                                    .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
-                                                                                                                                                   .registerTypeHierarchyAdapter(Identifier.class, new CodecTypeAdapter<>(Identifier.CODEC))
                                                                                                                                            )
                                                                                                                                            .build())
                                                                                           .build();
@@ -79,5 +67,10 @@ public class Skyblock21ConfigManager {
                 .category(GeneralCategory.create(defaults, config))
                 .category(MiningCategory.create(defaults, config))
                 .category(ForagingCategory.create(defaults, config))).generateScreen(parent);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E extends Enum<E>> EnumControllerBuilder<E> createEnumCyclingListController(Option<E> opt) {
+        return EnumControllerBuilder.create(opt).enumClass((Class<E>) opt.stateManager().get().getClass());
     }
 }

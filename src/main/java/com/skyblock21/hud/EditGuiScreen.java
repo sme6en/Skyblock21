@@ -2,14 +2,19 @@ package com.skyblock21.hud;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
+import java.util.function.Function;
 
 public class EditGuiScreen extends Screen {
 
+    private static final int GEAR_ICON_SIZE = 24;
+    private static final Identifier GEAR_ICON = Identifier.of("skyblock21", "gui/gear.png");
     public static HudElement selectedElement = null;
     protected final Screen parent;
 
@@ -22,19 +27,47 @@ public class EditGuiScreen extends Screen {
     public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
+        MatrixStack matrices = context.getMatrices();
         for (HudElement element : HudManager.getElements()) {
+            matrices.push();
+            matrices.translate(element.getX(), element.getY(), 0);
+            matrices.scale(element.getScale(), element.getScale(), 1.0f);
+
             element.render(context, mouseX, mouseY);
-            if ((element.isMouseOver(mouseX, mouseY) || selectedElement == element) && element.isEnabled()) {
-                String text = element.getName() + " (" + (int) (element.getScale() * 100) + "%)";
-                context.drawTextWithShadow(textRenderer, text, element.getX(), element.getY() - textRenderer.fontHeight, new Color(255, 255, 255, 150).getRGB());
+
+
+
+
+
+            matrices.pop();
+
+
+            if (selectedElement == element) {
+                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (element.getHeight() * element.getScale() * 0.4f));
+
+                boolean isOverGearIcon = mouseX >= (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4) && mouseX <= (element.getX() + element.getWidth() * element.getScale()) - 4 && mouseY >= element.getY() + 4 && mouseY <= (element.getY() + gearIconSize + 4);
+
+                context.drawTexture(RenderLayer::getGuiTextured, GEAR_ICON, (int) (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4), element.getY() + 4, 0, 0, gearIconSize, gearIconSize, gearIconSize, gearIconSize, new Color(255, 255, 255, isOverGearIcon ? 100 : 255).getRGB());
+                context.drawBorder(element.getX(), element.getY(), (int) (element.getWidth() * element.getScale()), (int) (element.getHeight() * element.getScale()), new Color(255, 255, 255, 150).getRGB());
             }
+
+
+            if (selectedElement == element && element.isEnabled()) {
+                String text = element.getName() + " (" + (int) (element.getScale() * 100) + "%)";
+                context.drawTextWithShadow(textRenderer, text, 0, -textRenderer.fontHeight, new Color(255, 255, 255, 150).getRGB());
+            }
+
         }
 
-        context.drawCenteredTextWithShadow(textRenderer, "§bSkyBlock§f21§r HUD Editor", width / 2, (height / 2) - textRenderer.fontHeight - 4, Color.GREEN.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Right Click to Reset Position", width / 2, height / 2, Color.GRAY.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Click \"B\" to Toggle Background", width / 2, (height / 2) + textRenderer.fontHeight + 4, Color.GRAY.getRGB());
+        matrices.push();
+        matrices.translate(width / 2f, (height / 2f) - textRenderer.fontHeight - 12, 0);
+        matrices.scale(1.4f, 1.4f, 1.0f);
+        context.drawCenteredTextWithShadow(textRenderer, "§bSkyBlock§f21§r HUD Editor", 0, 0, Color.GREEN.getRGB());
+        matrices.pop();
+        context.drawCenteredTextWithShadow(textRenderer, "Left Click to Select Element", width / 2, height / 2, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Right Click to Reset Position", width / 2, (height / 2) + (textRenderer.fontHeight + 4), Color.GRAY.getRGB());
         context.drawCenteredTextWithShadow(textRenderer, "Scroll or \"-\"/\"+\" to increase size", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 2, Color.GRAY.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Ctrl + Scroll to increase background opacity", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 3, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Move selected element with arrows", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 3, Color.GRAY.getRGB());
     }
 
     @Override
@@ -54,6 +87,16 @@ public class EditGuiScreen extends Screen {
                     element.resetPosition();
                     return true;
                 }
+
+                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (element.getHeight() * element.getScale() * 0.4f));
+                boolean isOverGearIcon = mouseX >= (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4) && mouseX <= (element.getX() + element.getWidth() * element.getScale()) - 4 && mouseY >= element.getY() + 4 && mouseY <= (element.getY() + gearIconSize + 4);
+
+
+                if (isOverGearIcon && selectedElement == element) {
+                    client.setScreen(new EditHudElementScreen(this, element));
+                    return true;
+                }
+
                 selectedElement = element;
                 element.startDragging(mouseX, mouseY);
                 return true;
@@ -73,9 +116,8 @@ public class EditGuiScreen extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (HudElement element : HudManager.getElements()) {
             if (element.isMouseOver(mouseX, mouseY)) {
-                if (hasControlDown()) {
-                    element.setBackgroundOpacity(element.getBackgroundOpacity() + (int) verticalAmount);
-                } else element.adjustScale((float) verticalAmount * 0.1f);
+                element.adjustScale((float) verticalAmount * 0.1f);
+
                 return true;
             }
         }
@@ -112,10 +154,6 @@ public class EditGuiScreen extends Screen {
             }
             case GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_KP_SUBTRACT -> {
                 selectedElement.adjustScale(shift ? -0.1f : -0.05f);
-                return true;
-            }
-            case GLFW.GLFW_KEY_B -> {
-                selectedElement.setBackgroundEnabled(!selectedElement.isBackgroundEnabled());
                 return true;
             }
         }

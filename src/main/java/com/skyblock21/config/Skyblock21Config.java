@@ -17,7 +17,7 @@ public class Skyblock21Config {
         @SerialEntry
         public boolean noFog = false;
         @SerialEntry
-        public boolean timestampBeforeMessages = true;
+        public boolean timestampBeforeMessages = false;
         @SerialEntry
         public boolean copyToClipboardRNGs = true;
         @SerialEntry
@@ -26,6 +26,18 @@ public class Skyblock21Config {
         public int boosterCookieReminderHours = 6;
         @SerialEntry
         public boolean godPotReminder = true;
+
+        @SerialEntry
+        public boolean preventDroppingStarredItems = true;
+
+        @SerialEntry
+        public CompactStarMode compactStarMode = CompactStarMode.NONE;
+
+        public enum CompactStarMode {
+            NONE,
+            COMPACT,
+            COMPACT_TILL_TEN // Compact items with their count
+        }
     }
 
     public static class Mining {

@@ -50,10 +50,8 @@ loom {
 
 	runs {
 		named("client") {
-			property("devauth.enabled", "true")
+//			property("devauth.enabled", "true")
 			vmArg("-XX:+AllowEnhancedClassRedefinition")
-//			vmArg("-XX:HotswapAgent=external")
-//			vmArg("-javaagent:C:\\Users\\dqdob\\Downloads\\hotswap-agent-1.4.2-SNAPSHOT.jar")
 	}
 }
 

@@ -59,9 +59,9 @@ public abstract class HudElement {
 
     public void setX(int x) {
         this.x = MinecraftClient.getInstance() == null || MinecraftClient.getInstance()
-                                                                         .getWindow() == null ? x : Math.max(0, Math.min(x, MinecraftClient.getInstance()
+                                                                         .getWindow() == null ? x : Math.max(1, Math.min(x, MinecraftClient.getInstance()
                                                                                                                                            .getWindow()
-                                                                                                                                           .getScaledWidth() - (int) (getWidth() * scale)));
+                                                                                                                                           .getScaledWidth() - (int) (getWidth() * scale) - 1));
     }
 
     public int getY() {
@@ -70,9 +70,9 @@ public abstract class HudElement {
 
     public void setY(int y) {
         this.y = MinecraftClient.getInstance() == null || MinecraftClient.getInstance()
-                                                                         .getWindow() == null ? y : Math.max(0, Math.min(y, MinecraftClient.getInstance()
+                                                                         .getWindow() == null ? y : Math.max(1, Math.min(y, MinecraftClient.getInstance()
                                                                                                                                            .getWindow()
-                                                                                                                                           .getScaledHeight() - (int) (getHeight() * scale)));
+                                                                                                                                           .getScaledHeight() - (int) (getHeight() * scale)-1));
     }
 
     public float getScale() {
@@ -100,42 +100,24 @@ public abstract class HudElement {
     }
 
     public void render(DrawContext context, int mouseX, int mouseY) {
-
         MinecraftClient client = MinecraftClient.getInstance();
-        MatrixStack matrices = context.getMatrices();
-        TextRenderer textRenderer = client.textRenderer;
 
-        matrices.push();
-        matrices.translate(x, y, 0);
-        matrices.scale(scale, scale, 1);
-
-
-        if (client.currentScreen instanceof EditGuiScreen) {
-            if (isEnabled()) {
-                renderBackground(context);
-            }
+        if (client.currentScreen instanceof EditGuiScreen || client.currentScreen instanceof EditHudElementScreen) {
+            renderBackground(context);
             if (shouldRenderDummy()) {
                 renderDummy(context);
             } else {
                 renderElement(context);
             }
         } else if (isAllowedInLocation(Utils.getLocation()) && isEnabled()) {
-            if (isBackgroundEnabled()) renderBackground(context);
+            if (!shouldRenderDummy()) renderBackground(context);
             renderElement(context);
         }
-
-        matrices.pop();
     }
 
     public void renderBackground(DrawContext context) {
         if (isBackgroundEnabled() && isEnabled()) {
             context.fill(0, 0, getWidth(), getHeight(), new Color(0, 0, 0, ((int) (255 * backgroundOpacity) / 100)).getRGB());
-        }
-        if (MinecraftClient.getInstance().currentScreen instanceof EditGuiScreen) {
-            if (EditGuiScreen.selectedElement == this) {
-                // highlight the selected element with stroke
-                context.drawBorder(0, 0, getWidth(), getHeight(), new Color(255, 255, 255, 150).getRGB());
-            }
         }
     }
 
@@ -198,6 +180,12 @@ public abstract class HudElement {
     public void resetPosition() {
         setX(defaultX);
         setY(defaultY);
+    }
+
+    public void resetDefaults() {
+        setBackgroundEnabled(false);
+        setScale(1f);
+        resetPosition();
     }
 
     public abstract int getWidth();

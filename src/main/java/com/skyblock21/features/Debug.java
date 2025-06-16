@@ -140,6 +140,7 @@ public class Debug {
             //slot id
             json.append("    {\n");
             json.append("      \"slot\": ").append(slot.id).append(",\n");
+            json.append("      \"customName\": \"").append(slot.getStack().getCustomName() != null ? TextUtils.toLegacy(slot.getStack().getCustomName()) : "").append("\",\n");
             json.append("      \"item\": ").append(stack.isEmpty() ? "null" : formatStack(stack)).append("\n");
             json.append("    },\n");
         });

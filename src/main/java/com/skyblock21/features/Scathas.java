@@ -1,40 +1,99 @@
 package com.skyblock21.features;
 
+import com.mojang.authlib.properties.Property;
 import com.skyblock21.config.Skyblock21ConfigManager;
-import com.skyblock21.events.ChatEvents;
 import com.skyblock21.config.persistent.PersistentData;
+import com.skyblock21.events.ChatEvents;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Scathas {
 
     private static ArmorStandEntity currentEntity = null;
+    private static final String SCATHA_HEAD_TEXTURE = "ewogICJ0aW1lc3RhbXAiIDogMTYyMDQ0NTc2NDQ1MSwKICAicHJvZmlsZUlkIiA6ICJmNDY0NTcxNDNkMTU0ZmEwOTkxNjBlNGJmNzI3ZGNiOSIsCiAgInByb2ZpbGVOYW1lIiA6ICJSZWxhcGFnbzA1IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2RmMDNhZDk2MDkyZjNmNzg5OTAyNDM2NzA5Y2RmNjlkZTZiNzI3YzEyMWIzYzJkYWVmOWZmYTFjY2FlZDE4NmMiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==";
+    private static final String SCATHA_BODY_TEXTURE = "ewogICJ0aW1lc3RhbXAiIDogMTYyNTA3MjMxNDE2OCwKICAicHJvZmlsZUlkIiA6ICIwNWQ0NTNiZWE0N2Y0MThiOWI2ZDUzODg0MWQxMDY2MCIsCiAgInByb2ZpbGVOYW1lIiA6ICJFY2hvcnJhIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzk2MjQxNjBlYjk5YmRjNjUxZGEzOGRiOTljZDdjMDlmMWRhNjY5ZWQ4MmI5Y2JjMjgyODc0NmU2NTBjNzY1ZGEiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==";
+    private static Map<UUID, Boolean> pastEntities = new HashMap<>();
+    private static boolean attacked = false;
 
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(Scathas::onTick);
         ChatEvents.RECEIVE_TEXT.register(Scathas::onChat);
+        AttackEntityCallback.EVENT.register(Scathas::onAttack);
+    }
+
+    private static ActionResult onAttack(PlayerEntity playerEntity, World world, Hand hand, Entity entity, @Nullable EntityHitResult entityHitResult) {
+        if (!Utils.isInCrystalHollows()) return ActionResult.PASS;
+        if (!(entity instanceof ArmorStandEntity armorStand)) return ActionResult.PASS;
+
+        if (!isScathaTexture(armorStand.getEquippedStack(EquipmentSlot.HEAD))) return ActionResult.PASS;
+
+        boolean isCurrentEntity = currentEntity != null && world.getEntitiesByClass(ArmorStandEntity.class, playerEntity.getBoundingBox()
+                                                                                                                        .expand(30d, 6d, 30d), e -> e.getUuid()
+                                                                                                                                                     .equals(currentEntity.getUuid()))
+                                                                .stream()
+                                                                .findFirst().orElse(null) != null;
+
+        if (isCurrentEntity) {
+            attacked = true;
+        }
+
+        return ActionResult.PASS;
+    }
+
+    private static boolean isScathaTexture(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || !stack.isOf(Items.PLAYER_HEAD) || !stack.contains(DataComponentTypes.PROFILE))
+            return false;
+
+        ProfileComponent profile = stack.get(DataComponentTypes.PROFILE);
+        if (profile == null) return false;
+
+        String texture = profile.properties().get("textures").stream().map(Property::value).findFirst().orElse("");
+
+        return texture.equals(SCATHA_HEAD_TEXTURE) || texture.equals(SCATHA_BODY_TEXTURE);
     }
 
     private static void onChat(Text text) {
         if (!Utils.isInCrystalHollows()) return;
 
-        String message = text.getString();
+        String message = TextUtils.toLegacy(text);
 
         if (message.contains("§6§lPET DROP! ") && message.contains("Scatha")) {
             PersistentData.get().scathasData.lastScathaPetDropTime = System.currentTimeMillis();
             PersistentData.get().scathasData.sinceLastScathaPetDropSpawns = 0;
+            MinecraftClient client = MinecraftClient.getInstance();
+
+            client.getNetworkHandler().onTitle(new TitleS2CPacket(Text.of("§6SCATHA PET! GG!")));
+            client.getNetworkHandler().onSubtitle(new SubtitleS2CPacket(Text.of("RNGesus has blessed you!")));
+            client.getNetworkHandler().onTitleFade(new TitleFadeS2CPacket(1, 80, 1));
         }
     }
 
@@ -62,10 +121,17 @@ public class Scathas {
         if (worm == null) return;
         if (currentEntity != null && worm.getUuid().equals(currentEntity.getUuid())) return;
 
+        boolean isScatha = worm.getCustomName().getString().startsWith("[Lv10] Scatha");
+
+        if (pastEntities.containsKey(worm.getUuid())) {
+            currentEntity = worm;
+            attacked = pastEntities.get(worm.getUuid());
+            return;
+        }
+
         currentEntity = worm;
         PersistentData.get().scathasData.lastSpawnTime = System.currentTimeMillis();
 
-        boolean isScatha = worm.getCustomName().getString().startsWith("[Lv10] Scatha");
         handleSpawn(isScatha);
     }
 
@@ -93,7 +159,7 @@ public class Scathas {
 
         if (System.currentTimeMillis() - data.lastSpawnTime > 28000) {
             TextUtils.addMessage("§cWorm despawned!", true, false);
-        } else if (entity.getBoundingBox().intersects(killBox)) {
+        } else if (entity.getBoundingBox().intersects(killBox) && attacked) {
             if (entity.getCustomName().getString().startsWith("[Lv10] Scatha")) {
                 TextUtils.addMessage("§aScatha killed! §7(" + data.scathasSpawned + " this session)", true, false);
             } else {
@@ -101,8 +167,11 @@ public class Scathas {
             }
             PersistentData.get().scathasData.lastScathaKillTime = System.currentTimeMillis();
         } else {
-            TextUtils.addMessage("§cWorm despawned out of range!", true, false);
+            TextUtils.addMessage("§cWorm went out of range or someone killed it!", true, false);
         }
+
+        pastEntities.put(entity.getUuid(), attacked);
+        attacked = false;
     }
 
     public static void alert(boolean isScatha) {
@@ -113,16 +182,16 @@ public class Scathas {
             client.getNetworkHandler()
                   .onTitle(new TitleS2CPacket(Text.of(isScatha ? "§cScatha has spawned!" : "§cWorm has spawned!"))); // title, subtitle, fadeIn, stay, fadeOut ticks;
             if (isScatha) client.getNetworkHandler().onSubtitle(new SubtitleS2CPacket(Text.of("Pray to RNGesus")));
-            client.getNetworkHandler().onTitleFade(new TitleFadeS2CPacket(2, 30, 2)); // fadeIn, stay, fadeOut ticks
+            client.getNetworkHandler().onTitleFade(new TitleFadeS2CPacket(2, 45, 2)); // fadeIn, stay, fadeOut ticks
             client
                     .getSoundManager()
                     .play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 1.0f), 1);
             client
                     .getSoundManager()
-                    .play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 2.0f), 10);
+                    .play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 1.0f), 10);
             client
                     .getSoundManager()
-                    .play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 2.0f), 20);
+                    .play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 1.0f), 20);
         } catch (Exception e) {
         }
     }

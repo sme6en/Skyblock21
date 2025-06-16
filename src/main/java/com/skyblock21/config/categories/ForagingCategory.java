@@ -37,7 +37,7 @@ public class ForagingCategory {
                                                              .build())
                                                .option(ButtonOption.createBuilder()
                                                                    .name(literal("Reset Tracker"))
-                                                                   .description(OptionDescription.of(literal("Resets the tracker data")))
+                                                                   .description(OptionDescription.of(literal("Resets the galatea tracker data")))
                                                                    .text(literal("Reset"))
                                                                    .action((screen, opt) -> GalateaTracker.resetSession())
                                                                    .build())

@@ -31,7 +31,7 @@ public class TreeProgressHudElement extends HudElement {
 
     @Override
     public int getWidth() {
-        return MinecraftClient.getInstance().textRenderer.getWidth("§a20%") + 22;
+        return (int) ((MinecraftClient.getInstance().textRenderer.getWidth("§a20%") + 22) * 1.3f);
     }
 
     @Override

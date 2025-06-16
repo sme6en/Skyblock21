@@ -1,9 +1,8 @@
 package com.skyblock21.features.foraging;
 
-import com.skyblock21.events.DrawSlotEvents;
+import com.skyblock21.events.WindowEvents;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -23,7 +22,7 @@ public class HOTFOverlay {
     private static int whisperAmount = 0;
 
     public static void init() {
-        DrawSlotEvents.BEFORE_ITEM.register(HOTFOverlay::onDrawSlot);
+        WindowEvents.DRAW_BEFORE_ITEM.register(HOTFOverlay::onDrawSlot);
 
         ClientTickEvents.END_CLIENT_TICK.register(HOTFOverlay::onTick);
     }

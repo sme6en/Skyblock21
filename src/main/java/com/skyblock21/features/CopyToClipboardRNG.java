@@ -22,7 +22,7 @@ public class CopyToClipboardRNG {
             // if the text starts with any of the MESSAGE_PREFIXES, copy it to clipboard, make it normal not if else everything
 
             for (String prefix : MESSAGE_PREFIXES) {
-                if (text.getString().startsWith(prefix)) {
+                if (TextUtils.toLegacy(text).startsWith(prefix)) {
                     String message = text.getString();
                     MinecraftClient.getInstance().keyboard.setClipboard(message);
                     TextUtils.addMessage("RNG message copied to clipboard: ", true, true);

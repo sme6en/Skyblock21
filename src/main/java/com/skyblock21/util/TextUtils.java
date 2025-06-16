@@ -120,6 +120,47 @@ public class TextUtils {
         return newText;
     }
 
+    public static String toLegacy(@NotNull Text text) {
+        StringBuilder formattedText = new StringBuilder();
+        text.visit((style, s) -> {
+            // Add formatting codes based on style
+            if (style.getColor() != null) {
+                String colorName = style.getColor().getName();
+                if (colorName != null) {
+                    switch (colorName) {
+                        case "gold": formattedText.append("§6"); break;
+                        case "red": formattedText.append("§c"); break;
+                        case "blue": formattedText.append("§9"); break;
+                        case "green": formattedText.append("§a"); break;
+                        case "yellow": formattedText.append("§e"); break;
+                        case "white": formattedText.append("§f"); break;
+                        case "dark_red": formattedText.append("§4"); break;
+                        case "dark_blue": formattedText.append("§1"); break;
+                        case "dark_green": formattedText.append("§2"); break;
+                        case "dark_aqua": formattedText.append("§3"); break;
+                        case "dark_gray": formattedText.append("§8"); break;
+                        case "black": formattedText.append("§0"); break;
+                        case "dark_purple": formattedText.append("§5"); break;
+                        case "light_purple": formattedText.append("§d"); break;
+                        case "gray": formattedText.append("§7"); break;
+                        case "reset": formattedText.append("§r"); break;
+                    }
+                }
+            }
+            if (style.isBold()) formattedText.append("§l");
+            if (style.isItalic()) formattedText.append("§o");
+            if (style.isUnderlined()) formattedText.append("§n");
+            if (style.isStrikethrough()) formattedText.append("§m");
+            if (style.isObfuscated()) formattedText.append("§k");
+
+            formattedText.append(s);
+            return java.util.Optional.empty();
+        }, net.minecraft.text.Style.EMPTY);
+
+
+        return formattedText.toString();
+    }
+
     /**
      * Transforms the given text by styling select parts of it and optionally replacing parts.
      * @implNote {@code textToStylize} is matched via

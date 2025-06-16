@@ -5,13 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.SkyblockEvents;
-import com.skyblock21.features.CookieGodPotReminder;
-import com.skyblock21.features.CopyToClipboardRNG;
-import com.skyblock21.features.MouseLock;
-import com.skyblock21.features.Scathas;
+import com.skyblock21.features.*;
 import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
+import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.GalateaTrackerElement;
@@ -28,7 +26,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +35,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.0.0";
+    public static final String MOD_VERSION = "1.0.1";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 
@@ -105,6 +102,7 @@ public class Skyblock21 implements ClientModInitializer {
         TreeProgress.init();
         HOTFOverlay.init();
         GalateaTracker.init();
+        StarredDropPrevention.init();
 
         HudManager.register(new TestHudElement(100, 50));
         HudManager.register(new TreeProgressHudElement(100, 190));

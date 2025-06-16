@@ -11,18 +11,21 @@
 - Foraging whisper tracker HUD (WIP)
 - Tree progress overlay HUD
 - Heart of the forest overlay (WIP)
+- Hunting overlay (WIP)
 
 ### Mining
 - Scatha Spawn Alerts
 - Scatha Tracker HUD
 
 ### Misc
-- Booster Cookie Reminder
-- Missing God Potions Notifier
-- Mouse Lock
+- Booster Cookie reminder
+- Missing God potion notifier
+- Mouse lock
 - Timestamped chat messages
-- Auto Copy RNG Messages
-- SessionID Protection (WIP)
+- Auto copy RNG Messages
+- Compact Stars on Items
+- Prevent dropping Starred Items
+- SessionID protection (WIP)
 
 *...and many more to come!*
 

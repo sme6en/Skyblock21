@@ -10,6 +10,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 import java.io.BufferedReader;
@@ -32,9 +33,17 @@ public class HudManager {
     private static void render(DrawContext drawContext, RenderTickCounter renderTickCounter) {
         if (MinecraftClient.getInstance().currentScreen instanceof EditGuiScreen) return;
         Location location = Utils.getLocation();
+        MatrixStack matrices = drawContext.getMatrices();
         for (HudElement element : hudElements) {
             if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
-            element.render(drawContext,0,0);
+
+            matrices.push();
+            matrices.translate(element.getX(), element.getY(), 0);
+            matrices.scale(element.getScale(), element.getScale(), 1.0f);
+
+            if (EditHudElementScreen.element != null && EditHudElementScreen.element != element) element.render(drawContext,0,0);
+
+            matrices.pop();
         }
     }
 
