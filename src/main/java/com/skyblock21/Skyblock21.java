@@ -88,7 +88,7 @@ public class Skyblock21 implements ClientModInitializer {
             if (!Objects.equals(AutoUpdater.latestUpdatedVersion, MOD_VERSION) && AutoUpdater.latestUpdatedVersion != "") {
                 minecraftClient.execute(() -> {
                     if (minecraftClient.player == null) return;
-                    minecraftClient.player.sendMessage(Text.literal("Skyblock21 updated to version: §b§l" + AutoUpdater.latestUpdatedVersion + "§r! Please restart your game to access new features."), false);
+                    TextUtils.addMessage("Updated to version: §b§l" + AutoUpdater.latestUpdatedVersion + "§r! Please restart your game to access new features.", true, false);
                 });
             }
         }));
