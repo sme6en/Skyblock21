@@ -20,6 +20,8 @@
 ### Misc
 - Booster Cookie Reminder
 - Missing God Potions Notifier
+- Prevent dropping starred items
+- Compact stars
 - Mouse Lock
 - Timestamped chat messages
 - Auto Copy RNG Messages
