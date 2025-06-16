@@ -11,6 +11,7 @@
 - Foraging whisper tracker HUD (WIP)
 - Tree progress overlay HUD
 - Heart of the forest overlay (WIP)
+- No Fog, See easier underwater
 
 ### Mining
 - Scatha Spawn Alerts
