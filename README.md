@@ -2,9 +2,8 @@
   <img src="./assets/skyblock21_header.png" alt="Skyblock 21 Logo">
 </p>
 
-# Skyblock 21
 
-*Hypixel Skyblock utility mod for Fabric 1.21.5*
+<p align="center"><em>Hypixel Skyblock utility mod for Fabric 1.21.5</em></p>
 
 ## ⚙️ Features
 
