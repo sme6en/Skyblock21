@@ -1,18 +1,20 @@
 package com.skyblock21.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.skyblock21.Skyblock21;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Util;
+
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-
-import com.google.gson.*;
-import com.skyblock21.Skyblock21;
-import net.fabricmc.loader.api.FabricLoader;
-import java.net.URL;
+import java.util.Objects;
 
 public class AutoUpdater {
 
@@ -20,33 +22,73 @@ public class AutoUpdater {
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
 
     private static final Path MODS_FOLDER = FabricLoader.getInstance().getGameDir().resolve("mods");
-    private static final Path TEMP_UPDATE_JAR = MODS_FOLDER.resolve("__mod_update__.jar");
     public static String latestUpdatedVersion = "";
 
     public static void onStartup() {
-        // Register shutdown hook once at game startup
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (Files.exists(TEMP_UPDATE_JAR)) {
-                    Files.list(MODS_FOLDER)
-                            .filter(p -> p.toString().endsWith(".jar"))
-                            .filter(p -> p.getFileName().toString().contains(Skyblock21.MOD_ID))
-                            .forEach(p -> {
-                                try {
-                                    Files.delete(p);
-                                } catch (IOException e) {
-                                    System.err.println("[AutoUpdater] Could not delete " + p.getFileName());
-                                }
-                            });
 
-                    Path newPath = MODS_FOLDER.resolve(Skyblock21.MOD_ID + "-" + latestUpdatedVersion + ".jar");
-                    Files.move(TEMP_UPDATE_JAR, newPath, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("[AutoUpdater] Update applied successfully on shutdown.");
-                }
-            } catch (IOException e) {
-                System.err.println("[AutoUpdater] Shutdown update failed: " + e.getMessage());
+        if (AutoUpdater.latestUpdatedVersion.isEmpty()) return;
+
+        try {
+            File oldModFile = new File(Skyblock21.class.getProtectionDomain()
+                                                       .getCodeSource()
+                                                       .getLocation()
+                                                       .toURI()
+                                                       .getPath());
+            if (Util.getOperatingSystem() != Util.OperatingSystem.WINDOWS) {
+                Skyblock21.LOGGER.info("Deleting old mod file via File.deleteOnExit()");
+                oldModFile.deleteOnExit();
+            } else { // screw you windows
+                // NOTE: This is a workaround for Windows, which doesn't work well with File.deleteOnExit()
+                // Instead, we create a batch file that will delete the old mod file on game shutdown.
+                // I know it looks very sus, but it's the only way to ensure the file is deleted properly
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    File deleter = new File(FabricLoader.getInstance()
+                                                        .getGameDir()
+                                                        .toFile(), "deleteOldJar.bat");
+
+                    String comment = """
+                            :: Skyblock21 AutoUpdater Deleter Script, Used with Skyblock21's AutoUpdater (https://github.com/sme6en/Skyblock21/blob/main/src/main/java/com/skyblock21/util/AutoUpdater.java)
+                            :: NOTE: This is a workaround for Windows, which doesn't work well with File.deleteOnExit()
+                            :: Instead, we create a batch file that will delete the old mod file on game shutdown.
+                            :: I know it looks very sus, but it's the only way to ensure the file is deleted properly
+                            :: or else your game won't start next time you launch it.
+                            """;
+
+
+                    String deleterProgram =
+                            "@echo off\n" +
+                                    comment +
+                                    ":TestFile\n" +
+                                    "REN \"" + oldModFile.getAbsolutePath() + "\" \"" + oldModFile.getName() + "\" 2>nul\n" +
+                                    "IF not ERRORLEVEL 1 GOTO Continue\n" +
+                                    "GOTO TestFile\n" +
+                                    ":Continue\n" +
+                                    "ECHO Deleting \"" + oldModFile.getAbsolutePath() + "\"\n" +
+                                    "DEL /F \"" + oldModFile.getAbsolutePath() + "\"\n" +
+                                    "EXIT\n";
+
+                    try {
+                        // Create the directory if it doesn't exist, re-write the file if it does
+                        deleter.mkdirs();
+                        if (deleter.exists()) {
+                            deleter.delete();
+                        }
+                        PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(deleter)));
+                        writer.println(deleterProgram);
+                        writer.close();
+
+                        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", deleter.getAbsolutePath());
+                        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+                        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                        pb.start();
+                    } catch (IOException e) {
+                        Skyblock21.LOGGER.error("Deleting old file with windows method (screw microsoft)", e);
+                    }
+                }));
             }
-        }));
+        } catch (Exception e) {
+            Skyblock21.LOGGER.error("Failed to delete old mod file: " + e.getMessage());
+        }
     }
 
     public static void checkForUpdate() {
@@ -63,8 +105,8 @@ public class AutoUpdater {
                     JsonObject asset = assetElem.getAsJsonObject();
                     String downloadUrl = asset.get("browser_download_url").getAsString();
                     if (downloadUrl.endsWith(".jar")) {
-                        downloadUpdate(downloadUrl);
                         latestUpdatedVersion = latestVersion;
+                        downloadUpdate(downloadUrl);
                         return;
                     }
                 }
@@ -103,7 +145,7 @@ public class AutoUpdater {
     private static void downloadUpdate(String urlStr) throws IOException {
         System.out.println("[AutoUpdater] Downloading update...");
         try (InputStream in = new URL(urlStr).openStream()) {
-            Files.copy(in, TEMP_UPDATE_JAR, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(in, MODS_FOLDER.resolve("skyblock21-" + latestUpdatedVersion + ".jar"), StandardCopyOption.REPLACE_EXISTING);
         }
         System.out.println("[AutoUpdater] Update downloaded. Will be installed on game shutdown.");
     }
