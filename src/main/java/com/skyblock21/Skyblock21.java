@@ -65,8 +65,6 @@ public class Skyblock21 implements ClientModInitializer {
                 TextUtils.addMessage("Galatea tracker reset!", true, true);
                 return 1;
             })));
-
-            dispatcher.register(literal("s21").redirect(dispatcher.getRoot().getChild("skyblock21")));
         });
 
     }
