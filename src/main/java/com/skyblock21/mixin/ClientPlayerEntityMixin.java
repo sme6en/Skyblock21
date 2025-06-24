@@ -1,7 +1,9 @@
 package com.skyblock21.mixin;
 
 import com.skyblock21.events.PlayerEvents;
+import com.skyblock21.features.commandaliases.CommandAliases;
 import com.skyblock21.util.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,11 +18,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixin {
 
+
     @Inject(method = "dropSelectedItem",
             at = @At("HEAD"),
             cancellable = true)
     private void onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
         if (!Utils.isOnSkyblock()) {
+            return;
+        }
+
+        if (MinecraftClient.getInstance().player == null) {
             return;
         }
 

@@ -22,6 +22,8 @@
 - Supply Helper
 
 ### Misc
+- **Keybind Command Shortcuts**
+- Command Aliases
 - Booster Cookie Reminder
 - Missing God Potions Notifier
 - Prevent dropping starred items
@@ -39,7 +41,8 @@
 - `/skyblock21` to open the main menu.
 - `/skyblock21 config` to open the config menu.
 - `/skyblock21 gui` to edit the position and scale of each HUD element.
-- `/skyblock21 resettracker <tracker>` to reset trackers.
+- `/skyblock21 keys` to edit your keybind shortcuts.
+- `/skyblock21 aliases` to edit your command aliases.
 
 ## 💡 Suggestions and Bugs
 If you have any suggestions, feature requests or bug reports please open an issue or join the [Discord Server](https://discord.gg/NMNSwQH6dr).

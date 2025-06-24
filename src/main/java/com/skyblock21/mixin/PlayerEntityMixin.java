@@ -1,6 +1,8 @@
 package com.skyblock21.mixin;
 
 import com.skyblock21.events.PlayerEvents;
+import com.skyblock21.util.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,15 +20,18 @@ public class PlayerEntityMixin {
             at = @At("HEAD"),
             cancellable = true)
     private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
+        if (!Utils.isOnSkyblock()) return;
+        if (MinecraftClient.getInstance().player == null) {
+            return;
+        }
+
         ClientPlayerEntity player = (ClientPlayerEntity) (Object) this;
 
         ItemStack currentStack = player.getMainHandStack();
 
-        // Fire the custom event
         ActionResult result = PlayerEvents.DROP_ITEM.invoker()
                                                 .interact(player, currentStack);
 
-        // If the event returns FAIL, cancel the drop
         if (result == ActionResult.FAIL) {
             cir.setReturnValue(null);
         }

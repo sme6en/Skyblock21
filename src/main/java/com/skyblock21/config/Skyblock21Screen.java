@@ -1,5 +1,7 @@
 package com.skyblock21.config;
 
+import com.skyblock21.features.commandaliases.CommandAliasesScreen;
+import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.hud.EditGuiScreen;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
@@ -34,6 +36,8 @@ public class Skyblock21Screen extends Screen {
 
         adder.add(ButtonWidget.builder(literal("Config"), button -> this.openConfig()).width(210).build(), 2);
         adder.add(ButtonWidget.builder(literal("Edit Gui"), button -> this.openGuiEditor()).width(210).build(), 2);
+        adder.add(ButtonWidget.builder(literal("Keybind shortcuts"), button -> this.openKeybinds()).width(210).build(), 2);
+        adder.add(ButtonWidget.builder(literal("Command aliases"), button -> this.openAliases()).width(210).build(), 2);
         adder.add(ButtonWidget.builder(literal("Discord server"), ConfirmLinkScreen.opening(this, "https://discord.gg/NMNSwQH6dr")).width(101).build());
         adder.add(ButtonWidget.builder(literal("Report bugs"), ConfirmLinkScreen.opening(this, "https://github.com/sme6en/Skyblock21/issues")).width(101).build());
         adder.add(ButtonWidget.builder(literal("Modrinth"), ConfirmLinkScreen.opening(this, "https://modrinth.com/mod/skyblock21")).width(101).build());
@@ -61,5 +65,13 @@ public class Skyblock21Screen extends Screen {
 
     private void openGuiEditor() {
         this.client.setScreen(new EditGuiScreen(this.client.currentScreen));
+    }
+
+    private void openKeybinds() {
+        this.client.setScreen(new KeyShortcutsScreen(this.client.currentScreen));
+    }
+
+    private void openAliases() {
+        this.client.setScreen(new CommandAliasesScreen(this.client.currentScreen));
     }
 }
