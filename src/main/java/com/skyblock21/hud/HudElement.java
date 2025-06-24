@@ -141,6 +141,14 @@ public abstract class HudElement {
         return locationsShown.contains(location);
     }
 
+    public void showInAllLocations() {
+        this.locationsShown = EnumSet.allOf(Location.class);
+    }
+
+    public void showInLocation(Location location) {
+        this.locationsShown = EnumSet.of(location);
+    }
+
     public boolean shouldRenderDummy() {
         return alwaysRenderDummy || !isAllowedInLocation(Utils.getLocation()) || !isEnabled();
     }

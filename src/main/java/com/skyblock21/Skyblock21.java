@@ -10,6 +10,7 @@ import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.features.items.StarredDropPrevention;
+import com.skyblock21.features.kuudra.Kuudra;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.GalateaTrackerElement;
@@ -35,7 +36,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.0.1";
+    public static final String MOD_VERSION = "1.1.0";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 
@@ -90,19 +91,32 @@ public class Skyblock21 implements ClientModInitializer {
             }
         }));
 
+        // General
         Skyblock21ConfigManager.load();
         PersistentData.init();
         Utils.init();
         TabUtils.init();
+        Debug.init();
+
+        // Misc
         CookieGodPotReminder.init();
-        Scathas.init();
         CopyToClipboardRNG.init();
         MouseLock.init();
-//        Debug.init();
+        HideAroundNPC.init();
+
+        // Mining
+        Scathas.init();
+
+        // Galatea
         TreeProgress.init();
         HOTFOverlay.init();
         GalateaTracker.init();
+
+        // Items
         StarredDropPrevention.init();
+
+        // Kuudra
+        Kuudra.init();
 
         HudManager.register(new TestHudElement(100, 50));
         HudManager.register(new TreeProgressHudElement(100, 190));

@@ -11,14 +11,15 @@
 		"YggdrasilServicesKeyInfoMixin",
 		"accessors.ChatHudAccessor",
 		"accessors.MessageHandlerAccessor",
-		"accessors.PlayerListHudAccessor"
+		"accessors.PlayerListHudAccessor",
+		"ClientPlayerEntityMixin",
+		"ItemStackMixin",
+		"PlayerEntityMixin",
+		"AxeItemMixin",
+		"ShovelItemMixin",
+		"EntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"mixins": [
-		"ClientPlayerEntityMixin",
-		"ItemStackMixin",
-		"PlayerEntityMixin"
-	]
+	}
 }

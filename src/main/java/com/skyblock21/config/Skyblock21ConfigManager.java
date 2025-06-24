@@ -1,35 +1,22 @@
 package com.skyblock21.config;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import dev.isxander.yacl3.api.Option;
+import com.google.gson.FieldNamingPolicy;
 import com.skyblock21.config.categories.ForagingCategory;
 import com.skyblock21.config.categories.GeneralCategory;
 import com.skyblock21.config.categories.MiningCategory;
+import com.skyblock21.config.categories.NetherCategory;
+import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
-import net.fabricmc.loader.api.FabricLoader;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import com.google.gson.FieldNamingPolicy;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
+import org.apache.commons.lang3.function.Consumers;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
-
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.function.Consumers;
-
-import java.lang.reflect.Type;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 public class Skyblock21ConfigManager {
 
@@ -66,7 +53,8 @@ public class Skyblock21ConfigManager {
                 .title(Text.literal("Skyblock21 Config"))
                 .category(GeneralCategory.create(defaults, config))
                 .category(MiningCategory.create(defaults, config))
-                .category(ForagingCategory.create(defaults, config))).generateScreen(parent);
+                .category(ForagingCategory.create(defaults, config))
+                .category(NetherCategory.create(defaults, config))).generateScreen(parent);
     }
 
     @SuppressWarnings("unchecked")

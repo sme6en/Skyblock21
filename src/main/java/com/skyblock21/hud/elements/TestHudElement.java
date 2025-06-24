@@ -1,5 +1,7 @@
 package com.skyblock21.hud.elements;
 
+import com.skyblock21.features.foraging.HOTFOverlay;
+import com.skyblock21.features.kuudra.Kuudra;
 import com.skyblock21.hud.HudElement;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -14,7 +16,8 @@ public class TestHudElement extends HudElement {
     @Override
     protected void renderElement(DrawContext context) {
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        context.drawTextWithShadow(textRenderer, "Test Element", 2, 2, 0xFFFFFF);
+//        context.drawTextWithShadow(textRenderer, "Current phase: " + Kuudra.currentPhase, 2, 2, 0xFFFFFF);
+//        context.drawTextWithShadow(textRenderer, "Whisps: " + HOTFOverlay.whisperAmount, 2, 2 + textRenderer.fontHeight + 2, 0xFFFFFF);
     }
 
     @Override
@@ -22,12 +25,12 @@ public class TestHudElement extends HudElement {
 
     @Override
     public int getWidth() {
-        return MinecraftClient.getInstance().textRenderer.getWidth("Test Element") + 4;
+        return MinecraftClient.getInstance().textRenderer.getWidth("Current phase: " + Kuudra.currentPhase) + 4;
     }
 
     @Override
     public int getHeight() {
-        return MinecraftClient.getInstance().textRenderer.fontHeight + 4;
+        return MinecraftClient.getInstance().textRenderer.fontHeight * 2 + 6;
     }
 
     @Override

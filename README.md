@@ -3,25 +3,31 @@
 </p>
 
 
-<p align="center"><em>Hypixel Skyblock utility mod for Fabric 1.21.5</em></p>
+<p align="center"><em>Hypixel Skyblock utility mod with features for the galatea update on Fabric 1.21.5</em></p>
 
 ## ⚙️ Features
 
 ### Galatea Island
-- Foraging whisper tracker HUD (WIP)
+- Foraging whisper tracker HUD
 - Tree progress overlay HUD
-- Heart of the forest overlay (WIP)
+- Heart of the forest overlay
 - No Fog, See easier underwater
+- Prevent log stripping
 
 ### Mining
 - Scatha Spawn Alerts
 - Scatha Tracker HUD
+
+### Kuudra
+- Supply Helper
 
 ### Misc
 - Booster Cookie Reminder
 - Missing God Potions Notifier
 - Prevent dropping starred items
 - Compact stars
+- Mute dirt path on AOTV
+- Hide players around NPCs
 - Mouse Lock
 - Timestamped chat messages
 - Auto Copy RNG Messages
@@ -40,4 +46,4 @@ If you have any suggestions, feature requests or bug reports please open an issu
 
 ## ©️ Credits
 
-Skyblocker, SkyblockTweaks
+Skyblocker, SkyblockTweaks and Scatha-Pro

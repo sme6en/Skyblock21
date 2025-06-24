@@ -5,7 +5,6 @@ import com.skyblock21.features.foraging.GalateaTracker;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
-import net.minecraft.text.Text;
 
 import static net.minecraft.text.Text.literal;
 
@@ -40,7 +39,15 @@ public class ForagingCategory {
                                                                    .description(OptionDescription.of(literal("Resets the galatea tracker data")))
                                                                    .text(literal("Reset"))
                                                                    .action((screen, opt) -> GalateaTracker.resetSession())
-                                                                   .build())
-                                               .build()).build();
+                                                                   .build()).build())
+                             .option(Option.<Boolean>createBuilder()
+                                           .name(literal("Prevent log stripping"))
+                                           .description(OptionDescription.of(literal("Prevents from trying to strip logs while in Skyblock")))
+                                           .binding(defaults.foraging.preventLogStripping, () -> config.foraging.preventLogStripping, newValue -> config.foraging.preventLogStripping = newValue)
+                                           .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                        .yesNoFormatter()
+                                                                                        .coloured(true))
+                                           .build())
+                             .build();
     }
 }

@@ -3,10 +3,12 @@ package com.skyblock21.hud.elements;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.features.Scathas;
 import com.skyblock21.hud.HudElement;
+import com.skyblock21.util.Location;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
+import org.spongepowered.asm.mixin.Overwrite;
 
 import java.awt.*;
 
@@ -71,5 +73,10 @@ public class ScathaTrackerElement extends HudElement {
     @Override
     public boolean isEnabled() {
         return Skyblock21ConfigManager.get().mining.scathaTracker;
+    }
+
+    @Override
+    public boolean isAllowedInLocation(Location location)  {
+        return Skyblock21ConfigManager.get().mining.showOnlyInCrystalHollows ? location.equals(Location.CRYSTAL_HOLLOWS) : true;
     }
 }

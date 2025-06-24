@@ -31,7 +31,7 @@ public class HudManager {
     }
 
     private static void render(DrawContext drawContext, RenderTickCounter renderTickCounter) {
-        if (MinecraftClient.getInstance().currentScreen instanceof EditGuiScreen) return;
+        if (MinecraftClient.getInstance().currentScreen instanceof EditGuiScreen || MinecraftClient.getInstance().currentScreen instanceof EditHudElementScreen) return;
         Location location = Utils.getLocation();
         MatrixStack matrices = drawContext.getMatrices();
         for (HudElement element : hudElements) {
@@ -41,7 +41,8 @@ public class HudManager {
             matrices.translate(element.getX(), element.getY(), 0);
             matrices.scale(element.getScale(), element.getScale(), 1.0f);
 
-            if (EditHudElementScreen.element != null && EditHudElementScreen.element != element) element.render(drawContext,0,0);
+                element.render(drawContext, 0,0);
+//(EditHudElementScreen.element != null && EditHudElementScreen.element != element) element.render(drawContext,0,0);
 
             matrices.pop();
         }

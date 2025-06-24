@@ -46,6 +46,26 @@ public class GeneralCategory {
                                                                                         .yesNoFormatter()
                                                                                         .coloured(true))
                                            .build())
+                             .option(Option.<Boolean>createBuilder()
+                                           .name(literal("Prevent Dirt Roads"))
+                                           .description(OptionDescription.of(literal("Prevents you from making dirt roads by right-clicking on grass blocks with a shovel")))
+                                           .binding(defaults.general.preventDirtRoads,
+                                                   () -> config.general.preventDirtRoads,
+                                                   newValue -> config.general.preventDirtRoads = newValue)
+                                           .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                        .yesNoFormatter()
+                                                                                        .coloured(true))
+                                           .build())
+                             .option(Option.<Boolean>createBuilder()
+                                           .name(literal("Hide players around NPCs"))
+                                           .description(OptionDescription.of(literal("Hides players around NPCs to reduce lag, improve performance and to make it easier to interact with them")))
+                                           .binding(defaults.general.hidePlayersAroundNpcs,
+                                                   () -> config.general.hidePlayersAroundNpcs,
+                                                   newValue -> config.general.hidePlayersAroundNpcs = newValue)
+                                           .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                        .yesNoFormatter()
+                                                                                        .coloured(true))
+                                           .build())
                              .group(OptionGroup.createBuilder().name(literal("Reminders"))
                                                .option(Option.<Boolean>createBuilder()
                                                              .name(literal("Booster Cookie reminder"))

@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static net.minecraft.text.Text.literal;
 
@@ -25,6 +27,50 @@ import static net.minecraft.text.Text.literal;
 public class TextUtils {
     private static final CharList FORMAT_CODES = CharList.of('4', 'c', '6', 'e', '2', 'a','b', '3', '1', '9', 'd', '5', 'f', '7', '8', '0', 'r', 'k', 'l', 'm', 'n', 'o');
     private static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
+
+    public static String removeFormatting(Text msg) {
+        if (msg == null || msg.toString().isEmpty()) return msg.toString();
+
+        String text = msg.getString();
+
+        StringBuilder builder = new StringBuilder();
+        boolean skipNext = false;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '§') {
+                skipNext = true;
+                continue;
+            }
+            if (skipNext) {
+                skipNext = FORMAT_CODES.contains(c);
+                continue;
+            }
+            builder.append(c);
+        }
+
+        return builder.toString();
+    }
+
+    public static int parseIntWithSuffix(String str) {
+        Pattern pattern = Pattern.compile("^(\\d*\\.?\\d+)([kmb]?)$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(str.trim());
+
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid format: " + str);
+        }
+
+        double number = Double.parseDouble(matcher.group(1));
+        String suffix = matcher.group(2).toLowerCase();
+
+        return switch (suffix) {
+            case "" -> (int) number;
+            case "k" -> (int) (number * 1_000);
+            case "m" -> (int) (number * 1_000_000);
+            case "b" -> (int) (number * 1_000_000_000L);
+            default -> throw new IllegalArgumentException("Unknown suffix: " + suffix);
+        };
+    }
 
     public static void addMessage(String message, boolean prefixed, boolean overlay) {
         if (MinecraftClient.getInstance().player == null) return;

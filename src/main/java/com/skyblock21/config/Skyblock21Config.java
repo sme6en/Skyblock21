@@ -13,6 +13,9 @@ public class Skyblock21Config {
     @SerialEntry
     public Foraging foraging = new Foraging();
 
+    @SerialEntry
+    public Nether nether = new Nether();
+
     public static class General {
         @SerialEntry
         public boolean noFog = false;
@@ -20,6 +23,13 @@ public class Skyblock21Config {
         public boolean timestampBeforeMessages = false;
         @SerialEntry
         public boolean copyToClipboardRNGs = true;
+
+        @SerialEntry
+        public boolean preventDirtRoads = true;
+
+        @SerialEntry
+        public boolean hidePlayersAroundNpcs = true;
+
         @SerialEntry
         public boolean boosterCookieReminder = true;
         @SerialEntry
@@ -46,6 +56,8 @@ public class Skyblock21Config {
         @SerialEntry
         public boolean scathaTracker = true;
         @SerialEntry
+        public boolean showOnlyInCrystalHollows = false;
+        @SerialEntry
         public boolean mouseLockKeybind = true;
     }
 
@@ -54,5 +66,13 @@ public class Skyblock21Config {
         public boolean galateaTracker = true;
         @SerialEntry
         public int afkTimeout = 30; // in seconds
+
+        @SerialEntry
+        public boolean preventLogStripping = true;
+    }
+
+    public static class Nether {
+        @SerialEntry
+        public boolean kuudraSupplyHelper = true;
     }
 }
