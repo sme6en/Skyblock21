@@ -1,17 +1,13 @@
 package com.skyblock21.features.waypoints;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
@@ -49,7 +45,9 @@ public class WaypointRenderer {
             if (waypoint.isCircleOnFloor()) {
                 renderCircleOnBlock(context, matrices, waypoint.getPosition(), cameraPos, waypoint.getColor(), 0.7f, 256);
             }
-//            renderWaypointBeacon(context, matrices, waypoint, camera, cameraPos, distance);
+            if (waypoint.isBeaconBeam()) {
+                renderWaypointBeacon(context, matrices, waypoint, camera, cameraPos, distance);
+        }
         }
 
     }

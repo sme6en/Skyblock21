@@ -31,15 +31,6 @@ public class Kuudra {
     public static final Map<Vec3d, UUID> supplyLocations = new HashMap<>();
 
     public static void init() {
-        WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
-            WaypointRenderer.renderWaypoints(
-                    context,
-                    context.camera(),
-                    context.tickCounter().getDynamicDeltaTicks()
-            );
-        });
-
-        EntityEvents.SPAWN.register(Kuudra::onEntitySpawn);
         ClientTickEvents.END_CLIENT_TICK.register(Kuudra::onTick);
         ChatEvents.RECEIVE_TEXT.register(Kuudra::onChat);
 
@@ -66,9 +57,6 @@ public class Kuudra {
 
         String message = text.getString();
 
-        System.out.println("kuudra - " + message);
-
-
         switch (message) {
             case "§e[NPC] §cElle§f: Okay adventurers, I will go and fish up Kuudra!" -> currentPhase = 1;
             case "§e[NPC] §cElle§f: OMG! Great work collecting my supplies!" -> currentPhase = 2;
@@ -88,8 +76,6 @@ public class Kuudra {
         if (!Utils.isInKuudra()) return;
         if (client.world == null || client.player == null) return;
 
-        SupplyWaypoints.onTick(client);
-
         for (Entity entity : client.world.getEntities()) {
             if (!(entity instanceof ArmorStandEntity armorStand)) continue;
 
@@ -105,11 +91,5 @@ public class Kuudra {
             WaypointManager.removeWaypointsIfMatch(uuid);
         }
 
-    }
-
-    private static void onEntitySpawn(Entity entity, int entityId) {
-        if (!Utils.isInKuudra()) return;
-
-        SupplyWaypoints.onEntitySpawn(entity, entityId);
     }
 }

@@ -31,15 +31,15 @@
 - Mouse Lock
 - Timestamped chat messages
 - Auto Copy RNG Messages
-- SessionID Protection (WIP)
 
 *...and many more to come!*
 
 ## 🗨️ Commands
 
-- `/skyblock21` to open the config menu
-- `/skyblock21 gui` to edit the position and scale of each HUD element. (`/s21 gui`)
-- `/skyblock21 resettracker <tracker>` to reset trackers. (`/s21 resettracker`)
+- `/skyblock21` to open the main menu.
+- `/skyblock21 config` to open the config menu.
+- `/skyblock21 gui` to edit the position and scale of each HUD element.
+- `/skyblock21 resettracker <tracker>` to reset trackers.
 
 ## 💡 Suggestions and Bugs
 If you have any suggestions, feature requests or bug reports please open an issue or join the [Discord Server](https://discord.gg/NMNSwQH6dr).

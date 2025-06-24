@@ -3,6 +3,7 @@ package com.skyblock21;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skyblock21.config.Skyblock21ConfigManager;
+import com.skyblock21.config.Skyblock21Screen;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.SkyblockEvents;
 import com.skyblock21.features.*;
@@ -50,9 +51,14 @@ public class Skyblock21 implements ClientModInitializer {
             dispatcher.register(literal("skyblock21").executes((ctx) -> {
                 MinecraftClient.getInstance()
                                .send(() -> MinecraftClient.getInstance()
+                                                          .setScreen(new Skyblock21Screen()));
+                return 1;
+            }).then(literal("config").executes((ctx) -> {
+                MinecraftClient.getInstance()
+                               .send(() -> MinecraftClient.getInstance()
                                                           .setScreen(Skyblock21ConfigManager.createGUI(null)));
                 return 1;
-            }).then(literal("gui").executes((ctx) -> {
+            })).then(literal("gui").executes((ctx) -> {
                 MinecraftClient.getInstance()
                                .send(() -> MinecraftClient.getInstance()
                                                           .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
@@ -94,7 +100,7 @@ public class Skyblock21 implements ClientModInitializer {
         PersistentData.init();
         Utils.init();
         TabUtils.init();
-        Debug.init();
+//        Debug.init();
 
         // Misc
         CookieGodPotReminder.init();

@@ -3,23 +3,21 @@ package com.skyblock21.features.kuudra;
 import com.skyblock21.features.waypoints.Waypoint;
 import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.features.waypoints.WaypointRenderer;
+import com.skyblock21.util.Utils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.mob.GiantEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class SupplyWaypoints {
 
-    private static final HashMap<Vec3d, String> supplyLocations = new HashMap<>();
-    public static List<GiantEntity> supplyEntities = new ArrayList<>();
+    public static List<ArmorStandEntity> supplyEntities = new ArrayList<>();
     // array of 6 true
     public static boolean[] supplies = {true, true, true, true, true, true};
 
@@ -34,10 +32,15 @@ public class SupplyWaypoints {
                     context.tickCounter().getDynamicDeltaTicks()
             );
         });
+        ClientTickEvents.END_CLIENT_TICK.register(SupplyWaypoints::onTick);
     }
 
     public static void onTick(MinecraftClient client) {
-        for (GiantEntity entity : supplyEntities) {
+        if (!Utils.isInKuudra()) return;
+        if (client.player == null || client.world == null) return;
+
+        List<ArmorStandEntity> supplyEntitiesCache = new ArrayList<>(SupplyWaypoints.supplyEntities);
+        for (ArmorStandEntity entity : supplyEntitiesCache) {
             if (entity.isRemoved()) {
                 supplyEntities.remove(entity);
                 WaypointManager.removeWaypointsIfMatch(entity.getUuid());
@@ -46,17 +49,17 @@ public class SupplyWaypoints {
                 WaypointManager.updateWaypointPosition(entity.getUuid(), pos);
             }
         }
-    }
 
-    public static void onEntitySpawn(Entity entity, int entityId) {
-        if (!(entity instanceof GiantEntity giant)) return;
+        for (Entity entity : client.world.getEntities()) {
+            if (!(entity instanceof ArmorStandEntity armorstand)) continue;
+            if (armorstand.getCustomName() == null) continue;
 
-        System.out.println("SupplyWaypoints - Held item: " + giant.getMainHandStack().getName().getString());
-        if (giant.getMainHandStack().getName().getString().contains("head")) {
-            supplyEntities.add(giant);
-            BlockPos pos = giant.getBlockPos();
-            Waypoint w = WaypointManager.addWaypoint(giant.getUuid(), "Supply", pos);
+            if (armorstand.getCustomName().getString().contains("SUPPLIES")) {
+                supplyEntities.add(armorstand);
+                BlockPos pos = armorstand.getBlockPos();
+                Waypoint w = WaypointManager.addWaypoint(armorstand.getUuid(), "Supply", pos);
+                w.setBeaconBeam(true);
+            }
         }
     }
-
 }
