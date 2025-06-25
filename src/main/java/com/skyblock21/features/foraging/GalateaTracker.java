@@ -1,7 +1,9 @@
 package com.skyblock21.features.foraging;
 
 import com.skyblock21.Skyblock21;
+import com.skyblock21.config.Skyblock21Config;
 import com.skyblock21.config.Skyblock21ConfigManager;
+import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.ChatEvents;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
@@ -13,9 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 public class GalateaTracker {
 
@@ -44,14 +44,82 @@ public class GalateaTracker {
     private static double cachedForagingExpPerHour = 0;
     private static double cachedHOTFExpPerHour = 0;
 
+    private static boolean insideTreeGiftMessage = false;
+    private static boolean pastBonusGiftsMessage = false;
     private static void onChat(Text text) {
         if (!Utils.isOnSkyblock()) return;
         if (!Utils.isInGalatea()) return;
-
-        boolean shouldUpdateRate = false;
+        Skyblock21Config config = Skyblock21ConfigManager.get();
+        if (!config.foraging.bonusGiftsTracker && !config.foraging.galateaTracker) return;
 
         String message = text.getString();
-        if (!message.contains("rewards gained")) return;
+        if (message.equals("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")) {
+            if (!insideTreeGiftMessage) {
+                insideTreeGiftMessage = true;
+            } else {
+                insideTreeGiftMessage = false;
+                pastBonusGiftsMessage = false;
+            }
+        }
+        if (!message.contains("rewards gained") && !insideTreeGiftMessage && !message.contains("BONUS GIFT")) return;
+
+        if (message.contains("rewards gained")) {
+            parseExp(text);
+        } else {
+            parseBonusGifts(text);
+        }
+
+
+        long currentTime = System.currentTimeMillis();
+        if (sessionStartTime == -1) {
+            sessionStartTime = currentTime;
+        }
+        lastActionTime = currentTime;
+        if (isAfk) {
+            exitAfk();
+        }
+    }
+
+    private static void parseBonusGifts(Text text) {
+        String message = text.getString();
+
+        if (message.contains("BONUS GIFT") && !pastBonusGiftsMessage) {
+            pastBonusGiftsMessage = true;
+        }
+
+        if (!message.endsWith("%)") || !pastBonusGiftsMessage) return;
+
+        String itemName = TextUtils.toLegacy(text).replaceAll("\\s§8\\(§a([\\d.]+%)§8\\)", "").replaceAll("^§f\\s+", "");
+
+        if (itemName.startsWith("Enchanted Book")) {
+            // Extract text inside the first parentheses
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("§aEnchanted Book \\((.*?)§a\\)")
+                                                                     .matcher(itemName);
+            if (matcher.find()) {
+                itemName = matcher.group(1).trim();
+            }
+
+            if (itemName.isEmpty()) {
+                Skyblock21.LOGGER.error("GalateaTracker - Error parsing Enchanted Book name from message: " + message);
+                return;
+            }
+
+
+        }
+        PersistentData.get().bonusDrops.put(itemName, PersistentData.get().bonusDrops.getOrDefault(itemName, 0) + 1);
+
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(PersistentData.get().bonusDrops.entrySet());
+
+        entries.sort((a, b) -> Integer.compare(b.getKey().length(), a.getKey().length()));
+
+        Map<String, Integer> sortedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : entries) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void parseExp(Text text) {
+        boolean shouldUpdateRate = false;
 
         Style style = text.getStyle();
         for (Text sibling : text.getSiblings()) {
@@ -100,15 +168,6 @@ public class GalateaTracker {
                 totalWhispers += parseNumber(nextChild);
                 shouldUpdateRate = true;
             }
-        }
-
-        long currentTime = System.currentTimeMillis();
-        if (sessionStartTime == -1) {
-            sessionStartTime = currentTime;
-        }
-        lastActionTime = currentTime;
-        if (isAfk) {
-            exitAfk();
         }
 
         if (shouldUpdateRate) {
@@ -217,6 +276,13 @@ public class GalateaTracker {
                 "§c(Paused)";
     }
 
+    public static String getDummyBonusDropsText() {
+        return """
+                §d§lFirst Impression I: 3
+                §aStretching Sticks: 6
+                §6Chameleon: 1""";
+    }
+
     public static void resetSession() {
         sessionStartTime = -1;
         lastActionTime = -1;
@@ -230,5 +296,10 @@ public class GalateaTracker {
         totalHOTFExperience = 0;
 
         TextUtils.addMessage("§aGalatea session reset!", true, false);
+    }
+
+    public static void resetBonusGifts() {
+        PersistentData.get().bonusDrops.clear();
+        TextUtils.addMessage("§aBonus Gifts tracker reset!", true, false);
     }
 }

@@ -65,10 +65,15 @@ public class Skyblock21Config {
         @SerialEntry
         public boolean galateaTracker = true;
         @SerialEntry
+        public boolean bonusGiftsTracker = true;
+        @SerialEntry
         public int afkTimeout = 30; // in seconds
 
         @SerialEntry
         public boolean preventLogStripping = true;
+
+        @SerialEntry
+        public boolean hideFloatingBlocks = true;
     }
 
     public static class Nether {

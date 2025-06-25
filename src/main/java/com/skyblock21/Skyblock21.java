@@ -16,11 +16,9 @@ import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
 import com.skyblock21.hud.EditGuiScreen;
+import com.skyblock21.hud.HudElement;
 import com.skyblock21.hud.HudManager;
-import com.skyblock21.hud.elements.GalateaTrackerElement;
-import com.skyblock21.hud.elements.ScathaTrackerElement;
-import com.skyblock21.hud.elements.TestHudElement;
-import com.skyblock21.hud.elements.TreeProgressHudElement;
+import com.skyblock21.hud.elements.*;
 import com.skyblock21.util.AutoUpdater;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
@@ -41,7 +39,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.2.0";
+    public static final String MOD_VERSION = "1.2.1";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 
@@ -133,6 +131,7 @@ public class Skyblock21 implements ClientModInitializer {
         HudManager.register(new TestHudElement(100, 50));
         HudManager.register(new TreeProgressHudElement(100, 190));
         HudManager.register(new GalateaTrackerElement(10, 10));
+        HudManager.register(new BonusGiftsTrackerElement(10, 40));
         HudManager.register(new ScathaTrackerElement(10, 60));
         HudManager.init();
         registerCommands();

@@ -20,7 +20,8 @@
 		"EntityRendererMixin",
 		"KeybindingMixin",
 		"KeyBindingEntryMixin",
-		"ClientPlayNetworkHandlerMixin"
+		"ClientPlayNetworkHandlerMixin",
+		"CommandDispatcherMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

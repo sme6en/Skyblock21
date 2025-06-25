@@ -6,7 +6,9 @@ import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.Shortcut;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Data {
@@ -15,9 +17,13 @@ public class Data {
     public ScathasData scathasData = new ScathasData();
 
     @SerialEntry
+    public Map<String, Integer> bonusDrops = new HashMap<>();
+
+    @SerialEntry
     public final Set<Shortcut> shortcuts = new HashSet<>();
 
     @SerialEntry
     public final Set<Alias> aliases = new HashSet<>();
+
 
 }

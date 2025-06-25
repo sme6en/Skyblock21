@@ -1,8 +1,11 @@
 package com.skyblock21.hud;
 
+import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -34,10 +37,6 @@ public class EditGuiScreen extends Screen {
             matrices.scale(element.getScale(), element.getScale(), 1.0f);
 
             element.render(context, mouseX, mouseY);
-
-
-
-
 
             matrices.pop();
 
@@ -82,7 +81,7 @@ public class EditGuiScreen extends Screen {
     @Override
     public final boolean mouseClicked(double mouseX, double mouseY, int button) {
         for (HudElement element : HudManager.getElements()) {
-            if (element.isMouseOver(mouseX, mouseY)) {
+            if (element.isMouseOver(mouseX, mouseY) && element.isEnabled()) {
                 if (button == 1) {
                     element.resetPosition();
                     return true;
@@ -115,7 +114,7 @@ public class EditGuiScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (HudElement element : HudManager.getElements()) {
-            if (element.isMouseOver(mouseX, mouseY)) {
+            if (element.isMouseOver(mouseX, mouseY) && element.isEnabled()) {
                 element.adjustScale((float) verticalAmount * 0.1f);
 
                 return true;

@@ -25,10 +25,11 @@ import java.util.regex.Pattern;
 
 public class TreeProgress {
 
-    private static final Pattern TREE_PROGRESS_PATTERN = Pattern.compile("^FIG TREE (\\d+)%");
+    private static final Pattern TREE_PROGRESS_PATTERN = Pattern.compile("^(?:FIG|MANGROVE) TREE (\\d+)%");
 
     private static List<Entity> entityList = new ArrayList<>();
     private static Entity currentEntity = null;
+    private static boolean isMangrove = false;
 
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(TreeProgress::onTick);
@@ -78,6 +79,8 @@ public class TreeProgress {
 
         int distance = (int) armorStand.getPos().distanceTo(client.player.getPos());
         if (currentEntity == null || currentEntity.getPos().distanceTo(client.player.getPos()) > distance ) {
+            String customName = armorStand.getCustomName().getString();
+            isMangrove = customName.contains("MANGROVE");
             currentEntity = armorStand;
         }
     }
@@ -85,7 +88,7 @@ public class TreeProgress {
     public static void render(DrawContext context, int x, int y) {
         if (currentEntity == null || !currentEntity.hasCustomName() || !currentEntity.isAlive()) return;
 
-        context.drawItem(new ItemStack(Items.STRIPPED_SPRUCE_LOG), x, y);
+        context.drawItem(new ItemStack(isMangrove ? Items.MANGROVE_WOOD : Items.STRIPPED_SPRUCE_LOG), x, y);
         context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, currentEntity.getStyledDisplayName().getString().split(" ")[2], x + 16 + 2, y + 5, Color.GREEN.getRGB());
     }
 }

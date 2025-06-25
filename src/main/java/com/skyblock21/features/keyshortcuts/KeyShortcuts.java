@@ -76,8 +76,6 @@ public class KeyShortcuts {
         if (!command.startsWith("/")) {
             command = "/" + command;
         }
-        System.out.println("Executing shortcut: " + shortcut.getDisplayString() + " for command: " + shortcut.command);
-
         client.player.networkHandler.sendChatCommand(command.substring(1));
     }
 }

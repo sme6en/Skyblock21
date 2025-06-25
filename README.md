@@ -8,11 +8,13 @@
 ## ⚙️ Features
 
 ### Galatea Island
-- Foraging whisper tracker HUD
+- Foraging tracker HUD
+- Bonus gifts tracker HUD
 - Tree progress overlay HUD
 - Heart of the forest overlay
 - No Fog, See easier underwater
 - Prevent log stripping
+- Hide floating blocks while chopping trees
 
 ### Mining
 - Scatha Spawn Alerts

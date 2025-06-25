@@ -13,6 +13,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 
+import static com.skyblock21.features.foraging.HideFloatingBlocks.shouldHideFloatingBlocks;
+
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin {
 
@@ -21,6 +23,10 @@ public class EntityRendererMixin {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (Utils.isOnSkyblock()) {
+            if (shouldHideFloatingBlocks(entity)) {
+                cir.setReturnValue(false);
+            }
+
             if (mc.world != null && Skyblock21ConfigManager.get().general.hidePlayersAroundNpcs &&
                     Utils.getLocation() != Location.PRIVATE_ISLAND && !Utils.isInDungeons()) {
                 if (entity instanceof OtherClientPlayerEntity && !HideAroundNPC.isNPC(entity) && HideAroundNPC.isNearNPC(entity)) {

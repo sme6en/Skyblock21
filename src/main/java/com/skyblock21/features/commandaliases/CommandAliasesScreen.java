@@ -1,11 +1,15 @@
 package com.skyblock21.features.commandaliases;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.skyblock21.config.persistent.PersistentData;
+import com.skyblock21.mixin.CommandDispatcherMixin;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
@@ -347,9 +351,29 @@ public class CommandAliasesScreen extends Screen {
             }
 
             if (!entry.alias.aliasCommand.trim().isEmpty() && !entry.alias.targetCommand.trim().isEmpty()) {
+
+                if (entry.alias.aliasCommand.startsWith("/")) {
+                    entry.alias.aliasCommand = entry.alias.aliasCommand.substring(1).trim();
+                }
+
+                if (entry.alias.targetCommand.startsWith("/")) {
+                    entry.alias.targetCommand = entry.alias.targetCommand.substring(1).trim();
+                }
+
                 PersistentData.get().aliases.add(entry.alias);
             }
+
+
         }
+
+        PersistentData.get().aliases.removeIf(alias -> {
+            for (Alias other : PersistentData.get().aliases) {
+                if (!alias.equals(other) && alias.targetCommand.equals(other.aliasCommand)) {
+                    return true;
+                }
+            }
+            return false;
+        });
 
         this.client.setScreen(parent);
     }

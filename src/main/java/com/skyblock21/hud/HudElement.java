@@ -13,8 +13,8 @@ import java.util.Set;
 
 public abstract class HudElement {
 
-    protected final int HORIZONTAL_PADDING = 2;
-    protected final int VERTICAL_PADDING = 2;
+    protected int HORIZONTAL_PADDING = 2;
+    protected int VERTICAL_PADDING = 2;
     private final String name;
     public boolean alwaysRenderDummy = false;
     protected Set<Location> locationsShown = EnumSet.allOf(Location.class);

@@ -6,11 +6,7 @@ import com.skyblock21.config.persistent.PersistentData;
 public class CommandAliases {
 
     public static String processCommand(String originalCommand) {
-        if (!originalCommand.startsWith("/")) {
-            return null;
-        }
-
-        String commandWithoutSlash = originalCommand.substring(1).trim();
+        String commandWithoutSlash = originalCommand.startsWith("/") ? originalCommand.substring(1).trim() : originalCommand.trim();
         String[] parts = commandWithoutSlash.split(" ", 2);
         String baseCommand = parts[0];
         String args = parts.length > 1 ? parts[1] : "";

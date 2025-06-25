@@ -12,7 +12,7 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "sendChatCommand", at = @At("HEAD"), cancellable = true)
     private void processCommandAliases(String command, CallbackInfo ci) {
-        String processedCommand = CommandAliases.processCommand("/" + command);
+        String processedCommand = CommandAliases.processCommand(command);
 
         if (processedCommand != null) {
             ci.cancel();
