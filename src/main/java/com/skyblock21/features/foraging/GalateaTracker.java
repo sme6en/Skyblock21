@@ -278,9 +278,9 @@ public class GalateaTracker {
 
     public static String getDummyBonusDropsText() {
         return """
-                §d§lFirst Impression I: 3
-                §aStretching Sticks: 6
-                §6Chameleon: 1""";
+                §d§lFirst Impression I§r§a: 3
+                §aStretching Sticks§r§a: 6
+                §6Chameleon§r§a: 1""";
     }
 
     public static void resetSession() {

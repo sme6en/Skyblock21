@@ -31,10 +31,17 @@ public class EditGuiScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
 
         MatrixStack matrices = context.getMatrices();
+        float combinedScale = HudManager.getCombinedScale();
+
         for (HudElement element : HudManager.getElements()) {
             matrices.push();
-            matrices.translate(element.getX(), element.getY(), 0);
-            matrices.scale(element.getScale(), element.getScale(), 1.0f);
+
+            float effectiveX = element.getEffectiveX();
+            float effectiveY = element.getEffectiveY();
+            float effectiveScale = element.getEffectiveScale();
+
+            matrices.translate(effectiveX, effectiveY, 0);
+            matrices.scale(effectiveScale, effectiveScale, 1.0f);
 
             element.render(context, mouseX, mouseY);
 
@@ -42,31 +49,44 @@ public class EditGuiScreen extends Screen {
 
 
             if (selectedElement == element) {
-                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (element.getHeight() * element.getScale() * 0.4f));
+                int scaledWidth = (int) (element.getWidth() * effectiveScale);
+                int scaledHeight = (int) (element.getHeight() * effectiveScale);
+                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (scaledHeight * 0.4f));
 
-                boolean isOverGearIcon = mouseX >= (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4) && mouseX <= (element.getX() + element.getWidth() * element.getScale()) - 4 && mouseY >= element.getY() + 4 && mouseY <= (element.getY() + gearIconSize + 4);
+                int gearX = (int) (effectiveX + scaledWidth - gearIconSize - 4);
+                int gearY = (int) (effectiveY + 4);
 
-                context.drawTexture(RenderLayer::getGuiTextured, GEAR_ICON, (int) (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4), element.getY() + 4, 0, 0, gearIconSize, gearIconSize, gearIconSize, gearIconSize, new Color(255, 255, 255, isOverGearIcon ? 100 : 255).getRGB());
-                context.drawBorder(element.getX(), element.getY(), (int) (element.getWidth() * element.getScale()), (int) (element.getHeight() * element.getScale()), new Color(255, 255, 255, 150).getRGB());
+                boolean isOverGearIcon = mouseX >= gearX && mouseX <= gearX + gearIconSize &&
+                        mouseY >= gearY && mouseY <= gearY + gearIconSize;
+
+                context.drawTexture(RenderLayer::getGuiTextured, GEAR_ICON,
+                        gearX, gearY, 0, 0, gearIconSize, gearIconSize, gearIconSize, gearIconSize,
+                        new Color(255, 255, 255, isOverGearIcon ? 100 : 255).getRGB());
+
+                context.drawBorder((int) effectiveX, (int) effectiveY,
+                        scaledWidth, scaledHeight,
+                        new Color(255, 255, 255, 150).getRGB());
             }
-
 
             if (selectedElement == element && element.isEnabled()) {
                 String text = element.getName() + " (" + (int) (element.getScale() * 100) + "%)";
-                context.drawTextWithShadow(textRenderer, text, 0, -textRenderer.fontHeight, new Color(255, 255, 255, 150).getRGB());
+                context.drawTextWithShadow(textRenderer, text,
+                        (int) element.getEffectiveX(), (int) element.getEffectiveY() - textRenderer.fontHeight,
+                        new Color(255, 255, 255, 150).getRGB());
             }
-
         }
 
         matrices.push();
-        matrices.translate(width / 2f, (height / 2f) - textRenderer.fontHeight - 12, 0);
-        matrices.scale(1.4f, 1.4f, 1.0f);
+        matrices.translate(width / 2f, (height / 2f) + 36, 0);
+        matrices.scale(combinedScale, combinedScale, 1.0f);
         context.drawCenteredTextWithShadow(textRenderer, "§bSkyBlock§f21§r HUD Editor", 0, 0, Color.GREEN.getRGB());
+
+        context.drawCenteredTextWithShadow(textRenderer, "Left Click to Select Element", 0, (textRenderer.fontHeight + 4), Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Right Click to Reset Position", 0, (textRenderer.fontHeight + 4) * 2, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Scroll or \"-\"/\"+\" to increase size", 0, (textRenderer.fontHeight + 4) * 3, Color.GRAY.getRGB());
+        context.drawCenteredTextWithShadow(textRenderer, "Move selected element with arrows", 0, (textRenderer.fontHeight + 4) * 4, Color.GRAY.getRGB());
         matrices.pop();
-        context.drawCenteredTextWithShadow(textRenderer, "Left Click to Select Element", width / 2, height / 2, Color.GRAY.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Right Click to Reset Position", width / 2, (height / 2) + (textRenderer.fontHeight + 4), Color.GRAY.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Scroll or \"-\"/\"+\" to increase size", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 2, Color.GRAY.getRGB());
-        context.drawCenteredTextWithShadow(textRenderer, "Move selected element with arrows", width / 2, (height / 2) + (textRenderer.fontHeight + 4) * 3, Color.GRAY.getRGB());
+
     }
 
     @Override
@@ -87,9 +107,18 @@ public class EditGuiScreen extends Screen {
                     return true;
                 }
 
-                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (element.getHeight() * element.getScale() * 0.4f));
-                boolean isOverGearIcon = mouseX >= (element.getX() + (element.getWidth() * element.getScale()) - gearIconSize - 4) && mouseX <= (element.getX() + element.getWidth() * element.getScale()) - 4 && mouseY >= element.getY() + 4 && mouseY <= (element.getY() + gearIconSize + 4);
+                float effectiveX = element.getEffectiveX();
+                float effectiveY = element.getEffectiveY();
+                float effectiveScale = element.getEffectiveScale();
+                int scaledWidth = (int) (element.getWidth() * effectiveScale);
+                int scaledHeight = (int) (element.getHeight() * effectiveScale);
+                int gearIconSize = Math.min(GEAR_ICON_SIZE, (int) (scaledHeight * 0.4f));
 
+                int gearX = (int) (effectiveX + scaledWidth - gearIconSize - 4);
+                int gearY = (int) (effectiveY + 4);
+
+                boolean isOverGearIcon = mouseX >= gearX && mouseX <= gearX + gearIconSize &&
+                        mouseY >= gearY && mouseY <= gearY + gearIconSize;
 
                 if (isOverGearIcon && selectedElement == element) {
                     client.setScreen(new EditHudElementScreen(this, element));
@@ -101,6 +130,8 @@ public class EditGuiScreen extends Screen {
                 return true;
             }
         }
+
+        selectedElement = null;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -116,7 +147,6 @@ public class EditGuiScreen extends Screen {
         for (HudElement element : HudManager.getElements()) {
             if (element.isMouseOver(mouseX, mouseY) && element.isEnabled()) {
                 element.adjustScale((float) verticalAmount * 0.1f);
-
                 return true;
             }
         }

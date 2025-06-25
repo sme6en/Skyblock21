@@ -25,7 +25,7 @@ public class EditHudElementScreen extends Screen {
     private ButtonWidget cancelButton;
 
     private static final int SETTINGS_PANEL_WIDTH = 220;
-    private static final int SETTINGS_PANEL_HEIGHT = 240;
+    private static final int SETTINGS_PANEL_HEIGHT = 300;
     private static final int SETTINGS_PANEL_MARGIN = 20;
 
     private boolean isDragging = false;
@@ -44,13 +44,14 @@ public class EditHudElementScreen extends Screen {
     protected void init() {
         super.init();
 
-        boolean elementOnRight = element.getX() > width / 2;
+
+        boolean elementOnRight = element.getEffectiveX() > width / 2;
         int settingsX = elementOnRight ? SETTINGS_PANEL_MARGIN : width - SETTINGS_PANEL_WIDTH - SETTINGS_PANEL_MARGIN;
         int settingsY = (height - SETTINGS_PANEL_HEIGHT) / 2;
         int widgetWidth = 180;
         int widgetHeight = 20;
         int spacing = 30;
-        int widgetStartY = settingsY + 60;
+        int widgetStartY = settingsY + 80;
 
         this.backgroundCheckbox = CheckboxWidget.builder(literal("Background"), textRenderer)
                                                 .callback((checkbox, checked) -> {
@@ -125,10 +126,10 @@ public class EditHudElementScreen extends Screen {
     }
 
     private void repositionWidgets() {
-        boolean elementOnRight = element.getX() > width / 2;
+        boolean elementOnRight = element.getEffectiveX() > width / 2;
         int newSettingsX = elementOnRight ? SETTINGS_PANEL_MARGIN : width - SETTINGS_PANEL_WIDTH - SETTINGS_PANEL_MARGIN;
         int settingsY = (height - SETTINGS_PANEL_HEIGHT) / 2;
-        int widgetStartY = settingsY + 60;
+        int widgetStartY = settingsY + 80;
         int spacing = 30;
 
         if (backgroundCheckbox != null) {
@@ -157,10 +158,9 @@ public class EditHudElementScreen extends Screen {
         }
     }
 
-
     private void resetToDefaults() {
         element.resetDefaults();
-
+        repositionWidgets();
         backgroundOpacitySlider.active = element.isBackgroundEnabled();
     }
 
@@ -179,16 +179,20 @@ public class EditHudElementScreen extends Screen {
         matrices.pop();
 
         matrices.push();
-        matrices.translate(element.getX(), element.getY(), 0);
-        matrices.scale(element.getScale(), element.getScale(), 1.0f);
+        float effectiveX = element.getEffectiveX();
+        float effectiveY = element.getEffectiveY();
+        float effectiveScale = element.getEffectiveScale();
+
+        matrices.translate(effectiveX, effectiveY, 0);
+        matrices.scale(effectiveScale, effectiveScale, 1.0f);
         element.render(context, mouseX, mouseY);
         matrices.pop();
 
-        int elementWidth = (int)(element.getWidth() * element.getScale());
-        int elementHeight = (int)(element.getHeight() * element.getScale());
-        context.drawBorder(element.getX() - 1, element.getY() - 1, elementWidth + 2, elementHeight + 2, 0xFFFFFFFF);
+        int elementWidth = (int)(element.getWidth() * effectiveScale);
+        int elementHeight = (int)(element.getHeight() * effectiveScale);
+        context.drawBorder((int)effectiveX - 1, (int)effectiveY - 1, elementWidth + 2, elementHeight + 2, 0xFFFFFFFF);
 
-        boolean elementOnRight = element.getX() > width / 2;
+        boolean elementOnRight = effectiveX > width / 2;
         int settingsX = elementOnRight ? SETTINGS_PANEL_MARGIN : width - SETTINGS_PANEL_WIDTH - SETTINGS_PANEL_MARGIN;
         int settingsY = (height - SETTINGS_PANEL_HEIGHT) / 2;
 
@@ -200,12 +204,13 @@ public class EditHudElementScreen extends Screen {
         int titleX = settingsX + (SETTINGS_PANEL_WIDTH - titleWidth) / 2;
         context.drawTextWithShadow(textRenderer, settingsTitle, titleX, settingsY + 15, 0xFFFFFF);
 
-        context.drawTextWithShadow(textRenderer, "Appearance:", settingsX + 20, settingsY + 45, 0xCCCCCC);
+        context.drawTextWithShadow(textRenderer, "Appearance:", settingsX + 20, settingsY + 65, 0xCCCCCC);
 
-        boolean isNearBottom = element.getY() + element.getHeight() * element.getScale() > (float) height * 0.8f;
-        String coords = String.format("(%d, %d)", element.getX(), element.getY());
-        context.drawTextWithShadow(textRenderer, coords, element.getX() + 2, isNearBottom ? element.getY() - textRenderer.fontHeight : (int) (element.getY() + element.getHeight() * element.getScale() + 5)
-                , 0xCCCCCC);
+        boolean isNearBottom = effectiveY + elementHeight > (float) height * 0.8f;
+        String coords = String.format("Pos: (%d, %d)", element.getX(), element.getY());
+
+        int coordY = isNearBottom ? (int)effectiveY - textRenderer.fontHeight * 2 - 5 : (int)effectiveY + elementHeight + 5;
+        context.drawTextWithShadow(textRenderer, coords, (int)effectiveX + 2, coordY, 0xCCCCCC);
 
         if (!isDragging) {
             context.drawCenteredTextWithShadow(textRenderer, "Click and drag the element to move it", width / 2, height - 30, 0xCCCCCC);
@@ -229,7 +234,6 @@ public class EditHudElementScreen extends Screen {
         } else if (resetButton.isHovered()) {
             context.drawTooltip(textRenderer, Text.literal("Reset all settings to default values"), mouseX, mouseY);
         }
-
     }
 
     @Override
@@ -257,14 +261,18 @@ public class EditHudElementScreen extends Screen {
         }
 
         if (button == 0) {
-            int elementWidth = (int)(element.getWidth() * element.getScale());
-            int elementHeight = (int)(element.getHeight() * element.getScale());
+            float effectiveX = element.getEffectiveX();
+            float effectiveY = element.getEffectiveY();
+            int elementWidth = (int)(element.getWidth() * element.getEffectiveScale());
+            int elementHeight = (int)(element.getHeight() * element.getEffectiveScale());
 
-            if (mouseX >= element.getX() && mouseX <= element.getX() + elementWidth &&
-                    mouseY >= element.getY() && mouseY <= element.getY() + elementHeight) {
+            if (mouseX >= effectiveX && mouseX <= effectiveX + elementWidth &&
+                    mouseY >= effectiveY && mouseY <= effectiveY + elementHeight) {
                 isDragging = true;
-                dragOffsetX = mouseX - element.getX();
-                dragOffsetY = mouseY - element.getY();
+
+                float combinedScale = HudManager.getCombinedScale();
+                dragOffsetX = (mouseX / combinedScale) - element.getX();
+                dragOffsetY = (mouseY / combinedScale) - element.getY();
                 return true;
             }
         }
@@ -274,11 +282,10 @@ public class EditHudElementScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (HudElement element : HudManager.getElements()) {
-            if (element.isMouseOver(mouseX, mouseY)) {
-                element.adjustScale((float) verticalAmount * 0.1f);
-                return true;
-            }
+        if (element.isMouseOver(mouseX, mouseY)) {
+            element.adjustScale((float) verticalAmount * 0.1f);
+
+            return true;
         }
 
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -292,6 +299,7 @@ public class EditHudElementScreen extends Screen {
 
         if (button == 0 && isDragging) {
             isDragging = false;
+            repositionWidgets();
             return true;
         }
 
@@ -305,22 +313,25 @@ public class EditHudElementScreen extends Screen {
         }
 
         if (button == 0 && isDragging) {
-            int newX = (int)(mouseX - dragOffsetX);
-            int newY = (int)(mouseY - dragOffsetY);
+            float combinedScale = HudManager.getCombinedScale();
+            int newX = (int)((mouseX / combinedScale) - dragOffsetX);
+            int newY = (int)((mouseY / combinedScale) - dragOffsetY);
 
-            newX = Math.max(0, Math.min(newX, width - (int)(element.getWidth() * element.getScale())));
-            newY = Math.max(0, Math.min(newY, height - (int)(element.getHeight() * element.getScale())));
+            int maxX = (int)((width / combinedScale) - (element.getWidth() * element.getScale()));
+            int maxY = (int)((height / combinedScale) - (element.getHeight() * element.getScale()));
+
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
 
             element.setX(newX);
             element.setY(newY);
-
-            repositionWidgets();
 
             return true;
         }
 
         return false;
     }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         boolean shift = hasShiftDown();
@@ -357,6 +368,6 @@ public class EditHudElementScreen extends Screen {
             }
         }
 
-        return true;
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

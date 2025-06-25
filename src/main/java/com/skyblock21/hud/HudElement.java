@@ -58,10 +58,16 @@ public abstract class HudElement {
     }
 
     public void setX(int x) {
-        this.x = MinecraftClient.getInstance() == null || MinecraftClient.getInstance()
-                                                                         .getWindow() == null ? x : Math.max(1, Math.min(x, MinecraftClient.getInstance()
-                                                                                                                                           .getWindow()
-                                                                                                                                           .getScaledWidth() - (int) (getWidth() * scale) - 1));
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.getWindow() == null) {
+            this.x = x;
+            return;
+        }
+
+        float combinedScale = HudManager.getCombinedScale();
+        int maxX = (int) ((client.getWindow().getWidth() / combinedScale) - (getWidth() * scale) - 1);
+
+        this.x = Math.max(1, Math.min(x, maxX));
     }
 
     public int getY() {
@@ -69,10 +75,28 @@ public abstract class HudElement {
     }
 
     public void setY(int y) {
-        this.y = MinecraftClient.getInstance() == null || MinecraftClient.getInstance()
-                                                                         .getWindow() == null ? y : Math.max(1, Math.min(y, MinecraftClient.getInstance()
-                                                                                                                                           .getWindow()
-                                                                                                                                           .getScaledHeight() - (int) (getHeight() * scale)-1));
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.getWindow() == null) {
+            this.y = y;
+            return;
+        }
+
+        float combinedScale = HudManager.getCombinedScale();
+        int maxY = (int) ((client.getWindow().getHeight() / combinedScale) - (getHeight() * scale) - 1);
+
+        this.y = Math.max(1, Math.min(y, maxY));
+    }
+
+    public float getEffectiveX() {
+        return x * HudManager.getCombinedScale();
+    }
+
+    public float getEffectiveY() {
+        return y * HudManager.getCombinedScale();
+    }
+
+    public float getEffectiveScale() {
+        return scale * HudManager.getCombinedScale();
     }
 
     public float getScale() {
@@ -81,6 +105,9 @@ public abstract class HudElement {
 
     public void setScale(float scale) {
         this.scale = scale;
+
+        setX(this.x);
+        setY(this.y);
     }
 
     public boolean isBackgroundEnabled() {
@@ -154,16 +181,21 @@ public abstract class HudElement {
     }
 
     public boolean isMouseOver(double mouseX, double mouseY) {
+        float effectiveX = getEffectiveX();
+        float effectiveY = getEffectiveY();
+        float effectiveScale = getEffectiveScale();
         int width = getWidth();
         int height = getHeight();
-        return mouseX >= x && mouseX <= x + width * scale &&
-                mouseY >= y && mouseY <= y + height * scale;
+
+        return mouseX >= effectiveX && mouseX <= effectiveX + width * effectiveScale &&
+                mouseY >= effectiveY && mouseY <= effectiveY + height * effectiveScale;
     }
 
     public void startDragging(double mouseX, double mouseY) {
         dragging = true;
-        dragOffsetX = (int) (mouseX - x);
-        dragOffsetY = (int) (mouseY - y);
+        float combinedScale = HudManager.getCombinedScale();
+        dragOffsetX = (int) ((mouseX / combinedScale) - x);
+        dragOffsetY = (int) ((mouseY / combinedScale) - y);
     }
 
     public void stopDragging() {
@@ -172,8 +204,9 @@ public abstract class HudElement {
 
     public void dragTo(double mouseX, double mouseY) {
         if (dragging) {
-            setX((int) (mouseX - dragOffsetX));
-            setY((int) (mouseY - dragOffsetY));
+            float combinedScale = HudManager.getCombinedScale();
+            setX((int) ((mouseX / combinedScale) - dragOffsetX));
+            setY((int) ((mouseY / combinedScale) - dragOffsetY));
         }
     }
 

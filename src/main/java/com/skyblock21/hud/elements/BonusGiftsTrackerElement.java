@@ -64,18 +64,19 @@ public class BonusGiftsTrackerElement extends HudElement {
 
     @Override
     public int getWidth() {
-        int longestString = PersistentData.get().bonusDrops.entrySet().stream().
-                                                           mapToInt(entry -> MinecraftClient.getInstance().textRenderer.getWidth(entry.getKey() + ": " + entry.getValue()))
+        int longestString = PersistentData.get().bonusDrops.entrySet()
+                                                           .stream()
+                                                           .mapToInt(entry -> MinecraftClient.getInstance().textRenderer.getWidth(entry.getKey() + ": " + entry.getValue()))
                                                            .max()
                                                            .orElse(0);
 
-        return (int) (Math.max(longestString, MinecraftClient.getInstance().textRenderer.getWidth("§lBonus Gifts")) * 1.3);
+        return shouldRenderDummy() ? (int) (MinecraftClient.getInstance().textRenderer.getWidth("§d§lFirst Impression I: 3") * 1.3) : (int) (Math.max(longestString, MinecraftClient.getInstance().textRenderer.getWidth("§lBonus Gifts")) * 1.3);
     }
 
     @Override
     public int getHeight() {
-        int lineCount = PersistentData.get().bonusDrops.size() + 1;
-        return (int) (((MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_PADDING * (lineCount)) * 1.2);
+        int lineCount = shouldRenderDummy() ? 4 : PersistentData.get().bonusDrops.size() + 1;
+        return (int) (((MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_PADDING * (lineCount)) * 1.3);
     }
 
     @Override
