@@ -88,7 +88,10 @@ public class TreeProgress {
     public static void render(DrawContext context, int x, int y) {
         if (currentEntity == null || !currentEntity.hasCustomName() || !currentEntity.isAlive()) return;
 
+        String[] str = currentEntity.getStyledDisplayName().getString().split(" ");
+        if (str.length < 3) return;
+
         context.drawItem(new ItemStack(isMangrove ? Items.MANGROVE_WOOD : Items.STRIPPED_SPRUCE_LOG), x, y);
-        context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, currentEntity.getStyledDisplayName().getString().split(" ")[2], x + 16 + 2, y + 5, Color.GREEN.getRGB());
+        context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, str[2], x + 16 + 2, y + 5, Color.GREEN.getRGB());
     }
 }
