@@ -51,4 +51,6 @@ If you have any suggestions, feature requests or bug reports please open an issu
 
 ## ©️ Credits
 
+**Note:** This mod includes small portions of code inspired by or directly copied from Skyblocker and SkyblockTweaks. Credit to their respective authors for their work.
+
 Skyblocker, SkyblockTweaks and Scatha-Pro
