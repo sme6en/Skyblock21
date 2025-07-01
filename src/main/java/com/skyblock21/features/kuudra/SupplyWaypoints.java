@@ -1,5 +1,7 @@
 package com.skyblock21.features.kuudra;
 
+import com.skyblock21.config.Skyblock21Config;
+import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.features.waypoints.Waypoint;
 import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.features.waypoints.WaypointRenderer;
@@ -26,6 +28,7 @@ public class SupplyWaypoints {
 
     public static void init() {
         WorldRenderEvents.LAST.register((context) -> {
+            if (!Skyblock21ConfigManager.get().nether.kuudraSupplyHelper) return;
             WaypointRenderer.renderWaypoints(
                     context,
                     context.camera(),
@@ -37,6 +40,7 @@ public class SupplyWaypoints {
 
     public static void onTick(MinecraftClient client) {
         if (!Utils.isInKuudra()) return;
+        if (!Skyblock21ConfigManager.get().nether.kuudraSupplyHelper) return;
         if (client.player == null || client.world == null) return;
 
         List<ArmorStandEntity> supplyEntitiesCache = new ArrayList<>(SupplyWaypoints.supplyEntities);
