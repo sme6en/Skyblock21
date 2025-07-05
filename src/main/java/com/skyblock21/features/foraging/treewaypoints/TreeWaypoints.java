@@ -3,6 +3,7 @@ package com.skyblock21.features.foraging.treewaypoints;
 import com.skyblock21.Skyblock21;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.events.ChatEvents;
+import com.skyblock21.events.ParticleEvents;
 import com.skyblock21.events.SkyblockEvents;
 import com.skyblock21.features.waypoints.Waypoint;
 import com.skyblock21.features.waypoints.WaypointManager;
@@ -18,8 +19,10 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexRendering;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -29,6 +32,7 @@ import net.minecraft.world.World;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.util.*;
+import java.util.List;
 import java.util.Queue;
 
 public class TreeWaypoints {
@@ -41,6 +45,38 @@ public class TreeWaypoints {
         ClientTickEvents.END_CLIENT_TICK.register(TreeWaypoints::tick);
         ChatEvents.RECEIVE_TEXT.register(TreeWaypoints::onChat);
         SkyblockEvents.LOCATION_CHANGE.register(TreeWaypoints::onLocationChange);
+        ParticleEvents.SPAWN.register(TreeWaypoints::onParticle);
+    }
+
+    private static void onParticle(ParticleS2CPacket particleS2CPacket) {
+        if (!Utils.isOnSkyblock()) return;
+        if (!Utils.isInGalatea()) return;
+        if (!Skyblock21ConfigManager.get().foraging.treeWaypoints) return;
+
+        ParticleType<?> particleType = particleS2CPacket.getParameters().getType();
+        if (particleType != ParticleTypes.GUST) return;
+
+        double particleX = particleS2CPacket.getX();
+        double particleY = particleS2CPacket.getY();
+        double particleZ = particleS2CPacket.getZ();
+
+        // find the closest tree to the particle
+        Tree closestTree = null;
+        double closestDistance = Double.MAX_VALUE;
+        for (Tree tree : trees.values()) {
+            if (!isTreeAllowed(tree)) continue;
+
+            double distance = new Vec3d(particleX, particleY, particleZ).squaredDistanceTo(tree.basePos.getX(), tree.basePos.getY(), tree.basePos.getZ());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestTree = tree;
+            }
+        }
+
+        if (closestTree != null && closestDistance <= 20) {
+            closestTree.setState(TreeState.NOT_PRESENT);
+            closestTree.knownLogPositions.clear();
+        }
 
     }
 
@@ -135,6 +171,7 @@ public class TreeWaypoints {
         if (!client.world.isChunkLoaded(chunkX, chunkZ) && tree.currentState != TreeState.NONE) {
             System.out.println("Tree is in unloaded chunk: " + tree.basePos + " (" + chunkX + ", " + chunkZ + ")");
             tree.setState(TreeState.NONE);
+            tree.knownLogPositions.clear();
             return;
         }
 
@@ -237,7 +274,6 @@ public class TreeWaypoints {
 
     private static void updateAllWaypoints() {
         for (Tree tree : trees.values()) {
-
             updateWaypointForTree(tree);
         }
     }
@@ -266,6 +302,16 @@ public class TreeWaypoints {
     private static String getWaypointName(Tree tree) {
         String treeName = tree.getTreeTypeName();
 
+        if (!tree.isBig()) {
+            BlockPos playerPos = MinecraftClient.getInstance().player.getBlockPos();
+            if (playerPos != null) {
+                Tree secondNearestSmallTree = findSecondNearestSmallTree(playerPos);
+                if (secondNearestSmallTree != null && secondNearestSmallTree.waypointId.equals(tree.waypointId)) {
+                    treeName += " §a(nearest)";
+                }
+            }
+        }
+
         switch (tree.getState()) {
             case NOT_PRESENT:
                 return treeName + " Broken";
@@ -281,6 +327,7 @@ public class TreeWaypoints {
             default:
                 return "Unknown Tree";
         }
+
     }
 
     private static int getWaypointColor(Tree tree) {
@@ -331,6 +378,28 @@ public class TreeWaypoints {
             }
         }
 
+    }
+
+    private static Tree findSecondNearestSmallTree(BlockPos playerPos) {
+        List<Tree> sortedTrees = new ArrayList<>();
+
+        for (Tree tree : trees.values()) {
+            // Only consider small trees that are visible and allowed
+            if (tree.isBig() || !isTreeAllowed(tree) || !shouldWaypointBeVisible(tree)) {
+                continue;
+            }
+            sortedTrees.add(tree);
+        }
+
+        // Sort by distance from player
+        sortedTrees.sort((t1, t2) -> {
+            double dist1 = playerPos.getSquaredDistance(t1.basePos);
+            double dist2 = playerPos.getSquaredDistance(t2.basePos);
+            return Double.compare(dist1, dist2);
+        });
+
+        // Return second nearest (index 1), or null if less than 2 trees
+        return sortedTrees.size() >= 2 ? sortedTrees.get(1) : null;
     }
 
 }

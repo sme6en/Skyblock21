@@ -38,7 +38,7 @@ public class WaypointRenderer {
         for (Waypoint waypoint : visibleWaypoints) {
             Vec3d waypointPos = Vec3d.of(waypoint.getPosition());
             double distance = Math.sqrt(client.player.squaredDistanceTo(waypointPos));
-            if (waypoint.shouldHideWhenClose() && distance < 10.0) continue;
+            if (waypoint.shouldHideWhenClose() && distance < 8.0) continue;
 
             if (distance > MAX_RENDER_DISTANCE) continue;
 
