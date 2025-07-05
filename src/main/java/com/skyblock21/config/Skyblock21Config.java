@@ -70,6 +70,19 @@ public class Skyblock21Config {
         public int afkTimeout = 30; // in seconds
 
         @SerialEntry
+        public boolean treeWaypoints = true;
+        @SerialEntry
+        public boolean onlyShowSmallTrees = false;
+        @SerialEntry
+        public boolean showFigTreeWaypoints = true;
+        @SerialEntry
+        public boolean showMangroveTreeWaypoints = true;
+        @SerialEntry
+        public int timeBeforeReady = 5;
+        @SerialEntry
+        public int maxDistance = 0;
+
+        @SerialEntry
         public boolean preventLogStripping = true;
 
         @SerialEntry

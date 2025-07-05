@@ -30,7 +30,7 @@ public class BonusGiftsTrackerElement extends HudElement {
         // 20% bigger
         matrices.push();
         matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "§lBonus Gifts", 2, 2, 0xFF55FF);
+        context.drawTextWithShadow(textRenderer, "Bonus Gifts", 2, 2, 0xFF55FF);
         matrices.pop();
 
 
@@ -39,7 +39,7 @@ public class BonusGiftsTrackerElement extends HudElement {
             String itemName = entry.getKey();
             int count = entry.getValue();
             String line = String.format("%s§а: %d", itemName, count);
-            context.drawTextWithShadow(textRenderer, line, 8, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (lineIndex + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, line, 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (lineIndex + 1), Color.WHITE.getRGB());
             lineIndex++;
         }
     }
@@ -53,12 +53,12 @@ public class BonusGiftsTrackerElement extends HudElement {
         // 20% bigger
         matrices.push();
         matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "§lBonus Gifts", 2, 2, 0xFF55FF);
+        context.drawTextWithShadow(textRenderer, "Bonus Gifts", 2, 2, 0xFF55FF);
         matrices.pop();
 
         String[] lines = dummyText.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 8, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 

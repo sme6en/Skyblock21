@@ -1,7 +1,11 @@
 package com.skyblock21.mixin;
 
+import com.skyblock21.events.BlockEvents;
+import com.skyblock21.events.ParticleEvents;
 import com.skyblock21.features.commandaliases.CommandAliases;
+import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,5 +26,10 @@ public class ClientPlayNetworkHandlerMixin {
             String commandWithoutSlash = processedCommand.substring(1);
             handler.sendChatCommand(commandWithoutSlash);
         }
+    }
+
+    @Inject(method = "onParticle", at = @At("RETURN"))
+    private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
+        ParticleEvents.SPAWN.invoker().onParticleSpawn(packet);
     }
 }

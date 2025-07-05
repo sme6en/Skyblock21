@@ -1,0 +1,336 @@
+package com.skyblock21.features.foraging.treewaypoints;
+
+import com.skyblock21.Skyblock21;
+import com.skyblock21.config.Skyblock21ConfigManager;
+import com.skyblock21.events.ChatEvents;
+import com.skyblock21.events.SkyblockEvents;
+import com.skyblock21.features.waypoints.Waypoint;
+import com.skyblock21.features.waypoints.WaypointManager;
+import com.skyblock21.features.waypoints.WaypointRenderer;
+import com.skyblock21.util.Location;
+import com.skyblock21.util.Utils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
+import net.minecraft.particle.ParticleType;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+
+import java.awt.*;
+import java.io.BufferedReader;
+import java.util.*;
+import java.util.Queue;
+
+public class TreeWaypoints {
+
+    public static final Map<UUID, Tree> trees = new HashMap<>();
+    private static final int SCAN_RADIUS = 1;
+    private static int ticks = 0;
+
+    public static void init() {
+        ClientTickEvents.END_CLIENT_TICK.register(TreeWaypoints::tick);
+        ChatEvents.RECEIVE_TEXT.register(TreeWaypoints::onChat);
+        SkyblockEvents.LOCATION_CHANGE.register(TreeWaypoints::onLocationChange);
+
+    }
+
+    private static void onLocationChange(Location location) {
+
+        if (location == Location.GALATEA) {
+            performInitialWorldScan();
+        } else {
+            trees.clear();
+            WaypointManager.removeAllWaypoints();
+        }
+    }
+
+    public static void loadTrees() {
+        try (BufferedReader r = MinecraftClient.getInstance()
+                                               .getResourceManager()
+                                               .openAsReader(Identifier.of("skyblock21", "tree_locations.json"))) {
+
+            Tree[] loadedTrees = Skyblock21.GSON.fromJson(r, Tree[].class);
+            for (Tree tree : loadedTrees) {
+                tree.basePos = new BlockPos(tree.x, tree.y, tree.z);
+                tree.currentState = TreeState.NONE;
+                tree.knownLogPositions = new HashSet<>();
+                tree.stateStartTime = System.currentTimeMillis();
+                tree.waypointId = UUID.randomUUID();
+
+                trees.put(tree.waypointId, tree);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean isTreeAllowed(Tree tree) {
+        boolean onlySmall = Skyblock21ConfigManager.get().foraging.onlyShowSmallTrees;
+        boolean mangrove = Skyblock21ConfigManager.get().foraging.showMangroveTreeWaypoints;
+        boolean fig = Skyblock21ConfigManager.get().foraging.showFigTreeWaypoints;
+
+        if (onlySmall && tree.isBigTree) {
+            return false;
+        }
+
+        if (tree.isMangrove) {
+            return mangrove;
+        } else {
+            return fig;
+        }
+    }
+
+    public static void tick(MinecraftClient client) {
+        if (client.world == null || client.player == null) return;
+        if (++ticks % 2 != 0) return;
+
+        if (!Utils.isOnSkyblock()) return;
+        if (!Utils.isInGalatea()) return;
+        if (!Skyblock21ConfigManager.get().foraging.treeWaypoints) return;
+
+        for (Tree tree : trees.values()) {
+            updateTreeStateMachine(tree);
+        }
+        updateAllWaypoints();
+
+        if (ticks == 20) ticks = 0;
+    }
+
+    private static void onChat(Text text) {
+        String message = text.getString();
+        if (!message.contains("rewards gained")) return;
+
+        for (Tree tree : trees.values()) {
+            BlockPos playerPos = MinecraftClient.getInstance().player.getBlockPos();
+            if (playerPos == null) continue;
+
+            double distance = tree.basePos.getSquaredDistance(playerPos);
+            if (distance <= 25) {
+                if (tree.currentState == TreeState.PRESENT) {
+                    tree.setState(TreeState.NOT_PRESENT);
+                    tree.knownLogPositions.clear();
+                }
+                break;
+            }
+        }
+    }
+
+    private static void updateTreeStateMachine(Tree tree) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null) return;
+
+        int chunkX = tree.basePos.getX() >> 4;
+        int chunkZ = tree.basePos.getZ() >> 4;
+
+        if (!client.world.isChunkLoaded(chunkX, chunkZ) && tree.currentState != TreeState.NONE) {
+            System.out.println("Tree is in unloaded chunk: " + tree.basePos + " (" + chunkX + ", " + chunkZ + ")");
+            tree.setState(TreeState.NONE);
+            return;
+        }
+
+        Set<BlockPos> logPositions = scanAreaForLogs(client.world, tree);
+        Set<BlockPos> connectedLogs = logPositions.isEmpty() ? new HashSet<>() : scanNeighborsForTree(client.world, logPositions, tree);
+
+        boolean treePhysicallyPresent = !connectedLogs.isEmpty();
+        long timeInState = tree.getTimeInCurrentState();
+
+        if ((tree.currentState == TreeState.PRESENT || tree.currentState == TreeState.NONE) && ticks % 20 != 0) return;
+
+        switch (tree.currentState) {
+            case NONE:
+                if (treePhysicallyPresent) {
+                    tree.setState(TreeState.PRESENT);
+                    tree.knownLogPositions = new HashSet<>(connectedLogs);
+                }
+            case NOT_PRESENT:
+                if (timeInState >= tree.NOT_PRESENT_DURATION) {
+                    tree.setState(TreeState.REGENERATING);
+                }
+                break;
+
+            case REGENERATING:
+                if (timeInState >= tree.getRegeneratingDuration()) {
+                    tree.setState(TreeState.PRESENT);
+                }
+                break;
+
+            case PRESENT:
+                if (!treePhysicallyPresent) {
+                    tree.setState(TreeState.NOT_PRESENT);
+                    tree.knownLogPositions.clear();
+                } else {
+                    tree.knownLogPositions = new HashSet<>(connectedLogs);
+                }
+                break;
+        }
+    }
+
+    private static Set<BlockPos> scanAreaForLogs(World world, Tree tree) {
+        Set<BlockPos> logPositions = new HashSet<>();
+
+        int baseX = tree.basePos.getX();
+        int baseZ = tree.basePos.getZ();
+
+        for (int x = baseX - SCAN_RADIUS; x <= baseX + SCAN_RADIUS; x++) {
+            for (int z = baseZ - SCAN_RADIUS; z <= baseZ + SCAN_RADIUS; z++) {
+                for (int y = tree.y; y <= tree.maxY; y++) {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    Block block = world.getBlockState(pos).getBlock();
+
+                    if (block == tree.getLogBlock()) {
+                        logPositions.add(pos);
+                    }
+                }
+            }
+        }
+
+        return logPositions;
+    }
+
+    private static Set<BlockPos> scanNeighborsForTree(World world, Set<BlockPos> initialLogs, Tree tree) {
+        Set<BlockPos> connectedLogs = new HashSet<>();
+        Set<BlockPos> visited = new HashSet<>();
+        Queue<BlockPos> queue = new LinkedList<>();
+
+        if (!initialLogs.isEmpty()) {
+            BlockPos start = initialLogs.iterator().next();
+            queue.add(start);
+            visited.add(start);
+        }
+
+        while (!queue.isEmpty()) {
+            BlockPos current = queue.poll();
+            connectedLogs.add(current);
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (dx == 0 && dy == 0 && dz == 0) continue;
+
+                        BlockPos neighbor = current.add(dx, dy, dz);
+
+                        if (!visited.contains(neighbor)) {
+                            Block block = world.getBlockState(neighbor).getBlock();
+
+                            if (block == tree.getLogBlock()) {
+                                visited.add(neighbor);
+                                queue.add(neighbor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return connectedLogs.size() >= 2 ? connectedLogs : new HashSet<>();
+    }
+
+    private static void updateAllWaypoints() {
+        for (Tree tree : trees.values()) {
+
+            updateWaypointForTree(tree);
+        }
+    }
+
+    private static void updateWaypointForTree(Tree tree) {
+        Waypoint waypoint = WaypointManager.getWaypoint(tree.waypointId);
+
+        String name = getWaypointName(tree);
+        int color = getWaypointColor(tree);
+        boolean visible = shouldWaypointBeVisible(tree);
+
+        if (waypoint == null && visible) {
+            waypoint = WaypointManager.addWaypoint(tree.waypointId, name, tree.getCenterPos(), color);
+            waypoint.setBeaconBeam(true);
+        } else if (waypoint != null) {
+            waypoint.setVisible(visible);
+            if (visible) {
+                waypoint.setPosition(tree.basePos);
+                waypoint.setName(name);
+                waypoint.setColor(color);
+                waypoint.setHideWhenClose(tree.currentState == TreeState.PRESENT);
+            }
+        }
+    }
+
+    private static String getWaypointName(Tree tree) {
+        String treeName = tree.getTreeTypeName();
+
+        switch (tree.getState()) {
+            case NOT_PRESENT:
+                return treeName + " Broken";
+
+            case REGENERATING:
+                long totalDuration = tree.isBig() ? 24000 : 12000;
+                long regenSecondsLeft = (totalDuration - tree.getTimeInState()) / 1000;
+                return treeName + (Skyblock21ConfigManager.get().foraging.timeBeforeReady >= regenSecondsLeft ? " §7(" + Math.max(0, regenSecondsLeft) + "s)" : "");
+
+            case PRESENT:
+                return treeName;
+
+            default:
+                return "Unknown Tree";
+        }
+    }
+
+    private static int getWaypointColor(Tree tree) {
+        switch (tree.getState()) {
+            case REGENERATING:
+                return 0xFFFF00;
+
+            case PRESENT:
+                if (tree.isMangrove()) {
+                    return tree.isBig() ? 0x8B4513 : 0xD2691E;
+                } else {
+                    return tree.isBig() ? 0x006400 : 0x32CD32;
+                }
+
+            default:
+                return 0xFFFFFF;
+        }
+    }
+
+    private static boolean shouldWaypointBeVisible(Tree tree) {
+        BlockPos playerPos = MinecraftClient.getInstance().player.getBlockPos();
+        if (playerPos == null) return false;
+
+        int distance = (int) playerPos.getSquaredDistance(tree.basePos.getX(), tree.basePos.getY(), tree.basePos.getZ());
+        int maxDistance = Skyblock21ConfigManager.get().foraging.maxDistance;
+        return tree.currentState != TreeState.NOT_PRESENT && tree.currentState != TreeState.NONE && isTreeAllowed(tree) && (maxDistance == 0 || distance <= maxDistance * maxDistance);
+    }
+
+    public static void performInitialWorldScan() {
+
+        if (trees.isEmpty()) {
+            loadTrees();
+            return;
+        }
+
+        for (Tree tree : trees.values()) {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.world == null) continue;
+
+            Set<BlockPos> logPositions = scanAreaForLogs(client.world, tree);
+            Set<BlockPos> connectedLogs = logPositions.isEmpty() ? new HashSet<>() : scanNeighborsForTree(client.world, logPositions, tree);
+
+            if (connectedLogs.isEmpty()) {
+                tree.setState(TreeState.NOT_PRESENT);
+            } else {
+                tree.setState(TreeState.PRESENT);
+                tree.knownLogPositions = new HashSet<>(connectedLogs);
+            }
+        }
+
+    }
+
+}

@@ -14,6 +14,8 @@ public class Waypoint {
 
     private boolean beaconBeam;
 
+    private boolean hideWhenClose = true;
+
     private boolean circleOnFloor;
 
     private boolean visible;
@@ -62,6 +64,14 @@ public class Waypoint {
 
     public boolean isBeaconBeam() {
         return beaconBeam;
+    }
+
+    public boolean shouldHideWhenClose() {
+        return hideWhenClose;
+    }
+
+    public void setHideWhenClose(boolean hideWhenClose) {
+        this.hideWhenClose = hideWhenClose;
     }
 
     public boolean isVisible() {

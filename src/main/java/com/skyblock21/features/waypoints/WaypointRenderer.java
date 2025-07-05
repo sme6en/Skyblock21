@@ -38,16 +38,18 @@ public class WaypointRenderer {
         for (Waypoint waypoint : visibleWaypoints) {
             Vec3d waypointPos = Vec3d.of(waypoint.getPosition());
             double distance = Math.sqrt(client.player.squaredDistanceTo(waypointPos));
+            if (waypoint.shouldHideWhenClose() && distance < 10.0) continue;
 
             if (distance > MAX_RENDER_DISTANCE) continue;
 
-            if (!waypoint.getName().isEmpty()) renderWaypointText(context, waypoint, distance, tickDelta);
             if (waypoint.isCircleOnFloor()) {
                 renderCircleOnBlock(context, matrices, waypoint.getPosition(), cameraPos, waypoint.getColor(), 0.7f, 256);
             }
             if (waypoint.isBeaconBeam()) {
                 renderWaypointBeacon(context, matrices, waypoint, camera, cameraPos, distance);
         }
+            if (!waypoint.getName().isEmpty()) renderWaypointText(context, waypoint, distance, tickDelta);
+
         }
 
     }
@@ -174,14 +176,14 @@ public class WaypointRenderer {
     }
 
     private static void renderWaypointText(WorldRenderContext context, Waypoint waypoint, double distance, float tickDelta) {
-        if (distance > 150.0) return; // Don't render text for distant waypoints
+        if (distance > 250.0) return; // Don't render text for distant waypoints
         Matrix4f positionMatrix = new Matrix4f();
 
         BlockPos pos = waypoint.getPosition();
         Vec3d waypointPos = Vec3d.of(pos).add(0.5, 2.5, 0.5);
 
 
-        float scale = 1.0f + (4.0f * (float)(distance / 50));
+        float scale = 1.0f + (3.0f * (float)(distance / 30));
 
         scale *= 0.025f;
 

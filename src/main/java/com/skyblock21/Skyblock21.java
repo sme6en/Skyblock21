@@ -11,6 +11,7 @@ import com.skyblock21.features.commandaliases.CommandAliasesScreen;
 import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
+import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
 import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
@@ -39,7 +40,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.2.2.1";
+    public static final String MOD_VERSION = "1.2.3";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 
@@ -84,6 +85,7 @@ public class Skyblock21 implements ClientModInitializer {
         Utils.update();
     }
 
+    private static boolean updateNotified = false;
     @Override
     public void onInitializeClient() {
         AutoUpdater.checkForUpdate();
@@ -92,11 +94,12 @@ public class Skyblock21 implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
 
         ClientPlayConnectionEvents.JOIN.register(((clientPlayNetworkHandler, packetSender, minecraftClient) -> {
-            if (!Objects.equals(AutoUpdater.latestUpdatedVersion, MOD_VERSION) && AutoUpdater.latestUpdatedVersion != "") {
+            if (!Objects.equals(AutoUpdater.latestUpdatedVersion, MOD_VERSION) && AutoUpdater.latestUpdatedVersion != "" && !updateNotified) {
                 minecraftClient.execute(() -> {
                     if (minecraftClient.player == null) return;
                     TextUtils.addMessage("Updated to version: §b§l" + AutoUpdater.latestUpdatedVersion + "§r! Please restart your game to access new features.", true, false);
                 });
+                updateNotified = true;
             }
         }));
 
@@ -121,6 +124,7 @@ public class Skyblock21 implements ClientModInitializer {
         TreeProgress.init();
         HOTFOverlay.init();
         GalateaTracker.init();
+        TreeWaypoints.init();
 
         // Items
         StarredDropPrevention.init();

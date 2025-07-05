@@ -2,6 +2,10 @@ package com.skyblock21.config.categories;
 
 import com.skyblock21.config.Skyblock21Config;
 import com.skyblock21.features.foraging.GalateaTracker;
+import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
+import com.skyblock21.features.waypoints.WaypointManager;
+import com.skyblock21.util.Location;
+import com.skyblock21.util.Utils;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
@@ -55,6 +59,68 @@ public class ForagingCategory {
                                                                    .action((screen, opt) -> GalateaTracker.resetBonusGifts())
                                                                    .build())
                                                .build())
+                             .group(OptionGroup.createBuilder()
+                                               .name(literal("Galatea Waypoints"))
+                                               .option(Option.<Boolean>createBuilder()
+                                                             .name(literal("Enable Waypoints"))
+                                                             .description(OptionDescription.of(literal("Shows tree waypoints")))
+                                                             .binding(defaults.foraging.treeWaypoints, () -> config.foraging.treeWaypoints, (newValue) -> {
+                                                                 config.foraging.treeWaypoints = newValue;
+                                                                 if (Utils.getLocation() == Location.GALATEA) {
+                                                                     TreeWaypoints.trees.clear();
+                                                                     WaypointManager.removeAllWaypoints();
+                                                                     TreeWaypoints.performInitialWorldScan();
+                                                                 }
+                                                             })
+                                                             .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                          .yesNoFormatter()
+                                                                                                          .coloured(true))
+                                                             .build())
+                                               .option(Option.<Boolean>createBuilder()
+                                                             .name(literal("Fig Trees"))
+                                                             .description(OptionDescription.of(literal("Show waypoints for Fig trees")))
+                                                             .binding(defaults.foraging.showFigTreeWaypoints, () -> config.foraging.showFigTreeWaypoints, newValue -> config.foraging.showFigTreeWaypoints = newValue)
+                                                             .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                          .yesNoFormatter()
+                                                                                                          .coloured(true))
+                                                             .build())
+                                               .option(Option.<Boolean>createBuilder()
+                                                             .name(literal("Mangrove Trees"))
+                                                             .description(OptionDescription.of(literal("Show waypoints for Mangrove trees")))
+                                                             .binding(defaults.foraging.showMangroveTreeWaypoints, () -> config.foraging.showMangroveTreeWaypoints, newValue -> config.foraging.showMangroveTreeWaypoints = newValue)
+                                                             .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                          .yesNoFormatter()
+                                                                                                          .coloured(true))
+                                                             .build())
+                                               .option(Option.<Boolean>createBuilder()
+                                                             .name(literal("Only Small Trees"))
+                                                             .description(OptionDescription.of(literal("Only show waypoints for small trees")))
+                                                             .binding(defaults.foraging.onlyShowSmallTrees, () -> config.foraging.onlyShowSmallTrees, newValue -> config.foraging.onlyShowSmallTrees = newValue)
+                                                             .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                          .yesNoFormatter()
+                                                                                                          .coloured(true))
+                                                             .build())
+                                               .option(Option.<Integer>createBuilder()
+                                                             .name(literal("Time before ready"))
+                                                             .description(OptionDescription.of(literal("How long before the tree finishes regeneration and waypoint is shown")))
+                                                             .binding(defaults.foraging.timeBeforeReady,
+                                                                     () -> config.foraging.timeBeforeReady,
+                                                                     newValue -> config.foraging.timeBeforeReady = newValue)
+                                                             .controller((opt) -> IntegerSliderControllerBuilder.create(opt)
+                                                                                                                .range(0, 12)
+                                                                                                                .step(1))
+                                                             .build())
+                                               .option(Option.<Integer>createBuilder()
+                                                             .name(literal("Max Distance"))
+                                                             .description(OptionDescription.of(literal("Maximum distance from the player to show waypoints (0 = no limit)")))
+                                                             .binding(defaults.foraging.maxDistance,
+                                                                     () -> config.foraging.maxDistance,
+                                                                     newValue -> config.foraging.maxDistance = newValue)
+                                                             .controller((opt) -> IntegerSliderControllerBuilder.create(opt)
+                                                                                                                .range(0, 200)
+                                                                                                                .step(5))
+                                                             .build())
+                                     .build())
                              .option(Option.<Boolean>createBuilder()
                                            .name(literal("Prevent log stripping"))
                                            .description(OptionDescription.of(literal("Prevents from trying to strip logs while in Skyblock")))

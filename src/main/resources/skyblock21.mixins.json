@@ -21,7 +21,9 @@
 		"KeybindingMixin",
 		"KeyBindingEntryMixin",
 		"ClientPlayNetworkHandlerMixin",
-		"CommandDispatcherMixin"
+		"CommandDispatcherMixin",
+		"ServerPlayerInteractionManagerMixin",
+		"BlockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
