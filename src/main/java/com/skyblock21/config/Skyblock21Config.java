@@ -81,6 +81,10 @@ public class Skyblock21Config {
         public int timeBeforeReady = 5;
         @SerialEntry
         public int maxDistance = 0;
+        @SerialEntry
+        public boolean noBeaconBeams = false;
+        @SerialEntry
+        public boolean onlyNearestTree = false;
 
         @SerialEntry
         public boolean preventLogStripping = true;

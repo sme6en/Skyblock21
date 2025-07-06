@@ -87,15 +87,15 @@ public class Tree {
 
         String colorChar = currentState == TreeState.REGENERATING ? "§6" : "§e";
 
+        if (isBigTree) {
+            typeName.append("§c§lL ");
+        } else {
+            typeName.append("§a§lS ");
+        }
+
         if (isMangrove) {
             typeName.append(colorChar + "Mangrove");
         } else {
-            if (isBigTree) {
-                typeName.append("§c§lL ");
-            } else {
-                typeName.append("§a§lS ");
-            }
-
             typeName.append(colorChar + "Fig");
         }
 

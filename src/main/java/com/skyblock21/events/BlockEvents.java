@@ -8,14 +8,32 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockEvents {
-    public static final Event<BlockBreakEvent> BREAK_BLOCK = EventFactory.createArrayBacked(BlockBreakEvent.class,
-            (listeners) -> (world, pos, state, player) -> {
-                for (BlockBreakEvent listener : listeners) {
-                    listener.onBlockBreak(world, pos, state, player);
-                }
-            });
 
-    public interface BlockBreakEvent {
-        void onBlockBreak(World world, BlockPos pos, BlockState state, PlayerEntity player);
+    public static final Event<BlockAdded> BLOCK_ADDED = EventFactory.createArrayBacked(
+            BlockAdded.class,
+            (listeners) -> (world, pos, state) -> {
+                for (BlockAdded listener : listeners) {
+                    listener.onBlockAdded(world, pos, state);
+                }
+            }
+    );
+
+    public static final Event<BlockBroken> BLOCK_BROKEN = EventFactory.createArrayBacked(
+            BlockBroken.class,
+            (listeners) -> (world, pos, state) -> {
+                for (BlockBroken listener : listeners) {
+                    listener.onBlockBroken(world, pos, state);
+                }
+            }
+    );
+
+    @FunctionalInterface
+    public interface BlockAdded {
+        void onBlockAdded(World world, BlockPos pos, BlockState state);
+    }
+
+    @FunctionalInterface
+    public interface BlockBroken {
+        void onBlockBroken(World world, BlockPos pos, BlockState state);
     }
 }
