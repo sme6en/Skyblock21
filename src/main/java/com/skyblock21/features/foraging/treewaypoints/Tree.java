@@ -43,6 +43,8 @@ public class Tree {
     }
 
     public long getRegeneratingDuration() {
+        if (isMangrove) return REGENERATING_DURATION_BIG;
+
         return isBigTree ? REGENERATING_DURATION_BIG : REGENERATING_DURATION_SMALL;
     }
 

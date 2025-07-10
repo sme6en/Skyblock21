@@ -56,7 +56,7 @@ public class Skyblock21Config {
         @SerialEntry
         public boolean scathaTracker = true;
         @SerialEntry
-        public boolean showOnlyInCrystalHollows = false;
+        public boolean showOnlyInCrystalHollows = true;
         @SerialEntry
         public boolean mouseLockKeybind = true;
     }
@@ -91,6 +91,8 @@ public class Skyblock21Config {
 
         @SerialEntry
         public boolean hideFloatingBlocks = true;
+        @SerialEntry
+        public boolean treeProgress = true;
     }
 
     public static class Nether {

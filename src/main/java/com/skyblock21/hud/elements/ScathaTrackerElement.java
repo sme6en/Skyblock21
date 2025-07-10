@@ -28,12 +28,12 @@ public class ScathaTrackerElement extends HudElement {
 
         matrices.push();
         matrices.scale(1.1f, 1.1f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "Scatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
+        context.drawTextWithShadow(textRenderer, "§lScatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
         matrices.pop();
 
         String[] lines = content.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 
@@ -45,12 +45,12 @@ public class ScathaTrackerElement extends HudElement {
 
         matrices.push();
         matrices.scale(1.1f, 1.1f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "Scatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
+        context.drawTextWithShadow(textRenderer, "§lScatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
         matrices.pop();
 
         String[] lines = dummyText.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 

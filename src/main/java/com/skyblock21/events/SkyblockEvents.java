@@ -6,6 +6,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.util.StringIdentifiable;
+
+import java.util.Arrays;
 
 @Environment(EnvType.CLIENT)
 public final class SkyblockEvents {
@@ -31,6 +34,12 @@ public final class SkyblockEvents {
         for (SkyblockAreaChange callback : callbacks) {
             callback.onSkyblockAreaChange(area);
         }
+    });
+
+    public static final Event<SkillGained> SKILL_GAINED = EventFactory.createArrayBacked(SkillGained.class, listeners -> (skill, amount) -> {
+       for (SkillGained listener : listeners) {
+           listener.onSkillGained(skill, amount);
+       }
     });
 
     /**
@@ -90,5 +99,41 @@ public final class SkyblockEvents {
     @FunctionalInterface
     public interface ProfileInit {
         void onSkyblockProfileInit(String profileId);
+    }
+
+    public enum Skill implements StringIdentifiable {
+        FARMING("Farming"),
+        MINING("Mining"),
+        COMBAT("Combat"),
+        FORAGING("Foraging"),
+        HUNTING("Hunting"),
+        TAMING("Taming"),
+        CARPENTRY("Carpentry"),
+        ENCHANTING("Enchanting"),
+        SOCIAL("Social"),
+        UNKNOWN("Unknown");
+
+        public final String name;
+
+        Skill(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String asString() {
+            return name;
+        }
+
+        public static Skill fromName(String displayName) {
+            return Arrays.stream(Skill.values())
+                    .filter(s -> s.name.equals(displayName))
+                    .findFirst()
+                    .orElse(UNKNOWN);
+        }
+    }
+
+    @FunctionalInterface
+    public interface SkillGained {
+        void onSkillGained(Skill skill, double amount);
     }
 }

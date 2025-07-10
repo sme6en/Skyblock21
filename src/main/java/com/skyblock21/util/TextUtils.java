@@ -29,7 +29,7 @@ public class TextUtils {
     private static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
 
     public static String removeFormatting(Text msg) {
-        if (msg == null || msg.toString().isEmpty()) return msg.toString();
+        if (msg == null || msg.getString().isEmpty()) return msg.getString();
 
         String text = msg.getString();
 

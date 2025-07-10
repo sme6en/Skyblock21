@@ -1,5 +1,6 @@
 package com.skyblock21.hud.elements;
 
+import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.hud.HudElement;
 import com.skyblock21.util.Location;
@@ -37,5 +38,10 @@ public class TreeProgressHudElement extends HudElement {
     @Override
     public int getHeight() {
         return 20;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Skyblock21ConfigManager.get().foraging.treeProgress;
     }
 }

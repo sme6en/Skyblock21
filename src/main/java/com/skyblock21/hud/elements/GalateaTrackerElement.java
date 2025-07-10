@@ -27,11 +27,11 @@ public class GalateaTrackerElement extends HudElement {
         // 20% bigger
         matrices.push();
         matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "Galatea Tracker", 2, 2, Color.GREEN.getRGB());
+        context.drawTextWithShadow(textRenderer, "§lGalatea Tracker", 2, 2, Color.GREEN.getRGB());
         matrices.pop();
         String[] lines = content.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 
@@ -44,12 +44,12 @@ public class GalateaTrackerElement extends HudElement {
         // 20% bigger
         matrices.push();
         matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "Galatea Tracker", 2, 2, Color.GREEN.getRGB());
+        context.drawTextWithShadow(textRenderer, "§lGalatea Tracker", 2, 2, Color.GREEN.getRGB());
         matrices.pop();
 
         String[] lines = dummyText.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 4 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 
