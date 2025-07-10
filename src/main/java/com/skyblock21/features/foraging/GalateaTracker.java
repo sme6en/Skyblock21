@@ -5,6 +5,8 @@ import com.skyblock21.config.Skyblock21Config;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.ChatEvents;
+import com.skyblock21.events.SkyblockEvents;
+import com.skyblock21.events.SkyblockEvents.Skill;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -34,6 +36,7 @@ public class GalateaTracker {
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(GalateaTracker::onTick);
         ChatEvents.RECEIVE_TEXT.register(GalateaTracker::onChat);
+        SkyblockEvents.SKILL_GAINED.register(GalateaTracker::onSkillGained);
     }
 
     private static float lastYaw = 0f;
@@ -78,6 +81,17 @@ public class GalateaTracker {
         if (isAfk) {
             exitAfk();
         }
+    }
+
+    public static void onSkillGained(Skill skill, double amount) {
+        System.out.println("Gained Skill - " + skill.name + " - exp: " + amount);
+        if (skill != Skill.FORAGING) return;
+        if (!Utils.isOnSkyblock()) return;
+        if (!Utils.isInGalatea()) return;
+        Skyblock21Config config = Skyblock21ConfigManager.get();
+        if (!config.foraging.galateaTracker) return;
+
+        totalForagingExp += (int) amount;
     }
 
     private static void parseBonusGifts(Text text) {

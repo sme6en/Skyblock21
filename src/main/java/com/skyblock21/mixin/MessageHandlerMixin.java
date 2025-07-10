@@ -2,6 +2,7 @@ package com.skyblock21.mixin;
 
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.events.ChatEvents;
+import com.skyblock21.features.Skills;
 import net.minecraft.client.network.message.MessageHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -20,7 +21,10 @@ public class MessageHandlerMixin {
 
     @Inject(method = "onGameMessage", at = @At("HEAD"))
     private void onGameMessage(Text text, boolean overlay, CallbackInfo ci) {
-        if (overlay) return;
+        if (overlay) {
+            Skills.onActionBar(text);
+            return;
+        }
         ChatEvents.RECEIVE_TEXT.invoker().onMessage(text);
     }
 
