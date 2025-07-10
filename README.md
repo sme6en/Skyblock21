@@ -8,6 +8,7 @@
 ## ⚙️ Features
 
 ### Galatea Island
+- Tree Waypoints
 - Foraging tracker HUD
 - Bonus gifts tracker HUD
 - Tree progress overlay HUD
