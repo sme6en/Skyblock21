@@ -29,7 +29,7 @@ public class HuntingTrackerElement extends MultiLineHudElement {
     public HuntingTrackerElement(int x, int y) {
         super(x, y);
 
-        setTitle("§d§lHunting", 0xFFFFFF, 1.2f, true);
+        setTitle("§9§lHunting", 0xFFFFFF, 1.2f, true);
 
         addLine("hunting_exp", literal("§9Hunting XP: §f%d".formatted(totalHuntingXP)));
         addLine("active_time", literal("§dActive Time: §f0s"));
@@ -43,9 +43,9 @@ public class HuntingTrackerElement extends MultiLineHudElement {
                 this::resetTracker
         ).setHoverText(literal("§eReset the hunting tracker"));
 
+        trackedShards = new HashMap<String, Integer>();
         SkyblockEvents.SKILL_GAINED.register(this::onSkillGained);
         ChatEvents.RECEIVE_TEXT.register(this::onChat);
-        trackedShards = new HashMap<String, Integer>();
     }
 
     private static final Pattern SHARD_PATTERN = Pattern.compile("(?:a|(\\d+)) (.*?) §.Shard");

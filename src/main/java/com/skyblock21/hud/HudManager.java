@@ -115,7 +115,7 @@ public class HudManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof EditGuiScreen ||
                 client.currentScreen instanceof EditHudElementScreen) {
-            return; // Don't handle hover in edit mode
+            return;
         }
 
         Location location = Utils.getLocation();
@@ -157,6 +157,7 @@ public class HudManager {
      * Renders HUD elements (shared between normal and container rendering)
      */
     private static void renderHudElements(DrawContext drawContext) {
+
         Location location = Utils.getLocation();
         MatrixStack matrices = drawContext.getMatrices();
         float combinedScale = getCombinedScale();
@@ -166,7 +167,6 @@ public class HudManager {
                 client.currentScreen instanceof EditHudElementScreen;
 
         for (HudElement element : hudElements) {
-            // In edit mode, show all elements (including disabled ones for positioning)
             if (inEditMode) {
                 matrices.push();
                 float scaledX = element.getX() * combinedScale;
@@ -177,8 +177,8 @@ public class HudManager {
                 element.render(drawContext, 0, 0);
                 matrices.pop();
             } else {
-                // Normal gameplay - only show enabled elements in correct location
                 if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
+                if (!Utils.isOnSkyblock()) return;
 
                 matrices.push();
                 float scaledX = element.getX() * combinedScale;
@@ -192,9 +192,6 @@ public class HudManager {
         }
     }
 
-    /**
-     * Calculates the scale factor for responsive scaling based on screen size
-     */
     public static float getViewportScale() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.getWindow() == null) return 1.0f;
@@ -202,7 +199,6 @@ public class HudManager {
         int currentWidth = client.getWindow().getWidth();
         int currentHeight = client.getWindow().getHeight();
 
-        // Calculate scale based on both width and height, use the smaller scale to ensure everything fits
         float widthScale = (float) currentWidth / REFERENCE_WIDTH;
         float heightScale = (float) currentHeight / REFERENCE_HEIGHT;
 
