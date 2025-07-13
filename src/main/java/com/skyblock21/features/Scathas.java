@@ -196,43 +196,6 @@ public class Scathas {
         }
     }
 
-    public static String getHudText() {
-        ScathasData data = PersistentData.get().scathasData;
-
-        return String.format("""
-                        §bWorms: §f%d
-                        §bScathas: §f%d §7(%.0f%%)
-                        §7Spawns since pet drop: §f%d
-                        §7Last Scatha spawn: §f%s ago
-                        %s
-                        """,
-                data.wormsSpawned,
-                data.scathasSpawned,
-                data.scathasSpawned > 0 ? (data.scathasSpawned * 100.0 / (data.wormsSpawned + data.scathasSpawned)) : 0.0,
-                data.sinceLastScathaPetDropSpawns,
-                data.lastSpawnTime == -1 || System.currentTimeMillis() - data.lastSpawnTime >= 24 * 60 * 60 * 1000 ? "N/A" : Utils.formatTime(System.currentTimeMillis() - data.lastSpawnTime),
-                System.currentTimeMillis() - data.lastScathaKillTime < 30000 ? "§cCannot spawn Scatha yet! " + Utils.formatTime(
-                        30000 - (System.currentTimeMillis() - data.lastScathaKillTime)
-                ) : ""
-        );
-    }
-
-    public static String getDummyHudText() {
-        return String.format("""
-                        §bWorms: §f%d
-                        §bScathas: §f%d §7(%.0f%%)
-                        §7Spawns since pet drop: §f%d
-                        §7Last Scatha spawn: §f%s ago
-                        %s
-                        """,
-                123,
-                24,
-                19.0,
-                4,
-                "12s",
-                ""
-        );
-    }
 
     public static void resetSession() {
         ScathasData data = PersistentData.get().scathasData;

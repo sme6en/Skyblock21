@@ -2,8 +2,10 @@ package com.skyblock21.hud;
 
 import com.google.gson.JsonObject;
 import com.skyblock21.Skyblock21;
+import com.skyblock21.events.SkyblockEvents;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,6 +39,16 @@ public class HudManager {
         HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper ->
                 layeredDrawerWrapper.attachLayerAfter(IdentifiedLayer.OVERLAY_MESSAGE,
                         Identifier.of("skyblock21", "hud_overlay"), HudManager::render)));
+        ClientTickEvents.END_CLIENT_TICK.register(HudManager::onTick);
+        SkyblockEvents.JOIN.register(HudManager::onJoin);
+    }
+
+    private static void onJoin() {
+        for (HudElement element : hudElements) {
+            if (element instanceof MultiLineHudElement multiLineHudElement) {
+                multiLineHudElement.recalculateDimensions();
+            }
+        }
     }
 
     /**
@@ -103,6 +115,15 @@ public class HudManager {
             element.render(drawContext, 0, 0);
 
             matrices.pop();
+        }
+    }
+
+    private static void onTick(MinecraftClient client) {
+        if (client.player == null || client.world == null) return;
+        if (!Utils.isOnSkyblock()) return;
+
+        for (HudElement element : hudElements) {
+            element.onTick(client);
         }
     }
 
@@ -183,6 +204,12 @@ public class HudManager {
                         element.setBackgroundOpacity(40);
                     }
 
+                    if (element instanceof MultiLineHudElement multiLineElement) {
+                        if (obj.has("lineStates")) {
+                            JsonObject lineStates = obj.getAsJsonObject("lineStates");
+                            multiLineElement.loadLineStates(lineStates);
+                        }
+                    }
                 }
             }
 
@@ -214,6 +241,13 @@ public class HudManager {
             obj.addProperty("backgroundEnabled", element.isBackgroundEnabled());
             obj.addProperty("backgroundOpacity", element.getBackgroundOpacity());
 
+
+            positions.add(element.getName(), obj);
+
+            if (element instanceof MultiLineHudElement multiLineElement) {
+                JsonObject lineStates = multiLineElement.saveLineStates();
+                obj.add("lineStates", lineStates);
+            }
 
             positions.add(element.getName(), obj);
         }

@@ -3,9 +3,7 @@ package com.skyblock21.hud;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -13,8 +11,8 @@ import java.util.Set;
 
 public abstract class HudElement {
 
-    protected int HORIZONTAL_PADDING = 2;
-    protected int VERTICAL_PADDING = 2;
+    protected int HORIZONTAL_SPACING = 2;
+    protected int VERTICAL_SPACING = 2;
     private final String name;
     public boolean alwaysRenderDummy = false;
     protected Set<Location> locationsShown = EnumSet.allOf(Location.class);
@@ -151,6 +149,10 @@ public abstract class HudElement {
     protected abstract void renderElement(DrawContext context);
 
     protected abstract void renderDummy(DrawContext context);
+
+    protected void onTick(MinecraftClient client) {
+
+    }
 
     public boolean isEnabled() {
         return enabled;

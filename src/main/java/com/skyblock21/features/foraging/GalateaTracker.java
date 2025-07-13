@@ -7,6 +7,7 @@ import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.ChatEvents;
 import com.skyblock21.events.SkyblockEvents;
 import com.skyblock21.events.SkyblockEvents.Skill;
+import com.skyblock21.hud.elements.BonusGiftsTrackerElement;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -120,16 +121,9 @@ public class GalateaTracker {
 
 
         }
-        PersistentData.get().bonusDrops.put(itemName, PersistentData.get().bonusDrops.getOrDefault(itemName, 0) + 1);
+        int amount = PersistentData.get().bonusDrops.put(itemName, PersistentData.get().bonusDrops.getOrDefault(itemName, 0) + 1);
 
-        List<Map.Entry<String, Integer>> entries = new ArrayList<>(PersistentData.get().bonusDrops.entrySet());
-
-        entries.sort((a, b) -> Integer.compare(b.getKey().length(), a.getKey().length()));
-
-        Map<String, Integer> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : entries) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
+        BonusGiftsTrackerElement.INSTANCE.addAmountLine(itemName, itemName, amount, "gifts");
     }
 
     private static void parseExp(Text text) {

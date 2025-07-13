@@ -1,28 +1,35 @@
 package com.skyblock21.hud.elements;
 
 import com.skyblock21.config.Skyblock21ConfigManager;
+import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.features.Scathas;
 import com.skyblock21.hud.HudElement;
+import com.skyblock21.hud.MultiLineHudElement;
 import com.skyblock21.util.Location;
+import com.skyblock21.util.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
-import org.spongepowered.asm.mixin.Overwrite;
 
 import java.awt.*;
 
-public class ScathaTrackerElement extends HudElement {
+import static net.minecraft.text.Text.literal;
+
+public class ScathaTrackerElement extends MultiLineHudElement {
 
     public ScathaTrackerElement(int x, int y) {
         super(x, y);
+
+        addAmountLine("worms", "§bWorms", 0);
+        addLine("scathas", literal("§bScathas: §f0 §7(0%)"));
+        addAmountLine("spawns_since_drop", "§7Spawns since pet drop", 0);
+        addLine("last_spawn", literal("§7Last Scatha spawn: §f28s ago"));
+        addLine("cannot_spawn", literal("§cCannot spawn scatha yet! 5s"));
     }
 
     @Override
     protected void renderElement(DrawContext context) {
-        String content = Scathas.getHudText();
-        if (content.isEmpty()) return;
-
         MatrixStack matrices = context.getMatrices();
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
@@ -31,15 +38,23 @@ public class ScathaTrackerElement extends HudElement {
         context.drawTextWithShadow(textRenderer, "§lScatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
         matrices.pop();
 
-        String[] lines = content.split("\n");
-        for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
-        }
+        super.renderElement(context);
+    }
+
+    @Override
+    protected void onTick(MinecraftClient client) {
+        Scathas.ScathasData data = PersistentData.get().scathasData;
+        if (data == null) return;
+
+        updateAmountLine("worms", data.wormsSpawned);
+        updateLine("scathas", literal(String.format("§bScathas: §f%d §7(%.0f%%)", data.scathasSpawned, data.scathasSpawned > 0 ? (data.scathasSpawned * 100.0 / (data.wormsSpawned + data.scathasSpawned)) : 0.0)));
+        updateAmountLine("spawns_since_drop", data.sinceLastScathaPetDropSpawns);
+        updateLine("last_spawn", literal(String.format("§7Last Scatha spawn: §f%s ago", data.lastSpawnTime == -1 || System.currentTimeMillis() - data.lastSpawnTime >= 24 * 60 * 60 * 1000 ? "N/A" : Utils.formatTime(System.currentTimeMillis() - data.lastSpawnTime))));
+        updateLine("cannot_spawn", literal(String.format("%s", System.currentTimeMillis() - data.lastScathaKillTime < 30000 ? "§cCannot spawn Scatha yet! " + Utils.formatTime(30000 - (System.currentTimeMillis() - data.lastScathaKillTime)) : "")));
     }
 
     @Override
     protected void renderDummy(DrawContext context) {
-        String dummyText = Scathas.getDummyHudText();
         MatrixStack matrices = context.getMatrices();
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
@@ -48,26 +63,7 @@ public class ScathaTrackerElement extends HudElement {
         context.drawTextWithShadow(textRenderer, "§lScatha Tracker", 2, 2, new Color(134, 239, 244).getRGB());
         matrices.pop();
 
-        String[] lines = dummyText.split("\n");
-        for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
-        }
-    }
-
-    @Override
-    public int getWidth() {
-        return (int) ((MinecraftClient.getInstance().textRenderer.getWidth("§bSpawns since pet drop: 123") + HORIZONTAL_PADDING) * 1.3);
-    }
-
-    @Override
-    public int getHeight() {
-        int lineCount = 6;
-        return (MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_PADDING * (lineCount - 1);
-    }
-
-    @Override
-    public boolean shouldRenderDummy() {
-        return super.shouldRenderDummy() || Scathas.getHudText().isEmpty();
+        super.renderElement(context);
     }
 
     @Override
@@ -76,7 +72,7 @@ public class ScathaTrackerElement extends HudElement {
     }
 
     @Override
-    public boolean isAllowedInLocation(Location location)  {
-        return Skyblock21ConfigManager.get().mining.showOnlyInCrystalHollows ? location.equals(Location.CRYSTAL_HOLLOWS) : true;
+    public boolean isAllowedInLocation(Location location) {
+        return !Skyblock21ConfigManager.get().mining.showOnlyInCrystalHollows || location.equals(Location.CRYSTAL_HOLLOWS);
     }
 }

@@ -31,7 +31,7 @@ public class GalateaTrackerElement extends HudElement {
         matrices.pop();
         String[] lines = content.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_SPACING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 
@@ -49,19 +49,19 @@ public class GalateaTrackerElement extends HudElement {
 
         String[] lines = dummyText.split("\n");
         for (int i = 0; i < lines.length; i++) {
-            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_PADDING) * (i + 1), Color.WHITE.getRGB());
+            context.drawTextWithShadow(textRenderer, lines[i], 2, 5 + (textRenderer.fontHeight + VERTICAL_SPACING) * (i + 1), Color.WHITE.getRGB());
         }
     }
 
     @Override
     public int getWidth() {
-        return (int) ((MinecraftClient.getInstance().textRenderer.getWidth("§lGalatea Tracker") * 1.2 + HORIZONTAL_PADDING) * 1.3);
+        return (int) ((MinecraftClient.getInstance().textRenderer.getWidth("§lGalatea Tracker") * 1.2 + HORIZONTAL_SPACING) * 1.3);
     }
 
     @Override
     public int getHeight() {
         int lineCount = 7;
-        return (MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_PADDING * (lineCount - 1);
+        return (MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_SPACING * (lineCount - 1);
     }
 
     @Override
