@@ -2,6 +2,7 @@ package com.skyblock21.mixin;
 
 import com.skyblock21.events.PlayerEvents;
 import com.skyblock21.events.WindowEvents;
+import com.skyblock21.hud.HudManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -43,9 +44,16 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         }
     }
 
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        if (HudManager.handleMouseClick(mouseX, mouseY, button)) {
+            cir.setReturnValue(true);
+        }
+    }
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickSlot(IIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/entity/player/PlayerEntity;)V"), cancellable = true)
     protected void onSlotClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+
         boolean result = WindowEvents.SLOT_CLICK.invoker().onSlotClick((HandledScreen<?>) (Object) this, this.handler, slot);
 
         if (!result) {

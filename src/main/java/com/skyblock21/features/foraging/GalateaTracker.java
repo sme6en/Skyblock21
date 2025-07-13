@@ -85,7 +85,6 @@ public class GalateaTracker {
     }
 
     public static void onSkillGained(Skill skill, double amount) {
-        System.out.println("Gained Skill - " + skill.name + " - exp: " + amount);
         if (skill != Skill.FORAGING) return;
         if (!Utils.isOnSkyblock()) return;
         if (!Utils.isInGalatea()) return;
@@ -121,9 +120,14 @@ public class GalateaTracker {
 
 
         }
-        int amount = PersistentData.get().bonusDrops.put(itemName, PersistentData.get().bonusDrops.getOrDefault(itemName, 0) + 1);
 
-        BonusGiftsTrackerElement.INSTANCE.addAmountLine(itemName, itemName, amount, "gifts");
+        int newAmount = PersistentData.get().bonusDrops.compute(itemName, (key, value) ->
+                value == null ? 1 : value + 1);
+
+        if (BonusGiftsTrackerElement.INSTANCE != null) {
+            BonusGiftsTrackerElement.INSTANCE.addOrUpdateGift(itemName, newAmount);
+        }
+
     }
 
     private static void parseExp(Text text) {

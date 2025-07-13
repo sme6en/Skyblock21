@@ -148,7 +148,9 @@ public abstract class HudElement {
 
     protected abstract void renderElement(DrawContext context);
 
-    protected abstract void renderDummy(DrawContext context);
+    protected void renderDummy(DrawContext context) {
+
+    }
 
     protected void onTick(MinecraftClient client) {
 

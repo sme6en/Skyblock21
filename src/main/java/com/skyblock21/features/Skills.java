@@ -12,22 +12,15 @@ import java.util.stream.Collectors;
 
 public class Skills {
 
-    private static final Pattern skillRegex = Pattern.compile("\\+([\\d.,]+) (.*)");
+    private static final Pattern skillRegex = Pattern.compile("\\+([\\d.,]+) (\\w+)");
 
-    private static String last = "";
     public static void onActionBar(Text message) {
         String[] parts = message.getString().split("\\s{2,}");
-
         for (String part : parts) {
             Matcher matcher = skillRegex.matcher(part);
-            if (last != message.getString()) {
-//                System.out.println(part);
-            }
-            if (!matcher.matches()) continue;
+            if (!matcher.find()) continue;
 
-            SkyblockEvents.SKILL_GAINED.invoker().onSkillGained(Skill.fromName(matcher.group(1)), Double.parseDouble(matcher.group(0)));
+            SkyblockEvents.SKILL_GAINED.invoker().onSkillGained(Skill.fromName(matcher.group(2)), Double.parseDouble(matcher.group(1).replace(",","")));
         }
-
-        last = message.getString();
     }
 }

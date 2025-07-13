@@ -16,6 +16,8 @@ import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
+import com.skyblock21.features.waypoints.Waypoint;
+import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudElement;
 import com.skyblock21.hud.HudManager;
@@ -30,9 +32,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.option.KeybindsScreen;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL43;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.2.3.1";
+    public static final String MOD_VERSION = "1.2.4";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 
@@ -128,6 +127,9 @@ public class Skyblock21 implements ClientModInitializer {
         GalateaTracker.init();
         TreeWaypoints.init();
 
+        // Hunting
+        SpinHelper.init();
+
         // Items
         StarredDropPrevention.init();
 
@@ -139,6 +141,7 @@ public class Skyblock21 implements ClientModInitializer {
         HudManager.register(new GalateaTrackerElement(10, 10));
         HudManager.register(new BonusGiftsTrackerElement(10, 40));
         HudManager.register(new ScathaTrackerElement(10, 60));
+        HudManager.register(new HuntingTrackerElement(30, 20));
         HudManager.init();
         registerCommands();
 

@@ -12,21 +12,21 @@ public class HudAmountLine extends HudLine {
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,###");
 
     public HudAmountLine(String id, String itemName, long amount) {
-        super(id, Text.literal(itemName + " x" + formatAmount(amount)));
+        super(id, Text.literal(itemName + " §fx" + formatAmount(amount)));
         this.itemName = itemName;
         this.amount = amount;
         this.customValue = 0;
     }
 
     public HudAmountLine(String id, String itemName, long amount, String groupId) {
-        super(id, Text.literal(itemName + " x" + formatAmount(amount)), groupId);
+        super(id, Text.literal(itemName + " §fx" + formatAmount(amount)), groupId);
         this.itemName = itemName;
         this.amount = amount;
         this.customValue = 0;
     }
 
     public HudAmountLine(String id, String itemName, long amount, String groupId, int order) {
-        super(id, Text.literal(itemName + " x" + formatAmount(amount)), groupId, order);
+        super(id, Text.literal(itemName + " §fx" + formatAmount(amount)), groupId, order);
         this.itemName = itemName;
         this.amount = amount;
         this.customValue = 0;

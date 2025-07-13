@@ -8,11 +8,15 @@ import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.io.BufferedReader;
@@ -34,6 +38,10 @@ public class HudManager {
     private static int savedWidth = REFERENCE_WIDTH;
     private static int savedHeight = REFERENCE_HEIGHT;
 
+    // Mouse interaction state
+    private static HudLine currentHoveredLine = null;
+    private static MultiLineHudElement currentHoveredElement = null;
+
     public static void init() {
         loadConfig();
         HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper ->
@@ -41,12 +49,145 @@ public class HudManager {
                         Identifier.of("skyblock21", "hud_overlay"), HudManager::render)));
         ClientTickEvents.END_CLIENT_TICK.register(HudManager::onTick);
         SkyblockEvents.JOIN.register(HudManager::onJoin);
+
+        // Add container interaction support
+        ScreenEvents.AFTER_INIT.register(HudManager::onScreenInit);
+    }
+
+    private static void onScreenInit(MinecraftClient client, Screen screen, int scaledWidth, int scaledHeight) {
+        if (screen instanceof HandledScreen<?>) {
+            // Register render events for container screens
+            ScreenEvents.afterRender(screen).register(HudManager::onContainerRender);
+        }
+    }
+
+    private static void onContainerRender(Screen screen, DrawContext context, int mouseX, int mouseY, float delta) {
+        // Update hover state
+        handleMouseMove(mouseX, mouseY);
+
+        // Render HUD elements over container
+        renderHudElements(context);
+
+        // Render hover tooltips
+        renderHoverTooltip(context, mouseX, mouseY);
     }
 
     private static void onJoin() {
         for (HudElement element : hudElements) {
             if (element instanceof MultiLineHudElement multiLineHudElement) {
                 multiLineHudElement.recalculateDimensions();
+            }
+        }
+    }
+
+    /**
+     * Handles mouse clicks on HUD elements
+     */
+    public static boolean handleMouseClick(double mouseX, double mouseY, int button) {
+        if (button != 0) return false; // Only handle left clicks
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen) {
+            return false; // Don't handle clicks in edit mode
+        }
+
+        Location location = Utils.getLocation();
+
+        for (HudElement element : hudElements) {
+            if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
+
+            if (element instanceof MultiLineHudElement multiLineElement) {
+                if (element.isMouseOver(mouseX, mouseY)) {
+                    if (multiLineElement.handleClick(mouseX, mouseY)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Handles mouse movement for hover effects
+     */
+    public static void handleMouseMove(double mouseX, double mouseY) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen) {
+            return; // Don't handle hover in edit mode
+        }
+
+        Location location = Utils.getLocation();
+        HudLine newHoveredLine = null;
+        MultiLineHudElement newHoveredElement = null;
+
+        for (HudElement element : hudElements) {
+            if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
+
+            if (element instanceof MultiLineHudElement multiLineElement) {
+                if (element.isMouseOver(mouseX, mouseY)) {
+                    HudLine hoveredLine = multiLineElement.getHoveredLine(mouseX, mouseY);
+                    if (hoveredLine != null) {
+                        newHoveredLine = hoveredLine;
+                        newHoveredElement = multiLineElement;
+                        break;
+                    }
+                }
+            }
+        }
+
+        currentHoveredLine = newHoveredLine;
+        currentHoveredElement = newHoveredElement;
+    }
+
+    /**
+     * Renders hover tooltip if applicable
+     */
+    public static void renderHoverTooltip(DrawContext drawContext, int mouseX, int mouseY) {
+        if (currentHoveredLine != null && currentHoveredLine.isHoverable() &&
+                currentHoveredLine.getHoverText() != null) {
+
+            Text hoverText = currentHoveredLine.getHoverText();
+            drawContext.drawTooltip(MinecraftClient.getInstance().textRenderer, hoverText, mouseX, mouseY);
+        }
+    }
+
+    /**
+     * Renders HUD elements (shared between normal and container rendering)
+     */
+    private static void renderHudElements(DrawContext drawContext) {
+        Location location = Utils.getLocation();
+        MatrixStack matrices = drawContext.getMatrices();
+        float combinedScale = getCombinedScale();
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen;
+
+        for (HudElement element : hudElements) {
+            // In edit mode, show all elements (including disabled ones for positioning)
+            if (inEditMode) {
+                matrices.push();
+                float scaledX = element.getX() * combinedScale;
+                float scaledY = element.getY() * combinedScale;
+                matrices.translate(scaledX, scaledY, 0);
+                float finalScale = element.getScale() * combinedScale;
+                matrices.scale(finalScale, finalScale, 1.0f);
+                element.render(drawContext, 0, 0);
+                matrices.pop();
+            } else {
+                // Normal gameplay - only show enabled elements in correct location
+                if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
+
+                matrices.push();
+                float scaledX = element.getX() * combinedScale;
+                float scaledY = element.getY() * combinedScale;
+                matrices.translate(scaledX, scaledY, 0);
+                float finalScale = element.getScale() * combinedScale;
+                matrices.scale(finalScale, finalScale, 1.0f);
+                element.render(drawContext, 0, 0);
+                matrices.pop();
             }
         }
     }
@@ -92,29 +233,16 @@ public class HudManager {
         if (client.currentScreen instanceof EditGuiScreen ||
                 client.currentScreen instanceof EditHudElementScreen) return;
 
-        Location location = Utils.getLocation();
-        MatrixStack matrices = drawContext.getMatrices();
+        // Skip if container is open (handled by container renderer)
+        if (client.currentScreen instanceof HandledScreen<?>) return;
 
-        float combinedScale = getCombinedScale();
+        renderHudElements(drawContext);
 
-        for (HudElement element : hudElements) {
-            if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
-
-            matrices.push();
-
-            // Apply viewport scaling to position
-            float scaledX = element.getX() * combinedScale;
-            float scaledY = element.getY() * combinedScale;
-
-            matrices.translate(scaledX, scaledY, 0);
-
-            // Apply combined scaling (element scale + viewport scale + GUI compensation)
-            float finalScale = element.getScale() * combinedScale;
-            matrices.scale(finalScale, finalScale, 1.0f);
-
-            element.render(drawContext, 0, 0);
-
-            matrices.pop();
+        // Render hover tooltip for normal gameplay
+        if (client.mouse != null) {
+            double mouseX = client.mouse.getX() * client.getWindow().getScaleFactor();
+            double mouseY = client.mouse.getY() * client.getWindow().getScaleFactor();
+            renderHoverTooltip(drawContext, (int) mouseX, (int) mouseY);
         }
     }
 
@@ -123,7 +251,15 @@ public class HudManager {
         if (!Utils.isOnSkyblock()) return;
 
         for (HudElement element : hudElements) {
+            if (!element.isEnabled() || !element.isAllowedInLocation(Utils.getLocation())) continue;
+
             element.onTick(client);
+        }
+
+        if (client.mouse != null && !(client.currentScreen instanceof HandledScreen<?>)) {
+            double mouseX = client.mouse.getX() * client.getWindow().getScaleFactor();
+            double mouseY = client.mouse.getY() * client.getWindow().getScaleFactor();
+            handleMouseMove(mouseX, mouseY);
         }
     }
 
@@ -240,9 +376,6 @@ public class HudManager {
             obj.addProperty("enabled", element.isEnabled());
             obj.addProperty("backgroundEnabled", element.isBackgroundEnabled());
             obj.addProperty("backgroundOpacity", element.getBackgroundOpacity());
-
-
-            positions.add(element.getName(), obj);
 
             if (element instanceof MultiLineHudElement multiLineElement) {
                 JsonObject lineStates = multiLineElement.saveLineStates();

@@ -11,14 +11,9 @@ base {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
 	maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
 	maven { url "https://maven.isxander.dev/releases" }
-	maven { url "https://maven.isxander.dev/snapshots" } //For minecraft snapshots
+	maven { url "https://maven.isxander.dev/snapshots" }
 	maven {
 		name = "Terraformers"
 		url = "https://maven.terraformersmc.com/"
@@ -30,16 +25,6 @@ repositories {
 			includeGroup "net.azureaaron"
 		}
 	}
-//	maven {
-//		name 'IzzelAliz Maven'
-//		url 'https://maven.izzel.io/releases'
-//	}
-//	maven {
-//		url 'https://raw.githubusercontent.com/Fuzss/modresources/main/maven/'
-//		content {
-//			includeGroup 'fuzs.forgeconfigapiport'
-//		}
-//	}
 
 }
 
@@ -59,25 +44,17 @@ loom {
 }
 
 dependencies {
-// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devAuth_version}")
 
-// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation("net.fabricmc.fabric-api:fabric-command-api-v2:${project.fabric_version}")
 	include modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}-fabric")
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 	include modImplementation("net.azureaaron:hm-api:${project.hm_api_version}")
-
-//	modImplementation "icyllis.modernui:ModernUI-Core:3.11.1"
-//	modImplementation "icyllis.modernui:ModernUI-Markdown:3.11.1"
-//	modImplementation "icyllis.modernui:ModernUI-Fabric:1.21.4-3.11.1.+"
-
-//	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.5.+"
 }
 
 processResources {
@@ -94,9 +71,6 @@ tasks.withType(JavaCompile).configureEach {
 
 
 java {
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
 
@@ -125,7 +99,6 @@ publishing {
 
 // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-// Add repositories to publish to here.
 // Notice: This block does NOT have the same function as the block in the top level.
 // The repositories here will be used for publishing your artifact, not for
 // retrieving dependencies.

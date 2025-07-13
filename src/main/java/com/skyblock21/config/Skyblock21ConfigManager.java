@@ -1,10 +1,7 @@
 package com.skyblock21.config;
 
 import com.google.gson.FieldNamingPolicy;
-import com.skyblock21.config.categories.ForagingCategory;
-import com.skyblock21.config.categories.GeneralCategory;
-import com.skyblock21.config.categories.MiningCategory;
-import com.skyblock21.config.categories.NetherCategory;
+import com.skyblock21.config.categories.*;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
@@ -54,6 +51,7 @@ public class Skyblock21ConfigManager {
                 .category(GeneralCategory.create(defaults, config))
                 .category(MiningCategory.create(defaults, config))
                 .category(ForagingCategory.create(defaults, config))
+                .category(HuntingCategory.create(defaults, config))
                 .category(NetherCategory.create(defaults, config))).generateScreen(parent);
     }
 

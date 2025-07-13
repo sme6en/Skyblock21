@@ -21,6 +21,10 @@
 - Scatha Spawn Alerts
 - Scatha Tracker HUD
 
+### Hunting
+- Hunting Tracker HUD
+- Fishing Net Spin Helper
+
 ### Kuudra
 - Supply Helper
 

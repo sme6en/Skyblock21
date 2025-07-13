@@ -14,6 +14,9 @@ public class Skyblock21Config {
     public Foraging foraging = new Foraging();
 
     @SerialEntry
+    public Hunting hunting = new Hunting();
+
+    @SerialEntry
     public Nether nether = new Nether();
 
     public static class General {
@@ -95,8 +98,16 @@ public class Skyblock21Config {
         public boolean treeProgress = true;
     }
 
+    public static class Hunting {
+        @SerialEntry
+        public boolean huntingTracker = true;
+        @SerialEntry
+        public boolean spinHelper = true;
+    }
+
     public static class Nether {
         @SerialEntry
         public boolean kuudraSupplyHelper = true;
     }
+
 }

@@ -3,6 +3,7 @@ package com.skyblock21.hud.elements;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.hud.HudElement;
+import com.skyblock21.util.Location;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -13,7 +14,7 @@ import java.awt.*;
 public class GalateaTrackerElement extends HudElement {
 
     public GalateaTrackerElement(int x, int y) {
-        super(x, y);
+        super(x, y, Location.GALATEA);
     }
 
     @Override

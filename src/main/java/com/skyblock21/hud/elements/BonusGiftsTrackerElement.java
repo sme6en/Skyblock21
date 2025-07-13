@@ -3,21 +3,21 @@ package com.skyblock21.hud.elements;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.features.foraging.GalateaTracker;
-import com.skyblock21.hud.HudElement;
-import com.skyblock21.hud.MultiLineHudElement;
-import com.skyblock21.hud.SortType;
+import com.skyblock21.hud.*;
 import com.skyblock21.util.Location;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 
-import java.awt.*;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import static net.minecraft.text.Text.literal;
 
 public class BonusGiftsTrackerElement extends MultiLineHudElement {
 
     public static BonusGiftsTrackerElement INSTANCE;
+    private Set<String> trackedGifts = new HashSet<>();
 
     public BonusGiftsTrackerElement(int x, int y) {
         super(x, y, Location.GALATEA);
@@ -26,59 +26,78 @@ public class BonusGiftsTrackerElement extends MultiLineHudElement {
             INSTANCE = this;
         }
 
+        // Set title with purple color and 20% bigger scale
+        setTitle("§lBonus Gifts", 0xFF55FF, 1.2f, true);
+
+        // Create group for bonus gifts with amount alignment and sorting by amount (descending)
         createGroup("gifts", "Bonus Gifts", true);
         setGroupSorting("gifts", SortType.AMOUNT, false);
+
+        // Add control lines (only show in containers)
+        addContainerClickableLine("reset_gifts",
+                literal("§c[Reset Tracker]"),
+                () -> {
+                    GalateaTracker.resetBonusGifts();
+                    clearGiftLines();
+                }
+        ).setHoverText(literal("§eReset the bonus gifts tracker"));
+
+    }
+
+    private void clearGiftLines() {
+        // Remove all gift lines (keep control lines)
+        lines.removeIf(line ->
+                line.getGroupId() != null && line.getGroupId().equals("gifts"));
+        trackedGifts.clear();
+        recalculateDimensions();
+    }
+
+    public void addOrUpdateGift(String giftName, int amount) {
+        String lineId = "gift_" + giftName.hashCode();
+
+        if (trackedGifts.contains(giftName)) {
+            updateAmountLine(lineId, "§d" + giftName, amount);
+        } else {
+            addAmountLine(lineId, "§d" + giftName, amount, "gifts");
+            trackedGifts.add(giftName);
+        }
     }
 
     @Override
-    protected void renderElement(DrawContext context) {
-        MatrixStack matrices = context.getMatrices();
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+    protected void onTick(MinecraftClient client) {
+        Map<String, Integer> bonusDrops = PersistentData.get().bonusDrops;
 
-        // 20% bigger
-        matrices.push();
-        matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "§lBonus Gifts", 2, 2, 0xFF55FF);
-        matrices.pop();
+        // Add new gifts
+        for (Map.Entry<String, Integer> entry : bonusDrops.entrySet()) {
+            String giftName = entry.getKey();
+            int amount = entry.getValue();
+            addOrUpdateGift(giftName, amount);
+        }
 
-        super.renderElement(context);
+        // Remove gifts that no longer exist in data
+        Set<String> toRemove = new HashSet<>();
+        for (String giftName : trackedGifts) {
+            if (!bonusDrops.containsKey(giftName)) {
+                String lineId = "gift_" + giftName.hashCode();
+                removeLine(lineId);
+                toRemove.add(giftName);
+            }
+        }
+        trackedGifts.removeAll(toRemove);
+
+        if (!toRemove.isEmpty()) {
+            recalculateDimensions();
+        }
     }
-
-    @Override
-    protected void renderDummy(DrawContext context) {
-        String dummyText = GalateaTracker.getDummyBonusDropsText();
-        MatrixStack matrices = context.getMatrices();
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-
-        // 20% bigger
-        matrices.push();
-        matrices.scale(1.2f, 1.2f, 1.0f);
-        context.drawTextWithShadow(textRenderer, "§lBonus Gifts", 2, 2, 0xFF55FF);
-        matrices.pop();
-
-        super.renderElement(context);
-    }
-
-//    @Override
-//    public int getWidth() {
-//        int longestString = PersistentData.get().bonusDrops.entrySet()
-//                                                           .stream()
-//                                                           .mapToInt(entry -> MinecraftClient.getInstance().textRenderer.getWidth(entry.getKey() + ": " + entry.getValue()))
-//                                                           .max()
-//                                                           .orElse(0);
-//
-//        return shouldRenderDummy() ? (int) (MinecraftClient.getInstance().textRenderer.getWidth("§d§lFirst Impression I: 3") * 1.3) : (int) (Math.max(longestString, MinecraftClient.getInstance().textRenderer.getWidth("§lBonus Gifts")) * 1.3);
-//    }
-//
-//    @Override
-//    public int getHeight() {
-//        int lineCount = shouldRenderDummy() ? 4 : PersistentData.get().bonusDrops.size() + 1;
-//        return (int) (((MinecraftClient.getInstance().textRenderer.fontHeight) * lineCount + VERTICAL_SPACING * (lineCount)) * 1.3);
-//    }
 
     @Override
     public boolean shouldRenderDummy() {
         return super.shouldRenderDummy() || PersistentData.get().bonusDrops.isEmpty();
+    }
+
+    @Override
+    protected void renderDummy(DrawContext context) {
+        this.renderElement(context);
     }
 
     @Override
