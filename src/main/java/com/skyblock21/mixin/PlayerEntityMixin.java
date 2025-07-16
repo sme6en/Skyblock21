@@ -27,10 +27,8 @@ public class PlayerEntityMixin {
 
         ClientPlayerEntity player = (ClientPlayerEntity) (Object) this;
 
-        ItemStack currentStack = player.getMainHandStack();
-
         ActionResult result = PlayerEvents.DROP_ITEM.invoker()
-                                                .interact(player, currentStack);
+                                                .interact(player, stack);
 
         if (result == ActionResult.FAIL) {
             cir.setReturnValue(null);

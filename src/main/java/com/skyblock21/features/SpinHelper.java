@@ -96,7 +96,7 @@ public class SpinHelper {
                 String cleanText = TextUtils.removeFormatting(loreLine)
                                             .replace("Pull: +", "")
                                             .trim();
-                return Integer.parseInt(cleanText);
+                return (int) Math.ceil(Double.parseDouble(cleanText));
             }
         }
 
