@@ -101,7 +101,7 @@ public class GeneralCategory {
                                                                           .name(literal("Items"))
                                                                           .option(Option.<Boolean>createBuilder()
                                                                                         .name(literal("Prevent dropping starred items"))
-                                                                                        .description(OptionDescription.of(literal("Notifies you when your booster cookie is about to expire or has expired")))
+                                                                                        .description(OptionDescription.of(literal("Prevents you from dropping starred items by accident")))
                                                                                         .binding(defaults.general.preventDroppingStarredItems,
                                                                                                 () -> config.general.preventDroppingStarredItems,
                                                                                                 newValue -> config.general.preventDroppingStarredItems = newValue)
