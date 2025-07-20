@@ -34,6 +34,9 @@ public class Skyblock21Config {
         public boolean hidePlayersAroundNpcs = true;
 
         @SerialEntry
+        public boolean infinityChatHistory = true;
+
+        @SerialEntry
         public boolean boosterCookieReminder = true;
         @SerialEntry
         public int boosterCookieReminderHours = 6;

@@ -20,6 +20,9 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -468,6 +471,10 @@ public class Utils {
         sb.append(String.format("%02ds", seconds));
 
         return sb.toString();
+    }
+
+    public static String getItemUUID(ItemStack stack) {
+        return stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt().getString("uuid").orElse("");
     }
 
 }

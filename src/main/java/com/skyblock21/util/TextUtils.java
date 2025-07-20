@@ -52,6 +52,33 @@ public class TextUtils {
         return builder.toString();
     }
 
+    public static String translateColorCodes(String text) {
+        if (text == null) return "";
+
+        return text.replace("&0", "§0")  // Black
+                   .replace("&1", "§1")   // Dark Blue
+                   .replace("&2", "§2")   // Dark Green
+                   .replace("&3", "§3")   // Dark Aqua
+                   .replace("&4", "§4")   // Dark Red
+                   .replace("&5", "§5")   // Dark Purple
+                   .replace("&6", "§6")   // Gold
+                   .replace("&7", "§7")   // Gray
+                   .replace("&8", "§8")   // Dark Gray
+                   .replace("&9", "§9")   // Blue
+                   .replace("&a", "§a")   // Green
+                   .replace("&b", "§b")   // Aqua
+                   .replace("&c", "§c")   // Red
+                   .replace("&d", "§d")   // Light Purple
+                   .replace("&e", "§e")   // Yellow
+                   .replace("&f", "§f")   // White
+                   .replace("&k", "§k")   // Obfuscated
+                   .replace("&l", "§l")   // Bold
+                   .replace("&m", "§m")   // Strikethrough
+                   .replace("&n", "§n")   // Underline
+                   .replace("&o", "§o")   // Italic
+                   .replace("&r", "§r");  // Reset
+    }
+
     public static int parseIntWithSuffix(String str) {
         Pattern pattern = Pattern.compile("^(\\d*\\.?\\d+)([kmb]?)$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(str.trim());

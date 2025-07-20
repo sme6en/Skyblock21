@@ -1,5 +1,6 @@
 package com.skyblock21.config;
 
+import com.skyblock21.Skyblock21;
 import com.skyblock21.features.commandaliases.CommandAliasesScreen;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.hud.EditGuiScreen;
@@ -21,7 +22,7 @@ public class Skyblock21Screen extends Screen {
     private ThreePartsLayoutWidget layout;
 
     public Skyblock21Screen() {
-        super(literal("Skyblock21"));
+        super(literal("Skyblock21 " + Skyblock21.MOD_VERSION));
     }
 
     @Override

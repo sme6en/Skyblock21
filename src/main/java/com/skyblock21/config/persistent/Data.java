@@ -1,8 +1,8 @@
 package com.skyblock21.config.persistent;
 
+import com.skyblock21.features.itemcustomization.ItemCustomization;
 import com.skyblock21.features.Scathas.ScathasData;
 import com.skyblock21.features.commandaliases.Alias;
-import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.Shortcut;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 
@@ -25,5 +25,6 @@ public class Data {
     @SerialEntry
     public final Set<Alias> aliases = new HashSet<>();
 
-
+    @SerialEntry
+    public Map<String, ItemCustomization> itemCustomizations = new HashMap<>();
 }
