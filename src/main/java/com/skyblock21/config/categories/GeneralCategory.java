@@ -57,6 +57,15 @@ public class GeneralCategory {
                                                                                         .coloured(true))
                                            .build())
                              .option(Option.<Boolean>createBuilder()
+                                           .name(literal("Infinity Chat History"))
+                                           .binding(defaults.general.infinityChatHistory,
+                                                   () -> config.general.infinityChatHistory,
+                                                   newValue -> config.general.infinityChatHistory = newValue)
+                                           .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                        .yesNoFormatter()
+                                                                                        .coloured(true))
+                                           .build())
+                             .option(Option.<Boolean>createBuilder()
                                            .name(literal("Hide players around NPCs"))
                                            .description(OptionDescription.of(literal("Hides players around NPCs to reduce lag, improve performance and to make it easier to interact with them")))
                                            .binding(defaults.general.hidePlayersAroundNpcs,

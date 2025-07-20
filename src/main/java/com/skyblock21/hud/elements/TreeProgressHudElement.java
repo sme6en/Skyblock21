@@ -7,6 +7,7 @@ import com.skyblock21.util.Location;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -42,6 +43,6 @@ public class TreeProgressHudElement extends HudElement {
 
     @Override
     public boolean isEnabled() {
-        return Skyblock21ConfigManager.get().foraging.treeProgress;
+        return Skyblock21ConfigManager.get().foraging.treeProgress && MinecraftClient.getInstance().currentScreen == null || !(MinecraftClient.getInstance().currentScreen instanceof HandledScreen);
     }
 }

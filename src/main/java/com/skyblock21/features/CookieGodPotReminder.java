@@ -31,7 +31,10 @@ public class CookieGodPotReminder {
         String footerText = ((PlayerListHudAccessor) MinecraftClient.getInstance().inGameHud.getPlayerListHud()).getFooter().getString();
         if (footerText == null || footerText.isEmpty() || !footerText.contains("Cookie Buff")) return;
 
-        String durationText = footerText.split("\n")[6];
+        String[] footerLines = footerText.split("\n");
+        if (footerLines.length < 7) return;
+        
+        String durationText = footerLines[6];
 
         checked = true;
 

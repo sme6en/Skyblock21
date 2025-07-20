@@ -2,6 +2,7 @@ package com.skyblock21;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.Skyblock21Screen;
 import com.skyblock21.config.persistent.PersistentData;
@@ -12,97 +13,116 @@ import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
+import com.skyblock21.features.itemcustomization.ItemCustomizationScreen;
 import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
-import com.skyblock21.features.waypoints.Waypoint;
-import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.hud.EditGuiScreen;
-import com.skyblock21.hud.HudElement;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
-import com.skyblock21.util.AutoUpdater;
 import com.skyblock21.util.TextUtils;
+import com.skyblock21.util.dev.AutoUpdater;
 import com.skyblock21.util.Utils;
 import com.skyblock21.util.tab.TabUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.2.4.1";
+    public static final String MOD_VERSION = "1.3.0";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-
-    // This logger is used to write text to the console and the log file.
-    // It is considered best practice to use your mod id as the logger's name.
-    // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {
-            dispatcher.register(literal("skyblock21").executes((ctx) -> {
-                MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(new Skyblock21Screen()));
-                return 1;
-            }).then(literal("config").executes((ctx) -> {
-                MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(Skyblock21ConfigManager.createGUI(null)));
-                return 1;
-            })).then(literal("gui").executes((ctx) -> {
-                MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
-                return 1;
-            })).then(literal("keys").executes((ctx) -> {
-                MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(new KeyShortcutsScreen(MinecraftClient.getInstance().currentScreen)));
-                return 1;
-            })).then(literal("aliases").executes((ctx) -> {
-                MinecraftClient.getInstance()
-                               .send(() -> MinecraftClient.getInstance()
-                                                          .setScreen(new CommandAliasesScreen(MinecraftClient.getInstance().currentScreen)));
-                return 1;
-            })));
+            dispatcher.register(createSkyblockCommand("skyblock21"));
+            dispatcher.register(createSkyblockCommand("sb21"));
         });
+    }
 
+    private static LiteralArgumentBuilder<FabricClientCommandSource> createSkyblockCommand(String commandName) {
+        return literal(commandName)
+                .executes((ctx) -> {
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(new Skyblock21Screen()));
+                    return 1;
+                })
+                .then(literal("config").executes((ctx) -> {
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(Skyblock21ConfigManager.createGUI(null)));
+                    return 1;
+                }))
+                .then(literal("gui").executes((ctx) -> {
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
+                    return 1;
+                }))
+                .then(literal("keys").executes((ctx) -> {
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(new KeyShortcutsScreen(MinecraftClient.getInstance().currentScreen)));
+                    return 1;
+                }))
+                .then(literal("aliases").executes((ctx) -> {
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(new CommandAliasesScreen(MinecraftClient.getInstance().currentScreen)));
+                    return 1;
+                })).then(literal("update").executes((ctx) -> {
+                    AutoUpdater.checkForUpdateAsyncAndRestart();
+
+                    return 1;
+                })).then(literal("customize").executes((ctx) -> {
+                    if (MinecraftClient.getInstance().player == null) return 1;
+
+                    ItemStack heldItem = MinecraftClient.getInstance().player.getMainHandStack();
+
+                    if (heldItem.isEmpty()) {
+                        TextUtils.addMessage("§cYou must hold an item to customize it!", true, false);
+                        return 0;
+                    }
+
+                    String itemUuid = Utils.getItemUUID(heldItem);
+                    if (itemUuid == null) {
+                        TextUtils.addMessage("§cThis item cannot be customized!", true, false);
+                        return 0;
+                    }
+
+                    MinecraftClient.getInstance()
+                                   .send(() -> MinecraftClient.getInstance()
+                                                              .setScreen(new ItemCustomizationScreen(heldItem)));
+
+                    return 1;
+                }));
     }
 
     public void tick(MinecraftClient client) {
         Utils.update();
     }
 
-    private static boolean updateNotified = false;
     @Override
     public void onInitializeClient() {
-        AutoUpdater.checkForUpdate();
-        AutoUpdater.onStartup();
+        AutoUpdater.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
-
-        ClientPlayConnectionEvents.JOIN.register(((clientPlayNetworkHandler, packetSender, minecraftClient) -> {
-            if (!Objects.equals(AutoUpdater.latestUpdatedVersion, MOD_VERSION) && AutoUpdater.latestUpdatedVersion != "" && !updateNotified) {
-                minecraftClient.execute(() -> {
-                    if (minecraftClient.player == null) return;
-                    TextUtils.addMessage("Updated to version: §b§l" + AutoUpdater.latestUpdatedVersion + "§r! Please restart your game to access new features.", true, false);
-                });
-                updateNotified = true;
-            }
-        }));
 
         // General
         Skyblock21ConfigManager.load();

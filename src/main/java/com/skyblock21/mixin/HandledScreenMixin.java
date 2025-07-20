@@ -1,8 +1,11 @@
 package com.skyblock21.mixin;
 
+import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.PlayerEvents;
 import com.skyblock21.events.WindowEvents;
+import com.skyblock21.features.itemcustomization.ItemCustomization;
 import com.skyblock21.hud.HudManager;
+import com.skyblock21.util.Utils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -18,6 +21,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -59,5 +63,51 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         if (!result) {
             ci.cancel();
         }
+    }
+
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawItem(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", ordinal = 0))
+    private ItemStack customizeHeldItem(ItemStack itemStack) {
+        if (itemStack == null || itemStack.isEmpty()) {
+            return itemStack;
+        }
+
+        String uuid = Utils.getItemUUID(itemStack);
+        if (uuid.isEmpty()) {
+            return itemStack;
+        }
+
+        ItemCustomization customization = PersistentData.get().itemCustomizations.get(uuid);
+        if (customization == null) {
+            return itemStack;
+        }
+
+        if (customization.getCustomItem() == null) {
+            return itemStack;
+        }
+
+        return customization.getCustomItem().getDefaultStack();
+    }
+
+    @ModifyArg(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V", ordinal = 0))
+    private ItemStack customizeDrawnItem(ItemStack itemStack) {
+        if (itemStack == null || itemStack.isEmpty()) {
+            return itemStack;
+        }
+
+        String uuid = Utils.getItemUUID(itemStack);
+        if (uuid.isEmpty()) {
+            return itemStack;
+        }
+
+        ItemCustomization customization = PersistentData.get().itemCustomizations.get(uuid);
+        if (customization == null) {
+            return itemStack;
+        }
+
+        if (customization.getCustomItem() == null) {
+            return itemStack;
+        }
+
+        return customization.getCustomItem().getDefaultStack();
     }
 }
