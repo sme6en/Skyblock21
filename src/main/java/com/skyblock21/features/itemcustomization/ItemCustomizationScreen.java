@@ -82,7 +82,7 @@ public class ItemCustomizationScreen extends Screen {
         // Item name field
         this.nameField = new TextFieldWidget(this.textRenderer, centerX - 100, startY, 200, 20, Text.literal(""));
         this.nameField.setMaxLength(130);
-        String name = this.customization.customName.isEmpty() ? (itemStack.getCustomName() != null ? TextUtils.translateColorCodes(itemStack.getCustomName().getString(), true) : "") : this.customization.customName;
+        String name = this.customization.customName.isEmpty() ? (itemStack.getCustomName() != null ? TextUtils.translateColorCodes(TextUtils.toLegacy(itemStack.getCustomName()), true) : "") : this.customization.customName;
         this.nameField.setText(name);
         this.nameField.setChangedListener(this::onNameChanged);
         this.addSelectableChild(this.nameField);
@@ -341,7 +341,7 @@ public class ItemCustomizationScreen extends Screen {
 
     private void reset() {
         this.nameField.setText(itemStack.getCustomName() != null ? itemStack.getCustomName().getString() : "");
-        this.itemIdField.setText(itemStack.getItem().toString());
+        this.itemIdField.setText(itemStack.getItem().toString().replace("minecraft:", ""));
         clearError();
     }
 
