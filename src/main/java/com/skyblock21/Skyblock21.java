@@ -47,7 +47,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.3.0";
+    public static final String MOD_VERSION = "1.3.1";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final MinecraftClient client = MinecraftClient.getInstance();
 
