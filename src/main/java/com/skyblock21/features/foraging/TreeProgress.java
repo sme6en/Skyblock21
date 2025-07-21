@@ -50,6 +50,8 @@ public class TreeProgress {
     public static void onTick(MinecraftClient client) {
         if (!Utils.isOnSkyblock()) return;
         if (!Utils.isInGalatea()) return;
+        if (client.player == null || client.world == null) return;
+
         Box searchBox = client.player.getBoundingBox().expand(80d);
         ArmorStandEntity armorStand = client.world.getOtherEntities(client.player, searchBox, e -> e instanceof ArmorStandEntity && e.hasCustomName() && TREE_PROGRESS_PATTERN.matcher(e.getCustomName()
                                                                                                                                                                                         .getString())
