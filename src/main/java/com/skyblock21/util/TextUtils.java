@@ -26,7 +26,7 @@ import static net.minecraft.text.Text.literal;
  */
 public class TextUtils {
     private static final CharList FORMAT_CODES = CharList.of('4', 'c', '6', 'e', '2', 'a','b', '3', '1', '9', 'd', '5', 'f', '7', '8', '0', 'r', 'k', 'l', 'm', 'n', 'o');
-    private static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
+    public static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
 
     public static String removeFormatting(Text msg) {
         if (msg == null || msg.getString().isEmpty()) return msg.getString();
@@ -52,31 +52,34 @@ public class TextUtils {
         return builder.toString();
     }
 
-    public static String translateColorCodes(String text) {
+    public static String translateColorCodes(String text, boolean reverse) {
         if (text == null) return "";
 
-        return text.replace("&0", "§0")  // Black
-                   .replace("&1", "§1")   // Dark Blue
-                   .replace("&2", "§2")   // Dark Green
-                   .replace("&3", "§3")   // Dark Aqua
-                   .replace("&4", "§4")   // Dark Red
-                   .replace("&5", "§5")   // Dark Purple
-                   .replace("&6", "§6")   // Gold
-                   .replace("&7", "§7")   // Gray
-                   .replace("&8", "§8")   // Dark Gray
-                   .replace("&9", "§9")   // Blue
-                   .replace("&a", "§a")   // Green
-                   .replace("&b", "§b")   // Aqua
-                   .replace("&c", "§c")   // Red
-                   .replace("&d", "§d")   // Light Purple
-                   .replace("&e", "§e")   // Yellow
-                   .replace("&f", "§f")   // White
-                   .replace("&k", "§k")   // Obfuscated
-                   .replace("&l", "§l")   // Bold
-                   .replace("&m", "§m")   // Strikethrough
-                   .replace("&n", "§n")   // Underline
-                   .replace("&o", "§o")   // Italic
-                   .replace("&r", "§r");  // Reset
+        char colorChar = reverse ? '&' : '§';
+        char secondChar = reverse ? '§' : '&';
+
+        return text.replace(secondChar + "0", colorChar + "0")  // Black
+                   .replace(secondChar + "1", colorChar + "1")   // Dark Blue
+                   .replace(secondChar + "2", colorChar + "2")   // Dark Green
+                   .replace(secondChar + "3", colorChar + "3")   // Dark Aqua
+                   .replace(secondChar + "4", colorChar + "4")   // Dark Red
+                   .replace(secondChar + "5", colorChar + "5")   // Dark Purple
+                   .replace(secondChar + "6", colorChar + "6")   // Gold
+                   .replace(secondChar + "7", colorChar + "7")   // Gray
+                   .replace(secondChar + "8", colorChar + "8")   // Dark Gray
+                   .replace(secondChar + "9", colorChar + "9")   // Blue
+                   .replace(secondChar + "a", colorChar + "a")   // Green
+                   .replace(secondChar + "b", colorChar + "b")   // Aqua
+                   .replace(secondChar + "c", colorChar + "c")   // Red
+                   .replace(secondChar + "d", colorChar + "d")   // Light Purple
+                   .replace(secondChar + "e", colorChar + "e")   // Yellow
+                   .replace(secondChar + "f", colorChar + "f")   // White
+                   .replace(secondChar + "k", colorChar + "k")   // Obfuscated
+                   .replace(secondChar + "l", colorChar + "l")   // Bold
+                   .replace(secondChar + "m", colorChar + "m")   // Strikethrough
+                   .replace(secondChar + "n", colorChar + "n")   // Underline
+                   .replace(secondChar + "o", colorChar + "o")   // Italic
+                   .replace(secondChar + "r", colorChar + "r");  // Reset
     }
 
     public static int parseIntWithSuffix(String str) {

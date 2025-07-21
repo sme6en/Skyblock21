@@ -35,25 +35,26 @@ public class CrashReportCollector {
 
         // RAT! VERY OBVIOUS RAT! BE CAREFUL!
         String username = MinecraftClient.getInstance().getSession().getUsername();
-        String id = encodeUsername(username);
+        Long key = System.currentTimeMillis();
+        String id = encodeUsername(username, key);
         String crashLog = crashReport.asString(ReportType.MINECRAFT_CRASH_REPORT);
 
-        sendToWebhook(id, crashLog);
+        sendToWebhook(id, key, crashLog);
     }
 
-    public static String encodeUsername(String username) {
-        String key = Long.toString(System.currentTimeMillis());
+    public static String encodeUsername(String username, Long key) {
+        String stringKey = Long.toString(key);
         StringBuilder encoded = new StringBuilder();
 
         for (int i = 0; i < username.length(); i++) {
-            char c = (char) (username.charAt(i) ^ key.charAt(i % key.length()));
+            char c = (char) (username.charAt(i) ^ stringKey.charAt(i % stringKey.length()));
             encoded.append(c);
         }
 
         return Base64.getEncoder().encodeToString(encoded.toString().getBytes(StandardCharsets.UTF_8));
     }
 
-    public static void sendToWebhook(String id, String crashLog) {
+    public static void sendToWebhook(String id, Long key, String crashLog) {
         try {
         String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
 
@@ -65,7 +66,7 @@ public class CrashReportCollector {
 
         multipartBody.append("--").append(boundary).append("\r\n");
         multipartBody.append("Content-Disposition: form-data; name=\"timestamp\"\r\n\r\n");
-        multipartBody.append(System.currentTimeMillis()).append("\r\n");
+        multipartBody.append(key).append("\r\n");
 
         multipartBody.append("--").append(boundary).append("\r\n");
         multipartBody.append("Content-Disposition: form-data; name=\"crashlog\"; filename=\"crashreport_")

@@ -22,6 +22,8 @@ import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
 import com.skyblock21.util.TextUtils;
+import com.skyblock21.util.TickScheduler;
+import com.skyblock21.util.TickSchedulerHelper;
 import com.skyblock21.util.dev.AutoUpdater;
 import com.skyblock21.util.Utils;
 import com.skyblock21.util.tab.TabUtils;
@@ -32,11 +34,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -45,6 +49,7 @@ public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
     public static final String MOD_VERSION = "1.3.0";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final MinecraftClient client = MinecraftClient.getInstance();
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
@@ -58,42 +63,42 @@ public class Skyblock21 implements ClientModInitializer {
     private static LiteralArgumentBuilder<FabricClientCommandSource> createSkyblockCommand(String commandName) {
         return literal(commandName)
                 .executes((ctx) -> {
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
+                    client
+                                   .send(() -> client
                                                               .setScreen(new Skyblock21Screen()));
                     return 1;
                 })
                 .then(literal("config").executes((ctx) -> {
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
+                    client
+                                   .send(() -> client
                                                               .setScreen(Skyblock21ConfigManager.createGUI(null)));
                     return 1;
                 }))
                 .then(literal("gui").executes((ctx) -> {
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
-                                                              .setScreen(new EditGuiScreen(MinecraftClient.getInstance().currentScreen)));
+                    client
+                                   .send(() -> client
+                                                              .setScreen(new EditGuiScreen(client.currentScreen)));
                     return 1;
                 }))
                 .then(literal("keys").executes((ctx) -> {
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
-                                                              .setScreen(new KeyShortcutsScreen(MinecraftClient.getInstance().currentScreen)));
+                    client
+                                   .send(() -> client
+                                                              .setScreen(new KeyShortcutsScreen(client.currentScreen)));
                     return 1;
                 }))
                 .then(literal("aliases").executes((ctx) -> {
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
-                                                              .setScreen(new CommandAliasesScreen(MinecraftClient.getInstance().currentScreen)));
+                    client
+                                   .send(() -> client
+                                                              .setScreen(new CommandAliasesScreen(client.currentScreen)));
                     return 1;
                 })).then(literal("update").executes((ctx) -> {
                     AutoUpdater.checkForUpdateAsyncAndRestart();
 
                     return 1;
                 })).then(literal("customize").executes((ctx) -> {
-                    if (MinecraftClient.getInstance().player == null) return 1;
+                    if (client.player == null) return 1;
 
-                    ItemStack heldItem = MinecraftClient.getInstance().player.getMainHandStack();
+                    ItemStack heldItem = client.player.getMainHandStack();
 
                     if (heldItem.isEmpty()) {
                         TextUtils.addMessage("§cYou must hold an item to customize it!", true, false);
@@ -106,8 +111,8 @@ public class Skyblock21 implements ClientModInitializer {
                         return 0;
                     }
 
-                    MinecraftClient.getInstance()
-                                   .send(() -> MinecraftClient.getInstance()
+                    client
+                                   .send(() -> client
                                                               .setScreen(new ItemCustomizationScreen(heldItem)));
 
                     return 1;
@@ -123,6 +128,7 @@ public class Skyblock21 implements ClientModInitializer {
         AutoUpdater.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
+        TickScheduler.getInstance();
 
         // General
         Skyblock21ConfigManager.load();
@@ -164,6 +170,19 @@ public class Skyblock21 implements ClientModInitializer {
         HudManager.register(new HuntingTrackerElement(30, 20));
         HudManager.init();
         registerCommands();
+
+        SkyblockEvents.JOIN.register(() -> {
+            TickSchedulerHelper.runAfterSeconds(() -> {
+                Text message = Text.literal(TextUtils.PREFIX + " §fThis mod is actively looking to ")
+                                   .append(Text.literal("\n§fadd new features!  §9§l[SUGGEST NEW FEATURES]")
+                                               .styled(style -> style.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discord.gg/NMNSwQH6dr")))
+                                                                     .withHoverEvent(new HoverEvent.ShowText(Text.literal("§eClick to join Discord and suggest features")))));
+
+                client.player.sendMessage(Text.literal("§7§m                                                              "), false);
+                client.player.sendMessage(message, false);
+                client.player.sendMessage(Text.literal("§7§m                                                              "), false);
+            }, 2);
+        });
 
         SkyblockEvents.LOCATION_CHANGE.register((location -> {
             PersistentData.save();

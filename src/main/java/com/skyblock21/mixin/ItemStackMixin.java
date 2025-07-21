@@ -40,7 +40,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
         if (!uuid.isEmpty()) {
             ItemCustomization customization = PersistentData.get().itemCustomizations.get(uuid);
             if (customization != null && customization.hasCustomName()) {
-                String customName = TextUtils.translateColorCodes(customization.customName);
+                String customName = TextUtils.translateColorCodes(customization.customName, false);
                 finalName = Text.literal(customName);
             }
         }

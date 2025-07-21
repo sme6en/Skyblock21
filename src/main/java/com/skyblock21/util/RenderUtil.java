@@ -2,11 +2,13 @@ package com.skyblock21.util;
 
 import com.skyblock21.features.waypoints.WaypointRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexRendering;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.passive.CodEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -134,5 +136,41 @@ public class RenderUtil {
         vertexConsumer.vertex(matrix, width, 0, depth).color(r, g, b, alpha);
         vertexConsumer.vertex(matrix, width, 0, 0).color(r, g, b, alpha);
         vertexConsumer.vertex(matrix, 0, 0, 0).color(r, g, b, alpha);
+    }
+
+    private static void renderVertex(MatrixStack.Entry matrix, VertexConsumer vertices, int color, float x, float y, float z) {
+        int a = (color >> 24) & 0xFF;
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        vertices.vertex(matrix, x, y, z).color(r, g, b, a).texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).light(0xF000F0).normal(matrix, 0, 1, 0);
+    }
+
+    private static void renderVertex(MatrixStack.Entry matrix, VertexConsumer vertices, float x, float y, float z, float u, float v) {
+        vertices.vertex(matrix, x, y, z)
+                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .texture(u, v)
+                .overlay(OverlayTexture.DEFAULT_UV)
+                .light(0xF000F0)
+                .normal(matrix, 0, 1, 0);
+    }
+
+    private static void renderQuad(MatrixStack.Entry matrix, VertexConsumer vertices, int color, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
+        renderVertex(matrix, vertices, color, x1, y1, z1);
+        renderVertex(matrix, vertices, color, x2, y2, z2);
+        renderVertex(matrix, vertices, color, x3, y3, z3);
+        renderVertex(matrix, vertices, color, x4, y4, z4);
+    }
+
+    private static void renderBeamQuad(MatrixStack.Entry matrix, VertexConsumer vertices,
+                                       float x1, float y1, float z1,
+                                       float x2, float y2, float z2,
+                                       float x3, float y3, float z3,
+                                       float x4, float y4, float z4,
+                                       float u1, float v1, float u2, float v2) {
+        renderVertex(matrix, vertices, x1, y1, z1, u1, v1);
+        renderVertex(matrix, vertices, x2, y2, z2, u2, v1);
+        renderVertex(matrix, vertices, x3, y3, z3, u2, v2);
+        renderVertex(matrix, vertices, x4, y4, z4, u1, v2);
     }
 }

@@ -31,6 +31,7 @@
 ### Misc
 - **Keybind Command Shortcuts**
 - Command Aliases
+- Item Customization
 - Booster Cookie Reminder
 - Missing God Potions Notifier
 - Prevent dropping starred items
