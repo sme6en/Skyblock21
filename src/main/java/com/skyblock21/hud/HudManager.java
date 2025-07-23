@@ -149,7 +149,10 @@ public class HudManager {
                 currentHoveredLine.getHoverText() != null) {
 
             Text hoverText = currentHoveredLine.getHoverText();
-            drawContext.drawTooltip(MinecraftClient.getInstance().textRenderer, hoverText, mouseX, mouseY);
+            try {
+                drawContext.drawTooltip(MinecraftClient.getInstance().textRenderer, hoverText, mouseX, mouseY);
+            } catch (Exception ignored) {
+            }
         }
     }
 

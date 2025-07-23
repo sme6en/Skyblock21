@@ -13,7 +13,7 @@ import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
-import com.skyblock21.features.itemcustomization.ItemCustomizationScreen;
+import com.skyblock21.features.itemcustomization.ItemCustomizationScreenV2;
 import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -106,14 +105,15 @@ public class Skyblock21 implements ClientModInitializer {
                     }
 
                     String itemUuid = Utils.getItemUUID(heldItem);
-                    if (itemUuid == null) {
+                    if (itemUuid.isEmpty()) {
                         TextUtils.addMessage("§cThis item cannot be customized!", true, false);
                         return 0;
                     }
 
                     client
                                    .send(() -> client
-                                                              .setScreen(new ItemCustomizationScreen(heldItem)));
+                                           .setScreen(new ItemCustomizationScreenV2(heldItem)));
+//                                                              .setScreen(new ItemCustomizationScreen(heldItem)));
 
                     return 1;
                 }));
@@ -126,6 +126,8 @@ public class Skyblock21 implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         AutoUpdater.initialize();
+//        Fonts.loadFonts();
+//        FontManager.cacheCommon();
 
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         TickScheduler.getInstance();

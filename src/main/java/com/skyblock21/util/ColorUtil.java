@@ -40,6 +40,30 @@ public class ColorUtil {
         };
     }
 
+    public static int getAlpha(int color) {
+        return (color >>> 24) & 0xFF;
+    }
+
+    public static int getRed(int color) {
+        return (color >>> 16) & 0xFF;
+    }
+
+    public static int getGreen(int color) {
+        return (color >>> 8) & 0xFF;
+    }
+
+    public static int getBlue(int color) {
+        return color & 0xFF;
+    }
+
+    public static int argb(int alpha, int red, int green, int blue) {
+        return (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    public static int rgb(int red, int green, int blue) {
+        return argb(255, red, green, blue);
+    }
+
     public static int getIntFromColor(Color color) {
         int red = color.getRed();
         int green = color.getGreen();
@@ -54,6 +78,11 @@ public class ColorUtil {
         int b = color & 0xFF;
 
         return (alpha << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    public static int applyAlpha(int color, float alpha) {
+        int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255)));
+        return (color & 0x00FFFFFF) | (alphaInt << 24);
     }
 
     public static int interpolateColor(int color1, int color2, float factor) {
@@ -90,6 +119,32 @@ public class ColorUtil {
         int blue = color & 0xFF;
 
         return new Color(red, green, blue, alpha);
+    }
+
+    public static int lighten(int color, float factor) {
+        int alpha = getAlpha(color);
+        int red = getRed(color);
+        int green = getGreen(color);
+        int blue = getBlue(color);
+
+        red = Math.min(255, (int) (red + (255 - red) * factor));
+        green = Math.min(255, (int) (green + (255 - green) * factor));
+        blue = Math.min(255, (int) (blue + (255 - blue) * factor));
+
+        return argb(alpha, red, green, blue);
+    }
+
+    public static int darken(int color, float factor) {
+        int alpha = getAlpha(color);
+        int red = getRed(color);
+        int green = getGreen(color);
+        int blue = getBlue(color);
+
+        red = Math.max(0, (int) (red * (1.0f - factor)));
+        green = Math.max(0, (int) (green * (1.0f - factor)));
+        blue = Math.max(0, (int) (blue * (1.0f - factor)));
+
+        return argb(alpha, red, green, blue);
     }
 
 }

@@ -25,6 +25,7 @@ repositories {
 			includeGroup "net.azureaaron"
 		}
 	}
+	maven { url 'https://maven.wispforest.io' }
 
 }
 
@@ -35,9 +36,9 @@ loom {
 
 	runs {
 		named("client") {
-//			property("devauth.enabled", "true")
+			property("devauth.enabled", "true")
 			vmArg("-XX:+AllowEnhancedClassRedefinition")
-			property 'mixin.debug.export', 'true'
+//			property 'mixin.debug.export', 'true'
 		}
 	}
 
@@ -55,7 +56,13 @@ dependencies {
 	include modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}-fabric")
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 	include modImplementation("net.azureaaron:hm-api:${project.hm_api_version}")
+
 	include modImplementation("io.github.0x3c50.renderer:renderer-fabric:2.0.2")
+//	include implementation("org.lwjgl:lwjgl-harfbuzz:3.3.3:natives-windows")
+//	include implementation("org.lwjgl:lwjgl-harfbuzz:3.3.3:natives-macos")
+//	include implementation("org.lwjgl:lwjgl-harfbuzz:3.3.3:natives-linux")
+
+	include modImplementation("io.wispforest:owo-lib:${project.owo_version}")
 }
 
 processResources {

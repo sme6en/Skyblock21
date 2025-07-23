@@ -42,7 +42,6 @@ public class KeyShortcuts {
                 int mouseButton = shortcut.keyCode - 1000;
                 isPressed = GLFW.glfwGetMouseButton(window, mouseButton) == GLFW.GLFW_PRESS;
             } else {
-                // Keyboard key
                 isPressed = GLFW.glfwGetKey(window, shortcut.keyCode) == GLFW.GLFW_PRESS;
             }
 

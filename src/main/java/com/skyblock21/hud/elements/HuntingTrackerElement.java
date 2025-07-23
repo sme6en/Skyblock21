@@ -218,4 +218,9 @@ public class HuntingTrackerElement extends MultiLineHudElement {
     public boolean isEnabled() {
         return Skyblock21ConfigManager.get().hunting.huntingTracker;
     }
+
+    @Override
+    public boolean shouldRenderDummy() {
+        return trackedShards.isEmpty();
+    }
 }
