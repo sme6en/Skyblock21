@@ -29,11 +29,13 @@ public class EditGuiScreen extends Screen {
     @Override
     public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
+        super.renderBackground(context, mouseX, mouseY, delta);
 
         MatrixStack matrices = context.getMatrices();
         float combinedScale = HudManager.getCombinedScale();
 
         for (HudElement element : HudManager.getElements()) {
+            if (!element.isEnabled()) continue;
             matrices.push();
 
             float effectiveX = element.getEffectiveX();

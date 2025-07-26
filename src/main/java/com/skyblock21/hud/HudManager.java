@@ -167,17 +167,9 @@ public class HudManager {
                 client.currentScreen instanceof EditHudElementScreen;
 
         for (HudElement element : hudElements) {
-            if (inEditMode) {
-                matrices.push();
-                float scaledX = element.getX() * combinedScale;
-                float scaledY = element.getY() * combinedScale;
-                matrices.translate(scaledX, scaledY, 0);
-                float finalScale = element.getScale() * combinedScale;
-                matrices.scale(finalScale, finalScale, 1.0f);
-                element.render(drawContext, 0, 0);
-                matrices.pop();
-            } else {
-                if (!element.isEnabled() || !element.isAllowedInLocation(location)) continue;
+            if (!element.isEnabled()) continue;
+            if (!inEditMode) {
+                if (!element.isAllowedInLocation(location)) continue;
                 if (!Utils.isOnSkyblock()) return;
 
                 matrices.push();
@@ -189,6 +181,7 @@ public class HudManager {
                 element.render(drawContext, 0, 0);
                 matrices.pop();
             }
+
         }
     }
 
