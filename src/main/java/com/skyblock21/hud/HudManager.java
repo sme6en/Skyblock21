@@ -45,7 +45,7 @@ public class HudManager {
     public static void init() {
         loadConfig();
         HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper ->
-                layeredDrawerWrapper.attachLayerAfter(IdentifiedLayer.OVERLAY_MESSAGE,
+                layeredDrawerWrapper.attachLayerAfter(IdentifiedLayer.PLAYER_LIST,
                         Identifier.of("skyblock21", "hud_overlay"), HudManager::render)));
         ClientTickEvents.END_CLIENT_TICK.register(HudManager::onTick);
         SkyblockEvents.JOIN.register(HudManager::onJoin);
@@ -62,13 +62,10 @@ public class HudManager {
     }
 
     private static void onContainerRender(Screen screen, DrawContext context, int mouseX, int mouseY, float delta) {
-        // Update hover state
         handleMouseMove(mouseX, mouseY);
 
-        // Render HUD elements over container
         renderHudElements(context);
 
-        // Render hover tooltips
         renderHoverTooltip(context, mouseX, mouseY);
     }
 
@@ -84,12 +81,12 @@ public class HudManager {
      * Handles mouse clicks on HUD elements
      */
     public static boolean handleMouseClick(double mouseX, double mouseY, int button) {
-        if (button != 0) return false; // Only handle left clicks
+        if (button != 0) return false;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof EditGuiScreen ||
                 client.currentScreen instanceof EditHudElementScreen) {
-            return false; // Don't handle clicks in edit mode
+            return false;
         }
 
         Location location = Utils.getLocation();
@@ -225,7 +222,7 @@ public class HudManager {
         return getViewportScale() * getGuiScaleCompensation();
     }
 
-    private static void render(DrawContext drawContext, RenderTickCounter renderTickCounter) {
+    public static void render(DrawContext drawContext, RenderTickCounter renderTickCounter) {
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Don't render if in edit screens

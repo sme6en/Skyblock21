@@ -2,6 +2,8 @@ package com.skyblock21.hud;
 
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 
@@ -13,19 +15,27 @@ public abstract class HudElement {
 
     protected int HORIZONTAL_SPACING = 2;
     protected int VERTICAL_SPACING = 2;
+    @Getter
     private final String name;
     public boolean alwaysRenderDummy = false;
     protected Set<Location> locationsShown = EnumSet.allOf(Location.class);
+    @Getter
     private int x;
     private int y;
     private int defaultX = 0;
     private int defaultY = 0;
+    @Getter
     private float scale = 1.0f;
     private boolean dragging = false;
     private int dragOffsetX = 0;
     private int dragOffsetY = 0;
+    @Getter
+    @Setter
     private boolean enabled = true;
+    @Getter
+    @Setter
     private boolean backgroundEnabled = false;
+    @Getter
     private int backgroundOpacity = 40;
 
     public HudElement(int x, int y) {
@@ -45,14 +55,6 @@ public abstract class HudElement {
         this(x, y);
         this.locationsShown = EnumSet.of(location);
         this.alwaysRenderDummy = alwaysDummy;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getX() {
-        return x;
     }
 
     public void setX(int x) {
@@ -97,27 +99,11 @@ public abstract class HudElement {
         return scale * HudManager.getCombinedScale();
     }
 
-    public float getScale() {
-        return scale;
-    }
-
     public void setScale(float scale) {
         this.scale = scale;
 
         setX(this.x);
         setY(this.y);
-    }
-
-    public boolean isBackgroundEnabled() {
-        return backgroundEnabled;
-    }
-
-    public void setBackgroundEnabled(boolean enabled) {
-        this.backgroundEnabled = enabled;
-    }
-
-    public int getBackgroundOpacity() {
-        return backgroundOpacity;
     }
 
     public void setBackgroundOpacity(int opacity) {
@@ -129,13 +115,9 @@ public abstract class HudElement {
 
         if (client.currentScreen instanceof EditGuiScreen || client.currentScreen instanceof EditHudElementScreen) {
             renderBackground(context);
-            if (shouldRenderDummy()) {
-                renderDummy(context);
-            } else {
-                renderElement(context);
-            }
+            renderElement(context);
         } else if (isAllowedInLocation(Utils.getLocation()) && isEnabled()) {
-            if (!shouldRenderDummy()) renderBackground(context);
+            renderBackground(context);
             renderElement(context);
         }
     }
@@ -154,14 +136,6 @@ public abstract class HudElement {
 
     protected void onTick(MinecraftClient client) {
 
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
     public void toggle() {

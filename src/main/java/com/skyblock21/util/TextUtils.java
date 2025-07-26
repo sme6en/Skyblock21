@@ -25,7 +25,7 @@ import static net.minecraft.text.Text.literal;
  * @author Aaron (https://github.com/AzureAaron/aaron-mod/blob/master/src/main/java/net/azureaaron/mod/utils/TextTransformer.java)
  */
 public class TextUtils {
-    private static final CharList FORMAT_CODES = CharList.of('4', 'c', '6', 'e', '2', 'a','b', '3', '1', '9', 'd', '5', 'f', '7', '8', '0', 'r', 'k', 'l', 'm', 'n', 'o');
+    public static final CharList FORMAT_CODES = CharList.of('4', 'c', '6', 'e', '2', 'a','b', '3', '1', '9', 'd', '5', 'f', '7', '8', '0', 'r', 'k', 'l', 'm', 'n', 'o');
     public static final String PREFIX = "§b[SkyBlock§f21§b]§7 ";
 
     public static String removeFormatting(Text msg) {

@@ -2,7 +2,9 @@ package com.skyblock21.hud;
 
 import com.google.gson.*;
 import com.skyblock21.util.Location;
+import com.skyblock21.util.Render2DUtil;
 import com.skyblock21.util.Utils;
+import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -62,12 +64,81 @@ public abstract class MultiLineHudElement extends HudElement {
         recalculateDimensions();
     }
 
-    // Enhanced line addition methods with container context awareness
+    // Regular line addition methods
     public void addLine(String id, Text content) {
         lines.add(new HudLine(id, content));
         recalculateDimensions();
     }
 
+    public void addLine(String id, Text content, String groupId) {
+        lines.add(new HudLine(id, content, groupId));
+        recalculateDimensions();
+    }
+
+    public void addLine(String id, Text content, String groupId, int order) {
+        lines.add(new HudLine(id, content, groupId, order));
+        recalculateDimensions();
+    }
+
+    // Dummy line addition methods
+    public void addDummyLine(String id, Text content) {
+        HudLine line = new HudLine(id, content);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummyLine(String id, Text content, String groupId) {
+        HudLine line = new HudLine(id, content, groupId);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummyLine(String id, Text content, String groupId, int order) {
+        HudLine line = new HudLine(id, content, groupId, order);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummyAmountLine(String id, String itemName, long amount) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummyAmountLine(String id, String itemName, long amount, String groupId) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount, groupId);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummyAmountLine(String id, String itemName, long amount, String groupId, int order) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount, groupId, order);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+    }
+
+    public void addDummySpacer(String id) {
+        lines.add(new HudSpacerLine(id, 1, true));
+        recalculateDimensions();
+    }
+
+    public void addDummySpacer(String id, int height) {
+        lines.add(new HudSpacerLine(id, height, true));
+        recalculateDimensions();
+    }
+
+    public void addDummySpacer(String id, int height, String groupId) {
+        lines.add(new HudSpacerLine(id, height, groupId, true));
+        recalculateDimensions();
+    }
+
+    // Clickable line methods
     public void addClickableLine(String id, Text content, Runnable clickAction) {
         HudLine line = new HudLine(id, content);
         line.setClickAction(clickAction);
@@ -90,6 +161,7 @@ public abstract class MultiLineHudElement extends HudElement {
         return line;
     }
 
+    // Hoverable line methods
     public void addHoverableLine(String id, Text content, Text hoverText) {
         HudLine line = new HudLine(id, content);
         line.setHoverText(hoverText);
@@ -111,6 +183,7 @@ public abstract class MultiLineHudElement extends HudElement {
         recalculateDimensions();
     }
 
+    // Conditional line methods
     public void addConditionalLine(String id, Text content, HudLine.ConditionalVisibilityProvider visibilityProvider) {
         HudLine line = new HudLine(id, content);
         line.setVisibilityProvider(visibilityProvider);
@@ -118,6 +191,7 @@ public abstract class MultiLineHudElement extends HudElement {
         recalculateDimensions();
     }
 
+    // Amount line methods
     public void addAmountLine(String id, String itemName, long amount) {
         lines.add(new HudAmountLine(id, itemName, amount));
         recalculateDimensions();
@@ -128,14 +202,37 @@ public abstract class MultiLineHudElement extends HudElement {
         recalculateDimensions();
     }
 
-    public void addLine(String id, Text content, String groupId) {
-        lines.add(new HudLine(id, content, groupId));
+    // Spacer methods
+    public void addSpacer(String id) {
+        lines.add(new HudSpacerLine(id));
         recalculateDimensions();
     }
 
-    public void addLine(String id, Text content, String groupId, int order) {
-        lines.add(new HudLine(id, content, groupId, order));
+    public void addSpacer(String id, int height) {
+        lines.add(new HudSpacerLine(id, height));
         recalculateDimensions();
+    }
+
+    public void addSpacer(String id, int height, String groupId) {
+        lines.add(new HudSpacerLine(id, height, groupId));
+        recalculateDimensions();
+    }
+
+    // Helper methods for converting existing lines to dummy
+    public HudLine addLineAsDummy(String id, Text content) {
+        HudLine line = new HudLine(id, content);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+        return line;
+    }
+
+    public HudLine addLineAsDummy(String id, Text content, String groupId) {
+        HudLine line = new HudLine(id, content, groupId);
+        line.setDummy(true);
+        lines.add(line);
+        recalculateDimensions();
+        return line;
     }
 
     // Group management with enhanced features
@@ -156,7 +253,7 @@ public abstract class MultiLineHudElement extends HudElement {
         }
     }
 
-    // Existing methods remain the same...
+    // Line management methods
     public void removeLine(String id) {
         lines.removeIf(line -> line.getId().equals(id));
         recalculateDimensions();
@@ -205,10 +302,13 @@ public abstract class MultiLineHudElement extends HudElement {
         }
     }
 
+    // Updated getVisibleLines with isDummy filtering
     public List<HudLine> getVisibleLines() {
-        // Group lines by their group ID
+        boolean isDummyMode = shouldRenderDummy();
+
+        // Group lines by their group ID and filter by dummy status
         Map<String, List<HudLine>> groupedLines = lines.stream()
-                                                       .filter(this::isLineVisible)
+                                                       .filter(line -> isLineVisible(line, isDummyMode))
                                                        .collect(Collectors.groupingBy(
                                                                line -> line.hasGroup() ? line.getGroupId() : "ungrouped"
                                                        ));
@@ -247,15 +347,19 @@ public abstract class MultiLineHudElement extends HudElement {
         return sortedLines;
     }
 
-    private boolean isLineVisible(HudLine line) {
+    private boolean isLineVisible(HudLine line, boolean isDummyMode) {
         if (!line.shouldShow()) return false;
+
+        // In dummy mode: only show dummy lines
+        // In normal mode: only show non-dummy lines
+        if (isDummyMode && !line.isDummy()) return false;
+        if (!isDummyMode && line.isDummy()) return false;
 
         if (line.hasGroup()) {
             HudGroup group = groups.get(line.getGroupId());
             if (group == null || !group.isEnabled()) return false;
         }
 
-        // Don't show clickable lines when not in a container screen (unless in edit mode)
         MinecraftClient client = MinecraftClient.getInstance();
         boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
                 client.currentScreen instanceof EditHudElementScreen;
@@ -292,31 +396,38 @@ public abstract class MultiLineHudElement extends HudElement {
                 totalHeight = titleHeight;
             }
         } else {
-            // Calculate dimensions considering alignment
+            // Calculate dimensions considering alignment and spacers
+            int totalLineHeight = 0;
             for (HudLine line : visibleLines) {
-                if (line.getContent() != null) {
-                    int lineWidth;
+                if (line.isSpacer()) {
+                    HudSpacerLine spacer = (HudSpacerLine) line;
+                    totalLineHeight += spacer.getSpacerHeight() * textRenderer.fontHeight;
+                } else {
+                    totalLineHeight += textRenderer.fontHeight + VERTICAL_SPACING;
 
-                    if (line instanceof HudAmountLine amountLine && line.hasGroup()) {
-                        HudGroup group = groups.get(line.getGroupId());
-                        if (group != null && group.isAlignAmounts()) {
-                            // Calculate aligned width
-                            int nameWidth = group.getMaxItemNameWidth(visibleLines);
-                            int amountWidth = textRenderer.getWidth(" x" + HudAmountLine.formatAmount(amountLine.getAmount()));
-                            lineWidth = nameWidth + amountWidth + 10;
+                    if (line.getContent() != null) {
+                        int lineWidth;
+
+                        if (line instanceof HudAmountLine amountLine && line.hasGroup()) {
+                            HudGroup group = groups.get(line.getGroupId());
+                            if (group != null && group.isAlignAmounts()) {
+                                // Calculate aligned width
+                                int nameWidth = group.getMaxItemNameWidth(visibleLines);
+                                int amountWidth = textRenderer.getWidth(" x" + HudAmountLine.formatAmount(amountLine.getAmount()));
+                                lineWidth = nameWidth + amountWidth + 10;
+                            } else {
+                                lineWidth = textRenderer.getWidth(line.getContent());
+                            }
                         } else {
                             lineWidth = textRenderer.getWidth(line.getContent());
                         }
-                    } else {
-                        lineWidth = textRenderer.getWidth(line.getContent());
-                    }
 
-                    maxWidth = Math.max(maxWidth, lineWidth);
+                        maxWidth = Math.max(maxWidth, lineWidth);
+                    }
                 }
             }
 
-            totalHeight = titleHeight + visibleLines.size() * textRenderer.fontHeight +
-                    (visibleLines.size() - 1) * VERTICAL_SPACING;
+            totalHeight = titleHeight + totalLineHeight - VERTICAL_SPACING; // Remove extra spacing from last line
         }
 
         maxWidth += HORIZONTAL_SPACING * 2;
@@ -337,7 +448,7 @@ public abstract class MultiLineHudElement extends HudElement {
             matrices.push();
             matrices.scale(title.getScale(), title.getScale(), 1.0f);
 
-            if (title.hasShadow()) {
+            if (title.isShadow()) {
                 context.drawTextWithShadow(textRenderer, title.getText(),
                         (int) (HORIZONTAL_SPACING / title.getScale()),
                         (int) (yOffset / title.getScale()),
@@ -355,6 +466,13 @@ public abstract class MultiLineHudElement extends HudElement {
 
         // Render lines
         for (HudLine line : visibleLines) {
+            if (line.isSpacer()) {
+                HudSpacerLine spacer = (HudSpacerLine) line;
+                // Just add the spacer height to yOffset, don't render anything
+                yOffset += spacer.getSpacerHeight() * textRenderer.fontHeight;
+                continue;
+            }
+
             if (line.getContent() != null) {
                 LineRenderInfo renderInfo = new LineRenderInfo(line, HORIZONTAL_SPACING, yOffset,
                         textRenderer.getWidth(line.getContent()), textRenderer.fontHeight);
@@ -458,7 +576,7 @@ public abstract class MultiLineHudElement extends HudElement {
             titleObj.addProperty("text", title.getText());
             titleObj.addProperty("color", title.getColor());
             titleObj.addProperty("scale", title.getScale());
-            titleObj.addProperty("shadow", title.hasShadow());
+            titleObj.addProperty("shadow", title.isShadow());
             root.add("title", titleObj);
         }
 
@@ -472,6 +590,7 @@ public abstract class MultiLineHudElement extends HudElement {
             lineObj.addProperty("type", line.getClass().getSimpleName());
             lineObj.addProperty("clickable", line.isClickable());
             lineObj.addProperty("hoverable", line.isHoverable());
+            lineObj.addProperty("isDummy", line.isDummy());
 
             if (line.hasGroup()) {
                 lineObj.addProperty("groupId", line.getGroupId());
@@ -530,6 +649,9 @@ public abstract class MultiLineHudElement extends HudElement {
                     }
                     if (lineObj.has("groupId")) {
                         line.setGroupId(lineObj.get("groupId").getAsString());
+                    }
+                    if (lineObj.has("isDummy")) {
+                        line.setDummy(lineObj.get("isDummy").getAsBoolean());
                     }
                 }
             }
@@ -607,11 +729,25 @@ public abstract class MultiLineHudElement extends HudElement {
         }
     }
 
+    public void setLineDummy(String id, boolean dummy) {
+        for (HudLine line : lines) {
+            if (line.getId().equals(id)) {
+                line.setDummy(dummy);
+                recalculateDimensions();
+                return;
+            }
+        }
+    }
+
     // Inner classes
     public static class HudTitle {
+        @Getter
         private final String text;
+        @Getter
         private final int color;
+        @Getter
         private final float scale;
+        @Getter()
         private final boolean shadow;
 
         public HudTitle(String text, int color, float scale) {
@@ -625,10 +761,6 @@ public abstract class MultiLineHudElement extends HudElement {
             this.shadow = shadow;
         }
 
-        public String getText() { return text; }
-        public int getColor() { return color; }
-        public float getScale() { return scale; }
-        public boolean hasShadow() { return shadow; }
     }
 
     private static class LineRenderInfo {

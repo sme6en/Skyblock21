@@ -65,11 +65,12 @@ public class ColorUtil {
     }
 
     public static int getIntFromColor(Color color) {
-        int red = color.getRed();
-        int green = color.getGreen();
-        int blue = color.getBlue();
+        int Alpha = ((color.getAlpha()) << 24) & 0xFF000000;
+        int R = ((color.getRed()) << 16) & 0x00FF0000;
+        int G = ((color.getGreen()) << 8) & 0x0000FF00;
+        int B = (color.getBlue()) & 0x000000FF;
 
-        return (red << 16) | (green << 8) | blue;
+        return Alpha | R | G | B;
     }
 
     public static int applyAlpha(int color, int alpha) {
@@ -83,6 +84,23 @@ public class ColorUtil {
     public static int applyAlpha(int color, float alpha) {
         int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255)));
         return (color & 0x00FFFFFF) | (alphaInt << 24);
+    }
+
+    public static Color applyAlpha(Color color, int alpha) {
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+
+        return new Color(red, green, blue, alpha);
+    }
+
+    public static Color applyAlpha(Color color, float alpha) {
+        int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255)));
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+
+        return new Color(red, green, blue, alphaInt);
     }
 
     public static int interpolateColor(int color1, int color2, float factor) {
@@ -145,6 +163,32 @@ public class ColorUtil {
         blue = Math.max(0, (int) (blue * (1.0f - factor)));
 
         return argb(alpha, red, green, blue);
+    }
+
+    public static Color lighten(Color color, float factor) {
+        int alpha = color.getAlpha();
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+
+        red = Math.min(255, (int) (red + (255 - red) * factor));
+        green = Math.min(255, (int) (green + (255 - green) * factor));
+        blue = Math.min(255, (int) (blue + (255 - blue) * factor));
+
+        return new Color(red, green, blue, alpha);
+    }
+
+    public static Color darken(Color color, float factor) {
+        int alpha = color.getAlpha();
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+
+        red = Math.max(0, (int) (red * (1.0f - factor)));
+        green = Math.max(0, (int) (green * (1.0f - factor)));
+        blue = Math.max(0, (int) (blue * (1.0f - factor)));
+
+        return new Color(red, green, blue, alpha);
     }
 
 }

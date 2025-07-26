@@ -1,40 +1,57 @@
 package com.skyblock21.gui;
 
 import com.skyblock21.util.ColorUtil;
+import lombok.Getter;
 import me.x150.renderer.fontng.FTLibrary;
 import me.x150.renderer.fontng.Font;
 import me.x150.renderer.fontng.FontScalingRegistry;
 import net.minecraft.client.font.TextRenderer;
 
+import java.awt.*;
+
 public enum Theme {
     WHITE(
-            0x1d53bc, // primary
-            0x5ba7f8, // secondary
-            0xFFFFFFFF, // background
-            0xd5ced0, // secondaryBackground
-            0xf1f5f9,
-            0x1d2026,
-            "roboto"
+            new Color(20, 83, 188, 255), // primary
+            new Color(91, 167, 248, 255), // secondary
+            new Color(255,255,255,255), // background
+            new Color(213, 206, 208, 255), // secondaryBackground
+            new Color(241, 245, 249, 255),
+            new Color(29,32,38, 255),
+            "roboto",
+            12f
     ),
     DARK(
-            0x5ba7f8, // primary
-            0x1d53bc, // secondary
-            0x1d2026, // background
-            0x17191e, // secondaryBackground
-            0x64748b,
-            0xFFFFFFFF, // text
-            "roboto"
+            new Color(91, 167, 248, 255), // primary
+            new Color(20, 83, 188, 255), // secondary
+            new Color(29,32,38, 255), // background
+            new Color(23, 25,30, 255), // secondaryBackground
+            new Color(100, 116, 139, 255),
+            new Color(255,255,255,255), // text
+            "roboto",
+            12f
     );
 
-    public final int primary;
-    public final int secondary;
-    public final int background;
-    public final int secondaryBackground;
-    public final int border;
-    public final int text;
-    public final String font;
+    @Getter
+    public final Color primary;
+    @Getter
+    public final Color secondary;
+    @Getter
+    public final Color background;
+    @Getter
+    private final Color secondaryBackground;
+    @Getter
+    private final Color border;
+    public final Color text;
+    @Getter
+    private final String font;
 
-    Theme(int primary, int secondary, int background, int secondaryBackground, int border, int text, String themeFont) {
+    @Getter
+    private final float rounding;
+
+    @Getter
+    private final TextRenderer textRenderer;
+
+    Theme(Color primary, Color secondary, Color background, Color secondaryBackground, Color border, Color text, String themeFont, float rounding) {
         this.primary = primary;
         this.secondary = secondary;
         this.background = background;
@@ -42,41 +59,40 @@ public enum Theme {
         this.border = border;
         this.text = text;
         this.font = themeFont;
+        this.textRenderer = FontManager.getFont(themeFont, 9);
+        this.rounding = rounding;
     }
 
-    public int getPrimaryHover() {
+    public Color getPrimaryHover() {
         return ColorUtil.lighten(primary, 0.1f);
     }
 
-    public int getPrimaryActive() {
+    public Color getPrimaryActive() {
         return ColorUtil.darken(primary, 0.1f);
     }
 
-    public int getButtonHover() {
+    public Color getSecondaryHover() {
+        return ColorUtil.lighten(secondary, 0.1f);
+    }
+
+    public Color getSecondaryActive() {
+        return ColorUtil.darken(secondary, 0.1f);
+    }
+
+    public Color getButtonHover() {
         return ColorUtil.darken(secondaryBackground, 0.1f);
     }
 
-    public int getButtonActive() {
+    public Color getButtonActive() {
         return ColorUtil.lighten(secondaryBackground, 0.1f);
     }
 
-    public int getTextSecondary() {
+    public Color getTextSecondary() {
         return ColorUtil.applyAlpha(text, 0.7f);
     }
 
-    public int getBorder() {
-        return this.border;
-    }
-
-    public int getBorderHover() {
+    public Color getBorderHover() {
         return ColorUtil.lighten(getBorder(), 0.2f);
     }
 
-    public String getFont() {
-        return this.font;
-    }
-
-    public TextRenderer getTextRenderer() {
-        return FontManager.getFont(this.font, 11);
-    }
 }

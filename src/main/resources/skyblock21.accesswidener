@@ -1,0 +1,21 @@
+accessWidener v1 named
+
+extendable class net/minecraft/client/gui/widget/TextFieldWidget
+extendable method net/minecraft/client/gui/widget/TextFieldWidget onChanged (Ljava/lang/String;)V
+accessible field net/minecraft/client/gui/widget/TextFieldWidget placeholder Lnet/minecraft/text/Text;
+accessible field net/minecraft/client/gui/widget/TextFieldWidget editable Z
+accessible field net/minecraft/client/gui/widget/TextFieldWidget editableColor I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget uneditableColor I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget firstCharacterIndex I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget lastSwitchFocusTime J
+accessible field net/minecraft/client/gui/widget/TextFieldWidget selectionEnd I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget renderTextProvider Ljava/util/function/BiFunction;
+accessible field net/minecraft/client/gui/widget/TextFieldWidget text Lnet/minecraft/text/Text;
+accessible method net/minecraft/client/gui/widget/TextFieldWidget getMaxLength ()I
+accessible method net/minecraft/client/gui/widget/TextFieldWidget drawSelectionHighlight (Lnet/minecraft/client/gui/DrawContext;IIII)V
+accessible field net/minecraft/client/gui/widget/TextFieldWidget selectionStart I
+
+accessible field net/minecraft/client/gui/widget/CheckboxWidget checked Z
+
+accessible field io/wispforest/owo/ui/component/LabelComponent textRenderer Lnet/minecraft/client/font/TextRenderer;
+mutable field io/wispforest/owo/ui/component/LabelComponent textRenderer Lnet/minecraft/client/font/TextRenderer;

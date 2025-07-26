@@ -20,11 +20,6 @@ public class FontManager {
     private static final ResourceManager RESOURCE_MANAGER = MC.getResourceManager();
     private static final TextureManager TEXTURE_MANAGER = MC.getTextureManager();
 
-
-    public static void cacheCommon() {
-        getFont("roboto", 11);
-    }
-
     public static TextRenderer getFont(final String fontName, final int size) {
         final String key = (fontName + size).toLowerCase();
 

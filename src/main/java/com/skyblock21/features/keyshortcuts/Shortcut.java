@@ -11,7 +11,7 @@ public class Shortcut {
     @SerialEntry
     public String command;
     @SerialEntry
-    public int keyCode;
+    public int keyCode = -1;
     @SerialEntry
     public Set<Modifier> modifiers;
     @SerialEntry
@@ -19,7 +19,6 @@ public class Shortcut {
 
     public Shortcut() {
         this.command = "";
-        this.keyCode = -1; // Default to an invalid key code
         this.modifiers = Set.of(); // Default to no modifiers
         this.enabled = true; // Default to enabled
     }

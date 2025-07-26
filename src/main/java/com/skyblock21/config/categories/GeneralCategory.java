@@ -125,6 +125,15 @@ public class GeneralCategory {
                                                                                                             newValue -> config.general.compactStarMode = newValue)
                                                                                                     .controller(Skyblock21ConfigManager::createEnumCyclingListController)
                                                                                                     .build())
-                                                                          .build()).build();
+                                                                          .build()).option(Option.<Boolean>createBuilder()
+                                                                                                 .name(literal("Left handed mode"))
+                                                                                                 .description(OptionDescription.of(literal("Changes the main arm to left hand, useful for left-handed players")))
+                                                                                                 .binding(defaults.general.leftHandedMode,
+                                                                                                         () -> config.general.leftHandedMode,
+                                                                                                         newValue -> config.general.leftHandedMode = newValue)
+                                                                                                 .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                                                                              .yesNoFormatter()
+                                                                                                                                              .coloured(true))
+                                                                                                 .build()).build();
     }
 }

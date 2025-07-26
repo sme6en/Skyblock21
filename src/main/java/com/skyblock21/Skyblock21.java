@@ -13,7 +13,7 @@ import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
-import com.skyblock21.features.itemcustomization.ItemCustomizationScreenV2;
+import com.skyblock21.features.itemcustomization.ItemCustomizationScreen;
 import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
@@ -21,6 +21,7 @@ import com.skyblock21.features.kuudra.Kuudra;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
+import com.skyblock21.tracking.TrackerManager;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.TickScheduler;
 import com.skyblock21.util.TickSchedulerHelper;
@@ -82,7 +83,7 @@ public class Skyblock21 implements ClientModInitializer {
                 .then(literal("keys").executes((ctx) -> {
                     client
                                    .send(() -> client
-                                                              .setScreen(new KeyShortcutsScreen(client.currentScreen)));
+                                                              .setScreen(new KeyShortcutsScreen()));
                     return 1;
                 }))
                 .then(literal("aliases").executes((ctx) -> {
@@ -112,11 +113,15 @@ public class Skyblock21 implements ClientModInitializer {
 
                     client
                                    .send(() -> client
-                                           .setScreen(new ItemCustomizationScreenV2(heldItem)));
-//                                                              .setScreen(new ItemCustomizationScreen(heldItem)));
+                                           .setScreen(new ItemCustomizationScreen(heldItem)));
 
                     return 1;
-                }));
+                })).then(literal("resetcustomizations")).executes((ctx) -> {
+                    PersistentData.get().itemCustomizations.clear();
+                    PersistentData.save();
+                    TextUtils.addMessage("§aAll item customizations reset", true, false);
+                    return 1;
+                });
     }
 
     public void tick(MinecraftClient client) {
@@ -126,8 +131,6 @@ public class Skyblock21 implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         AutoUpdater.initialize();
-//        Fonts.loadFonts();
-//        FontManager.cacheCommon();
 
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         TickScheduler.getInstance();
@@ -175,6 +178,7 @@ public class Skyblock21 implements ClientModInitializer {
 
         SkyblockEvents.JOIN.register(() -> {
             TickSchedulerHelper.runAfterSeconds(() -> {
+                if (client.player == null || client.world == null) return;
                 Text message = Text.literal(TextUtils.PREFIX + " §fThis mod is actively looking to ")
                                    .append(Text.literal("\n§fadd new features!  §9§l[SUGGEST NEW FEATURES]")
                                                .styled(style -> style.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discord.gg/NMNSwQH6dr")))
@@ -190,7 +194,10 @@ public class Skyblock21 implements ClientModInitializer {
             PersistentData.save();
         }));
 
+        SkyblockEvents.LEAVE.register(TrackerManager::saveAllTrackers);
+
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            TrackerManager.shutdown();
             Skyblock21ConfigManager.save();
             PersistentData.save();
         });

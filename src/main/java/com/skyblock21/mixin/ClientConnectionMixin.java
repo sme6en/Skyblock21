@@ -2,12 +2,17 @@ package com.skyblock21.mixin;
 
 import com.skyblock21.events.BlockEvents;
 import com.skyblock21.events.PacketEvents;
+import com.skyblock21.tracking.BaseTracker;
+import com.skyblock21.tracking.TrackerManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,5 +36,17 @@ public class ClientConnectionMixin {
         if (!result) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "disconnect(Lnet/minecraft/text/Text;)V", at = @At("HEAD"))
+    private void onDisconnect(Text disconnectReason, CallbackInfo ci) {
+        // Save all tracker data when disconnecting from server
+        saveAllTrackers();
+    }
+
+    @Unique
+    private void saveAllTrackers() {
+        TrackerManager.getAllTrackers().forEach(BaseTracker::saveAndClose);
+
     }
 }

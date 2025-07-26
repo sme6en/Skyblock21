@@ -1,10 +1,12 @@
 package com.skyblock21.hud;
 
+import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 import java.text.DecimalFormat;
 
+@Getter
 public class HudAmountLine extends HudLine {
     private String itemName;
     private long amount;
@@ -32,6 +34,24 @@ public class HudAmountLine extends HudLine {
         this.customValue = 0;
     }
 
+    public static HudAmountLine createDummy(String id, String itemName, long amount) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount);
+        line.setDummy(true);
+        return line;
+    }
+
+    public static HudAmountLine createDummy(String id, String itemName, long amount, String groupId) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount, groupId);
+        line.setDummy(true);
+        return line;
+    }
+
+    public static HudAmountLine createDummy(String id, String itemName, long amount, String groupId, int order) {
+        HudAmountLine line = new HudAmountLine(id, itemName, amount, groupId, order);
+        line.setDummy(true);
+        return line;
+    }
+
     public void updateAmount(long newAmount) {
         this.amount = newAmount;
         updateContent();
@@ -53,10 +73,6 @@ public class HudAmountLine extends HudLine {
     public static String formatAmount(long amount) {
         return NUMBER_FORMAT.format(amount);
     }
-
-    public String getItemName() { return itemName; }
-    public long getAmount() { return amount; }
-    public int getCustomValue() { return customValue; }
 
     @Override
     public int getSortValue() {

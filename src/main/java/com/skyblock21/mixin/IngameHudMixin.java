@@ -2,15 +2,23 @@ package com.skyblock21.mixin;
 
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.features.itemcustomization.ItemCustomization;
+import com.skyblock21.hud.HudManager;
+import com.skyblock21.util.Render2DUtil;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.awt.*;
 
 @Mixin(InGameHud.class)
 public class IngameHudMixin {

@@ -69,7 +69,7 @@ public class Skyblock21Screen extends Screen {
     }
 
     private void openKeybinds() {
-        this.client.setScreen(new KeyShortcutsScreen(this.client.currentScreen));
+        this.client.setScreen(new KeyShortcutsScreen());
     }
 
     private void openAliases() {

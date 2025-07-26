@@ -54,6 +54,9 @@ public class Skyblock21Config {
             COMPACT,
             COMPACT_TILL_TEN // Compact items with their count
         }
+
+        @SerialEntry
+        public boolean leftHandedMode = false;
     }
 
     public static class Mining {

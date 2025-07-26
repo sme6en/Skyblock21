@@ -1,11 +1,10 @@
 package com.skyblock21.gui;
 
-public class ThemeManager {
-    private static Theme currentTheme = Theme.WHITE;
+import lombok.Getter;
 
-    public static Theme getCurrentTheme() {
-        return currentTheme;
-    }
+public class ThemeManager {
+    @Getter
+    private static Theme currentTheme = Theme.WHITE;
 
     public static void setTheme(Theme theme) {
         currentTheme = theme;

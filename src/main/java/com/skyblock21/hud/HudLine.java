@@ -1,122 +1,92 @@
 package com.skyblock21.hud;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.text.Text;
 
 public class HudLine {
+    // Getters
+    @Getter
     private final String id;
+    // Setters
+    @Getter
+    @Setter
     private Text content;
-    private boolean enabled;
+    @Getter
+    @Setter
     private String groupId;
-    private int order;
-    private boolean clickable;
-    private boolean hoverable;
+    @Getter
+    @Setter
+    private int order = 0;
+    @Getter
+    @Setter
+    private boolean enabled = true;
+    @Getter
+    @Setter
+    private boolean isDummy = false;
+
+    // Interaction properties
+    @Getter
+    private boolean clickable = false;
+    @Getter
+    private boolean hoverable = false;
     private Runnable clickAction;
+    @Getter
     private Text hoverText;
-    private boolean conditionalVisibility;
+    private Text[] multilineHoverText;
+
+    // Visibility control
+    @Getter
+    @Setter
     private ConditionalVisibilityProvider visibilityProvider;
 
     public HudLine(String id, Text content) {
         this.id = id;
         this.content = content;
-        this.enabled = true;
-        this.order = 0;
-        this.clickable = false;
-        this.hoverable = false;
-        this.conditionalVisibility = false;
     }
 
     public HudLine(String id, Text content, String groupId) {
         this.id = id;
         this.content = content;
-        this.enabled = true;
         this.groupId = groupId;
-        this.order = 0;
-        this.clickable = false;
-        this.hoverable = false;
-        this.conditionalVisibility = false;
     }
 
     public HudLine(String id, Text content, String groupId, int order) {
         this.id = id;
         this.content = content;
-        this.enabled = true;
         this.groupId = groupId;
         this.order = order;
-        this.clickable = false;
-        this.hoverable = false;
-        this.conditionalVisibility = false;
     }
 
-    // Getters and setters
-    public String getId() { return id; }
-    public Text getContent() { return content; }
-    public void setContent(Text content) { this.content = content; }
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
-    public String getGroupId() { return groupId; }
-    public void setGroupId(String groupId) { this.groupId = groupId; }
-    public int getOrder() { return order; }
-    public void setOrder(int order) { this.order = order; }
-
+    // Helper methods
     public boolean hasGroup() { return groupId != null && !groupId.isEmpty(); }
 
-    public int getSortValue() { return order; }
-    public int getDisplayWidth() { return 0; }
-
-    // Enhanced features
-    public boolean isClickable() { return clickable; }
-    public void setClickable(boolean clickable) { this.clickable = clickable; }
-
-    public boolean isHoverable() { return hoverable; }
-    public void setHoverable(boolean hoverable) { this.hoverable = hoverable; }
-
-    public Runnable getClickAction() { return clickAction; }
-    public void setClickAction(Runnable clickAction) {
-        this.clickAction = clickAction;
-        this.clickable = clickAction != null;
+    // Interaction methods
+    public void setClickAction(Runnable action) {
+        this.clickAction = action;
+        this.clickable = action != null;
     }
 
-    public Text getHoverText() { return hoverText; }
     public void setHoverText(Text hoverText) {
         this.hoverText = hoverText;
         this.hoverable = hoverText != null;
     }
 
-    // Convenience method for multiline hover text
     public void setMultilineHoverText(String... lines) {
-        if (lines == null || lines.length == 0) {
-            setHoverText((Text) null);
+        if (lines.length == 0) {
+            this.hoverText = null;
+            this.hoverable = false;
             return;
         }
 
-        String combinedText = String.join("\n", lines);
-        setHoverText(Text.literal(combinedText));
-    }
-
-    // Convenience method for multiline hover with formatting
-    public void setHoverTextFormatted(String... lines) {
-        if (lines == null || lines.length == 0) {
-            setHoverText((Text) null);
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
+        StringBuilder combined = new StringBuilder();
         for (int i = 0; i < lines.length; i++) {
-            if (i > 0) sb.append("\n");
-            sb.append(lines[i]);
+            combined.append(lines[i]);
+            if (i < lines.length - 1) {
+                combined.append("\n");
+            }
         }
-        setHoverText(Text.literal(sb.toString()));
-    }
-
-    public boolean hasConditionalVisibility() { return conditionalVisibility; }
-    public void setConditionalVisibility(boolean conditionalVisibility) {
-        this.conditionalVisibility = conditionalVisibility;
-    }
-
-    public ConditionalVisibilityProvider getVisibilityProvider() { return visibilityProvider; }
-    public void setVisibilityProvider(ConditionalVisibilityProvider visibilityProvider) {
-        this.visibilityProvider = visibilityProvider;
-        this.conditionalVisibility = visibilityProvider != null;
+        setHoverText(Text.literal(combined.toString()));
     }
 
     public void onClick() {
@@ -126,11 +96,20 @@ public class HudLine {
     }
 
     public boolean shouldShow() {
-        if (!enabled) return false;
-        if (conditionalVisibility && visibilityProvider != null) {
-            return visibilityProvider.shouldShow();
-        }
-        return true;
+        return enabled && (visibilityProvider == null || visibilityProvider.shouldShow());
+    }
+
+    public boolean isSpacer() {
+        return false;
+    }
+
+    // Sorting support for amount lines
+    public int getSortValue() {
+        return order;
+    }
+
+    public int getDisplayWidth() {
+        return content != null ? content.getString().length() : 0;
     }
 
     @FunctionalInterface

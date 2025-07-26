@@ -1,204 +1,762 @@
 package com.skyblock21.util;
 
-import net.minecraft.client.gl.RenderPipelines;
+import com.skyblock21.gui.Theme;
+import com.skyblock21.gui.ThemeManager;
+import com.skyblock21.util.render.RenderLayers;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import org.joml.Vector4f;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix4f;
 import net.minecraft.util.Identifier;
-import me.x150.renderer.render.ExtendedDrawContext;
-import me.x150.renderer.util.Color;
+import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
 
 public class Render2DUtil {
 
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
-
-    public static void drawRoundedRect(
-            DrawContext context,
-            int x,
-            int y,
-            int width,
-            int height,
-            Vector4f radius,
-            int color
-    ) {
-
-        ExtendedDrawContext.drawRoundedRect(
-                context,
-                x,
-                y,
-                width,
-                height,
-                radius,
-                new Color(ColorUtil.getColorFromInt(color))
-        );
+    /**
+     * Draws a textured quad onto the screen.
+     *
+     * @param drawContext Context.
+     * @param texture  Texture identifier to draw.
+     * @param size     Size and position of the quad to draw.
+     * @param color    Color to overlay on top of the quad.
+     */
+    public static void drawTexturedQuad(DrawContext drawContext, Identifier texture, Rectangle size, Color color) {
+        drawTexturedQuad(drawContext, texture, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), color);
     }
 
-    public static void drawRoundedRectOutline(DrawContext context, float x, float y, float width, float height, float radius, float lineWidth, int color) {
-        int ix = (int) x;
-        int iy = (int) y;
-        int iWidth = (int) width;
-        int iHeight = (int) height;
-        int iRadius = Math.min((int) radius, Math.min(iWidth, iHeight) / 2);
-        int iLineWidth = Math.max(1, (int) lineWidth);
+    /**
+     * Draws a textured quad onto the screen.
+     *
+     * @param drawContext Context
+     * @param texture
+     * @param x1       X position to draw the quad.
+     * @param y1       Y position to draw the quad.
+     * @param width    Width of the quad.
+     * @param height   Height of the quad.
+     * @param color    Color to overlay on top of the quad.
+     */
+    public static void drawTexturedQuad(DrawContext drawContext, Identifier texture, float x1, float y1, float width,
+                                        float height, Color color) {
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        int colorInt = ColorUtil.getIntFromColor(color);
 
-        if(iRadius <= 0) {
-            drawRectOutline(context, ix, iy, iWidth, iHeight, iLineWidth, color);
-            return;
+        float x2 = x1 + width;
+        float y2 = y1 + height;
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider
+                    .getBuffer(RenderLayers.TEXTURES_QUADS_GUI.apply(texture));
+            bufferBuilder.vertex(matrix4f, x1, y1, 0).color(colorInt).texture(0, 0);
+            bufferBuilder.vertex(matrix4f, x1, y2, 0).color(colorInt).texture(0, 1);
+            bufferBuilder.vertex(matrix4f, x2, y2, 0).color(colorInt).texture(1, 1);
+            bufferBuilder.vertex(matrix4f, x2, y1, 0).color(colorInt).texture(1, 0);
+        });
+    }
+
+    /**
+     * Draws a box on the screen.
+     *
+     * @param drawContext Context
+     * @param size     Size and position of the box to draw.
+     * @param color    Color of the box.
+     */
+    public static void drawBox(DrawContext drawContext, Rectangle size, Color color) {
+        drawBox(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), color);
+    }
+
+    /**
+     * Draws a filled box on the screen.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param width    Width of the box.
+     * @param height   Height of the box.
+     * @param color    Color of the box.
+     */
+    public static void drawBox(DrawContext drawContext, float x, float y, float width, float height, Color color) {
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.QUADS_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0).color(colorInt);
+        });
+
+    }
+
+    /**
+     * Draws a filled rounded box.
+     *
+     * @param drawContext Context
+     * @param size     Size and position of the rounded box.
+     * @param radius   Radius of the box corners.
+     * @param color    Color of the box.
+     */
+    public static void drawRoundedBox(DrawContext drawContext, Rectangle size, float radius, Color color) {
+        drawRoundedBox(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), radius, color);
+    }
+
+    /**
+     * Draws a filled rounded box.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param width    Width of the box.
+     * @param height   Height of the box.
+     * @param radius   Radius of the box corners.
+     * @param color    Color of the box.
+     */
+    public static void drawRoundedBox(DrawContext drawContext, float x, float y, float width, float height,
+                                      float radius, Color color) {
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.TRIS_GUI);
+            buildFilledArc(bufferBuilder, matrix4f, x + radius, y + radius, radius, 180.0f, 90.0f, color);
+            buildFilledArc(bufferBuilder, matrix4f, x + width - radius, y + radius, radius, 270.0f, 90.0f, color);
+            buildFilledArc(bufferBuilder, matrix4f, x + width - radius, y + height - radius, radius, 0.0f, 90.0f,
+                    color);
+            buildFilledArc(bufferBuilder, matrix4f, x + radius, y + height - radius, radius, 90.0f, 90.0f, color);
+
+            // |---
+            bufferBuilder.vertex(matrix4f, x + radius, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(colorInt);
+
+            // ---|
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(colorInt);
+
+            // _||
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(colorInt);
+
+            // |||
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(colorInt);
+
+            /// __|
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+
+            // |__
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(colorInt);
+
+            // |||
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(colorInt);
+
+            /// ||-
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+
+            /// |-/
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+
+            /// /_|
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(colorInt);
+        });
+    }
+
+    /**
+     * Draws a filled circle.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param radius   Radius of the circle.
+     * @param color    Color of the box.
+     */
+    public static void drawCircle(DrawContext drawContext, float x, float y, float radius, Color color) {
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.TRIS_GUI);
+            double roundedInterval = (360.0f / 30.0f);
+
+            for (int i = 0; i < 30; i++) {
+                double angle = Math.toRadians(0 + (i * roundedInterval));
+                double angle2 = Math.toRadians(0 + ((i + 1) * roundedInterval));
+                float radiusX1 = (float) (Math.cos(angle) * radius);
+                float radiusY1 = (float) Math.sin(angle) * radius;
+                float radiusX2 = (float) Math.cos(angle2) * radius;
+                float radiusY2 = (float) Math.sin(angle2) * radius;
+
+                bufferBuilder.vertex(matrix4f, x, y, 0).color(colorInt);
+                bufferBuilder.vertex(matrix4f, x + radiusX1, y + radiusY1, 0).color(colorInt);
+                bufferBuilder.vertex(matrix4f, x + radiusX2, y + radiusY2, 0).color(colorInt);
+            }
+        });
+    }
+
+    /**
+     * Draws blurred rounded box onto the screen.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param width    Width of the box.
+     * @param height   Height of the box.
+     * @param radius   Radius of the corners of the box.
+     * @param color    Color of the box.
+     */
+    public static void drawTranslucentBlurredRoundedBox(DrawContext drawContext, float x, float y, float width,
+                                                        float height, float radius, Color color) {
+        for (int i = 0; i < 5; i++) {
+            float r = color.getRed();
+            float g = color.getGreen();
+            float b = color.getBlue();
+            float alpha = color.getAlpha() * (1.0f / (i + 1)); // Adjust alpha for each blur layer
+
+            Color newColor = new Color(r, g, b, alpha);
+            drawRoundedBox(drawContext, x - i, y - i, width + 2 * i, height + 2 * i, radius + i, newColor);
         }
 
-        context.fill(ix + iRadius, iy, ix + iWidth - iRadius, iy + iLineWidth, color);
-        context.fill(ix + iRadius, iy + iHeight - iLineWidth, ix + iWidth - iRadius, iy + iHeight, color);
-        context.fill(ix, iy + iRadius, ix + iLineWidth, iy + iHeight - iRadius, color);
-        context.fill(ix + iWidth - iLineWidth, iy + iRadius, ix + iWidth, iy + iHeight - iRadius, color);
-
-        drawCornerOutline(context, ix, iy, iRadius, iLineWidth, color, CornerType.TOP_LEFT);
-        drawCornerOutline(context, ix + iWidth - iRadius, iy, iRadius, iLineWidth, color, CornerType.TOP_RIGHT);
-        drawCornerOutline(context, ix + iWidth - iRadius, iy + iHeight - iRadius, iRadius, iLineWidth, color, CornerType.BOTTOM_RIGHT);
-        drawCornerOutline(context, ix, iy + iHeight - iRadius, iRadius, iLineWidth, color, CornerType.BOTTOM_LEFT);
+        // Draw the main rounded box
+        drawRoundedBox(drawContext, x, y, width, height, radius, color);
     }
 
-    private static void drawCorner(DrawContext context, int x, int y, int radius, int color, CornerType corner) {
-        int baseAlpha = (color >> 24) & 0xFF;
-        int red = (color >> 16) & 0xFF;
-        int green = (color >> 8) & 0xFF;
-        int blue = color & 0xFF;
+    /**
+     * Draws a filled AND outlined box.
+     *
+     * @param drawContext        Context
+     * @param size            Size and position to draw the outlined box.
+     * @param outlineColor    Color of the outline of the box.
+     * @param backgroundColor Color of the fill.
+     */
+    public static void drawOutlinedBox(DrawContext drawContext, Rectangle size, Color outlineColor,
+                                       Color backgroundColor) {
+        drawOutlinedBox(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), outlineColor,
+                backgroundColor);
+    }
 
-        for(int py = 0; py < radius; py++) {
-            for(int px = 0; px < radius; px++) {
-                float coverage = getPixelCoverage(px, py, radius, corner);
+    /**
+     * Draws a filled AND outlined box.
+     *
+     * @param drawContext        Context
+     * @param x               X position of the box.
+     * @param y               Y position of the box.
+     * @param width           Width of the box.
+     * @param height          Height of the box.
+     * @param outlineColor    Color of the outline of the box.
+     * @param backgroundColor Color of the fill.
+     */
+    public static void drawOutlinedBox(DrawContext drawContext, float x, float y, float width, float height,
+                                       Color outlineColor, Color backgroundColor) {
 
-                if(coverage > 0) {
-                    int alpha = (int) (baseAlpha * coverage);
-                    if(alpha > 0) {
-                        int pixelColor = (alpha << 24) | (red << 16) | (green << 8) | blue;
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        int backgroundColorInt = ColorUtil.getIntFromColor(backgroundColor);
+        int outlineColorInt = ColorUtil.getIntFromColor(outlineColor);
 
-                        int drawX = x + (corner == CornerType.TOP_RIGHT || corner == CornerType.BOTTOM_RIGHT ? radius - px - 1 : px);
-                        int drawY = y + (corner == CornerType.BOTTOM_LEFT || corner == CornerType.BOTTOM_RIGHT ? radius - py - 1 : py);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.QUADS_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0).color(backgroundColorInt);
+        });
 
-                        context.fill(drawX, drawY, drawX + 1, drawY + 1, pixelColor);
-                    }
-                }
-            }
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.LINES_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(outlineColorInt);
+        });
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+
+    }
+
+    /**
+     ** OUTLINES
+     **/
+
+    /**
+     * Draws the outline of a box.
+     *
+     * @param drawContext Context
+     * @param size     Size and position of the box.
+     * @param color    Color of the box.
+     */
+    public static void drawBoxOutline(DrawContext drawContext, Rectangle size, Color color) {
+        drawBoxOutline(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), color);
+    }
+
+    /**
+     * Draws the outline of a box.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param width    Width of the box.
+     * @param height   Height of the box.
+     * @param color    Color of the box.
+     */
+    public static void drawBoxOutline(DrawContext drawContext, float x, float y, float width, float height,
+                                      Color color) {
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.LINES_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y, 0).color(colorInt);
+
+        });
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    /**
+     * Draws the outline of a rounded box.
+     *
+     * @param drawContext Context
+     * @param size     Size of the rounded box.
+     * @param radius   Corner radius of the box outline.
+     * @param color    Color of the outline of the box.
+     */
+    public static void drawRoundedBoxOutline(DrawContext drawContext, Rectangle size, float radius, Color color) {
+        drawRoundedBoxOutline(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), radius, color);
+    }
+
+    /**
+     * Draws the outline of a rounded box.
+     *
+     * @param drawContext        Transformation matrix
+     * @param x               X position of the box.
+     * @param y               Y position of the box.
+     * @param width           Width of the box.
+     * @param height          Height of the box.
+     * @param radius          Corner radius of the box outline.
+     * @param outlineColor    Color of the outline of the box.
+     * @param backgroundColor Color of the background of the box.
+     */
+    public static void drawOutlinedRoundedBox(DrawContext drawContext, float x, float y, float width, float height,
+                                              float radius, Color outlineColor, Color backgroundColor) {
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        int backgroundColorInt = ColorUtil.getIntFromColor(backgroundColor);
+        int outlineColorInt = ColorUtil.getIntFromColor(outlineColor);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.TRIS_GUI);
+
+            //
+            buildFilledArc(bufferBuilder, matrix4f, x + width - radius, y + radius, radius, 270.0f, 90.0f,
+                    backgroundColor);
+            buildFilledArc(bufferBuilder, matrix4f, x + width - radius, y + height - radius, radius, 0.0f, 90.0f,
+                    backgroundColor);
+            buildFilledArc(bufferBuilder, matrix4f, x + radius, y + height - radius, radius, 90.0f, 90.0f,
+                    backgroundColor);
+            buildFilledArc(bufferBuilder, matrix4f, x + radius, y + radius, radius, 180.0f, 90.0f, backgroundColor);
+
+            // |---
+            bufferBuilder.vertex(matrix4f, x + radius, y, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(backgroundColorInt);
+
+            // ---|
+
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(backgroundColorInt);
+
+            // _||
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(backgroundColorInt);
+
+            // |||
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(backgroundColorInt);
+
+            /// __|
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+
+            // |__
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(backgroundColorInt);
+
+            // |||
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(backgroundColorInt);
+
+            /// ||-
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+
+            /// |-/
+            bufferBuilder.vertex(matrix4f, x + radius, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+
+            /// /_|
+            bufferBuilder.vertex(matrix4f, x + radius, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height - radius, 0).color(backgroundColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + radius, 0).color(backgroundColorInt);
+
+            bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.LINES_GUI);
+            // Top Left Arc and Top
+            buildArc(bufferBuilder, matrix4f, x + radius, y + radius, radius, 180.0f, 90.0f, outlineColor);
+            bufferBuilder.vertex(matrix4f, x + radius, y, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(outlineColorInt);
+
+            // Top Right Arc and Right
+            buildArc(bufferBuilder, matrix4f, x + width - radius, y + radius, radius, 270.0f, 90.0f, outlineColor);
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height - radius, 0).color(outlineColorInt);
+
+            // Bottom Right
+            buildArc(bufferBuilder, matrix4f, x + width - radius, y + height - radius, radius, 0.0f, 90.0f,
+                    outlineColor);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height, 0).color(outlineColorInt);
+
+            // Bottom Left
+            buildArc(bufferBuilder, matrix4f, x + radius, y + height - radius, radius, 90.0f, 90.0f, outlineColor);
+            bufferBuilder.vertex(matrix4f, x, y + height - radius, 0).color(outlineColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(outlineColorInt);
+        });
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    /**
+     * Draws the outline of a rounded box.
+     *
+     * @param drawContext Context
+     * @param x        X position of the box.
+     * @param y        Y position of the box.
+     * @param width    Width of the box.
+     * @param height   Height of the box.
+     * @param radius   Corner radius of the box outline.
+     * @param color    Color of the outline of the box.
+     */
+    public static void drawRoundedBoxOutline(DrawContext drawContext, float x, float y, float width, float height,
+                                             float radius, Color color) {
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        int colorInt = ColorUtil.getIntFromColor(color);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.LINES_GUI);
+            // Top Left Arc and Top
+            buildArc(bufferBuilder, matrix4f, x + radius, y + radius, radius, 180.0f, 90.0f, color);
+            bufferBuilder.vertex(matrix4f, x + radius, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y, 0).color(colorInt);
+
+            // Top Right Arc and Right
+            buildArc(bufferBuilder, matrix4f, x + width - radius, y + radius, radius, 270.0f, 90.0f, color);
+            bufferBuilder.vertex(matrix4f, x + width, y + radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height - radius, 0).color(colorInt);
+
+            // Bottom Right
+            buildArc(bufferBuilder, matrix4f, x + width - radius, y + height - radius, radius, 0.0f, 90.0f, color);
+            bufferBuilder.vertex(matrix4f, x + width - radius, y + height, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x + radius, y + height, 0).color(colorInt);
+
+            // Bottom Left
+            buildArc(bufferBuilder, matrix4f, x + radius, y + height - radius, radius, 90.0f, 90.0f, color);
+            bufferBuilder.vertex(matrix4f, x, y + height - radius, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x, y + radius, 0).color(colorInt);
+        });
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    /**
+     * Draws a line from Point A to Point B
+     *
+     * @param drawContext Context
+     * @param x1       X position of the first line.
+     * @param y1       Y position of the first line.
+     * @param x2       X position of the second line.
+     * @param y2       Y position of the second line.
+     * @param color    Color to draw the line in.
+     */
+    public static void drawLine(DrawContext drawContext, float x1, float y1, float x2, float y2, Color color) {
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.LINES_GUI);
+            bufferBuilder.vertex(matrix4f, x1, y1, 0).color(colorInt);
+            bufferBuilder.vertex(matrix4f, x2, y2, 0).color(colorInt);
+        });
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    /**
+     ** GRADIENTS
+     **/
+
+    /**
+     * Draws a horizontal gradient within a box.
+     *
+     * @param drawContext   Context.
+     * @param size       Size and position of the gradient.
+     * @param startColor The start color of the gradient.
+     * @param endColor   The end color of the gradient.
+     */
+    public static void drawHorizontalGradient(DrawContext drawContext, Rectangle size, Color startColor,
+                                              Color endColor) {
+        drawHorizontalGradient(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), startColor,
+                endColor);
+    }
+
+    /**
+     * Draws a horizontal gradient within a box.
+     *
+     * @param drawContext   Context.
+     * @param x          X position of the gradient.
+     * @param y          Y position of the gradient.
+     * @param width      Width of the gradient.
+     * @param height     Height of the gradient.
+     * @param startColor The start color of the gradient.
+     * @param endColor   The end color of the gradient.
+     */
+    public static void drawHorizontalGradient(DrawContext drawContext, float x, float y, float width, float height,
+                                              Color startColor, Color endColor) {
+        int startColorInt = ColorUtil.getIntFromColor(startColor);
+        int endColorInt = ColorUtil.getIntFromColor(endColor);
+
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.QUADS_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0.0F).color(startColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0.0F).color(endColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0.0F).color(endColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0.0F).color(startColorInt);
+        });
+    }
+
+    /**
+     * Draws a vertical gradient within a box.
+     *
+     * @param drawContext   Context.
+     * @param size       Size and position of the gradient.
+     * @param startColor The start color of the gradient.
+     * @param endColor   The end color of the gradient.
+     */
+    public static void drawVerticalGradient(DrawContext drawContext, Rectangle size, Color startColor, Color endColor) {
+        drawVerticalGradient(drawContext, (float) size.getX(), (float) size.getY(), (float) size.getWidth(), (float) size.getHeight(), startColor,
+                endColor);
+    }
+
+    /**
+     * Draws a vertical gradient within a box.
+     *
+     * @param drawContext   Context.
+     * @param x          X position of the gradient.
+     * @param y          Y position of the gradient.
+     * @param width      Width of the gradient.
+     * @param height     Height of the gradient.
+     * @param startColor The start color of the gradient.
+     * @param endColor   The end color of the gradient.
+     */
+    public static void drawVerticalGradient(DrawContext drawContext, float x, float y, float width, float height,
+                                            Color startColor, Color endColor) {
+        MatrixStack matrixStack = drawContext.getMatrices();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+
+        int startColorInt = ColorUtil.getIntFromColor(startColor);
+        int endColorInt = ColorUtil.getIntFromColor(endColor);
+
+        drawContext.draw(vertexConsumerProvider -> {
+            VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(RenderLayers.QUADS_GUI);
+            bufferBuilder.vertex(matrix4f, x, y, 0.0F).color(startColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y, 0.0F).color(startColorInt);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, 0.0F).color(endColorInt);
+            bufferBuilder.vertex(matrix4f, x, y + height, 0.0F).color(endColorInt);
+        });
+    }
+
+    /**
+     * Draws a string at a certain position.
+     *
+     * @param drawContext Draw context.
+     * @param text        Text to draw on the screen.
+     * @param x           X position to draw the string.
+     * @param y           Y position to draw the string.
+     * @param color       Color to draw the string.
+     */
+    public static void drawString(DrawContext drawContext, String text, float x, float y, Color color) {
+        Theme theme = ThemeManager.getCurrentTheme();
+        MatrixStack matrixStack = drawContext.getMatrices();
+        matrixStack.push();
+        matrixStack.scale(2.0f, 2.0f, 1.0f);
+        matrixStack.translate(-x / 2, -y / 2, 0.0f);
+        drawContext.drawText(theme.getTextRenderer(), text, (int) x, (int) y, ColorUtil.getIntFromColor(color), false);
+        matrixStack.pop();
+    }
+
+    /**
+     * Draws a string at a certain position.
+     *
+     * @param drawContext Draw context.
+     * @param text        Text to draw on the screen.
+     * @param x           X position to draw the string.
+     * @param y           Y position to draw the string.
+     * @param color       Color (as int) to draw the string.
+     */
+    public static void drawString(DrawContext drawContext, String text, float x, float y, int color) {
+        Theme theme = ThemeManager.getCurrentTheme();
+        MatrixStack matrixStack = drawContext.getMatrices();
+        matrixStack.push();
+        matrixStack.scale(2.0f, 2.0f, 1.0f);
+        matrixStack.translate(-x / 2, -y / 2, 0.0f);
+        drawContext.drawText(theme.getTextRenderer(), text, (int) x, (int) y, color, false);
+        matrixStack.pop();
+    }
+
+    /**
+     * Draws a string at a certain position with a scale.
+     *
+     * @param drawContext Draw context.
+     * @param text        Text to draw on the screen.
+     * @param x           X position to draw the string.
+     * @param y           Y position to draw the string.
+     * @param color       Color to draw the string.
+     * @param scale       Scale to draw the string.
+     */
+    public static void drawStringWithScale(DrawContext drawContext, String text, float x, float y, Color color,
+                                           float scale) {
+        Theme theme = ThemeManager.getCurrentTheme();
+        MatrixStack matrixStack = drawContext.getMatrices();
+        matrixStack.push();
+        matrixStack.scale(scale, scale, 1.0f);
+        if (scale > 1.0f) {
+            matrixStack.translate(-x / scale, -y / scale, 0.0f);
+        } else {
+            matrixStack.translate((x / scale) - x, (y * scale) - y, 0.0f);
+        }
+        drawContext.drawText(theme.getTextRenderer(), text, (int) x, (int) y, ColorUtil.getIntFromColor(color), false);
+        matrixStack.pop();
+    }
+
+    /**
+     * Draws a string at a certain position with a scale.
+     *
+     * @param drawContext Draw context.
+     * @param text        Text to draw on the screen.
+     * @param x           X position to draw the string.
+     * @param y           Y position to draw the string.
+     * @param color       Color (as int) to draw the string.
+     * @param scale       Scale to draw the string.
+     */
+    public static void drawStringWithScale(DrawContext drawContext, String text, float x, float y, int color,
+                                           float scale) {
+        Theme theme = ThemeManager.getCurrentTheme();
+        MatrixStack matrixStack = drawContext.getMatrices();
+        matrixStack.push();
+        matrixStack.scale(scale, scale, 1.0f);
+        if (scale > 1.0f) {
+            matrixStack.translate(-x / scale, -y / scale, 0.0f);
+        } else {
+            matrixStack.translate((x / scale) - x, (y * scale) - y, 0.0f);
+        }
+        drawContext.drawText(theme.getTextRenderer(), text, (int) x, (int) y, color, false);
+        matrixStack.pop();
+    }
+
+    /**
+     * Uses a buffer builder to build a filled arc around a position and radius.
+     *
+     * @param bufferBuilder Buffer builder to build vertices with.
+     * @param matrix        Transformation matrix.
+     * @param x             X position to draw arc.
+     * @param y             Y position to draw arc.
+     * @param radius        Radius to draw arc.
+     * @param startAngle    Starting angle of the arc.
+     * @param sweepAngle    Sweep angle of the arc.
+     */
+    private static void buildFilledArc(VertexConsumer bufferBuilder, Matrix4f matrix, float x, float y, float radius,
+                                       float startAngle, float sweepAngle, Color color) {
+        double roundedInterval = (sweepAngle / radius);
+
+        int colorInt = ColorUtil.getIntFromColor(color);
+
+        for (int i = 0; i < radius; i++) {
+            double angle = Math.toRadians(startAngle + (i * roundedInterval));
+            double angle2 = Math.toRadians(startAngle + ((i + 1) * roundedInterval));
+            float radiusX1 = (float) (Math.cos(angle) * radius);
+            float radiusY1 = (float) (Math.sin(angle) * radius);
+            float radiusX2 = (float) (Math.cos(angle2) * radius);
+            float radiusY2 = (float) (Math.sin(angle2) * radius);
+
+            bufferBuilder.vertex(matrix, x, y, 0).color(colorInt);
+            bufferBuilder.vertex(matrix, x + radiusX1, y + radiusY1, 0).color(colorInt);
+            bufferBuilder.vertex(matrix, x + radiusX2, y + radiusY2, 0).color(colorInt);
         }
     }
 
-    private static void drawCornerOutline(DrawContext context, int x, int y, int radius, int lineWidth, int color, CornerType corner) {
-        int baseAlpha = (color >> 24) & 0xFF;
-        int red = (color >> 16) & 0xFF;
-        int green = (color >> 8) & 0xFF;
-        int blue = color & 0xFF;
+    /**
+     * Uses a buffer builder to build an arc around a position and radius.
+     *
+     * @param bufferBuilder Buffer builder to build vertices with.
+     * @param matrix        Transformation matrix.
+     * @param x             X position to draw arc.
+     * @param y             Y position to draw arc.
+     * @param radius        Radius to draw arc.
+     * @param startAngle    Starting angle of the arc.
+     * @param sweepAngle    Sweep angle of the arc.
+     */
+    private static void buildArc(VertexConsumer bufferBuilder, Matrix4f matrix, float x, float y, float radius,
+                                 float startAngle, float sweepAngle, Color color) {
+        float roundedInterval = (sweepAngle / radius);
 
-        for(int py = 0; py < radius; py++) {
-            for(int px = 0; px < radius; px++) {
-                float outerCoverage = getPixelCoverage(px, py, radius, corner);
-                float innerCoverage = getPixelCoverage(px, py, radius - lineWidth, corner);
-                float coverage = Math.max(0, outerCoverage - innerCoverage);
+        int colorInt = ColorUtil.getIntFromColor(color);
+        for (int i = 0; i < radius; i++) {
+            double angle = Math.toRadians(startAngle + (i * roundedInterval));
+            float radiusX1 = (float) (Math.cos(angle) * radius);
+            float radiusY1 = (float) Math.sin(angle) * radius;
 
-                if(coverage > 0) {
-                    int alpha = (int) (baseAlpha * coverage);
-                    if(alpha > 0) {
-                        int pixelColor = (alpha << 24) | (red << 16) | (green << 8) | blue;
-
-                        int drawX = x + (corner == CornerType.TOP_RIGHT || corner == CornerType.BOTTOM_RIGHT ? radius - px - 1 : px);
-                        int drawY = y + (corner == CornerType.BOTTOM_LEFT || corner == CornerType.BOTTOM_RIGHT ? radius - py - 1 : py);
-
-                        context.fill(drawX, drawY, drawX + 1, drawY + 1, pixelColor);
-                    }
-                }
-            }
+            bufferBuilder.vertex(matrix, x + radiusX1, y + radiusY1, 0).color(colorInt);
         }
-    }
-
-    private static float getPixelCoverage(int px, int py, float radius, CornerType corner) {
-        if(radius <= 0) return 0;
-
-        float centerX = radius - 0.5f;
-        float centerY = radius - 0.5f;
-
-        int samples = 0;
-        int inside = 0;
-
-        for(int sx = 0; sx < 4; sx++) {
-            for(int sy = 0; sy < 4; sy++) {
-                float sampleX = px + (sx + 0.5f) / 4.0f;
-                float sampleY = py + (sy + 0.5f) / 4.0f;
-
-                float dx = sampleX - centerX;
-                float dy = sampleY - centerY;
-                float dist = (float) Math.sqrt(dx * dx + dy * dy);
-
-                if(dist <= radius) {
-                    inside++;
-                }
-                samples++;
-            }
-        }
-
-        return (float) inside / samples;
-    }
-
-    private static void drawRectOutline(DrawContext context, int x, int y, int width, int height, int lineWidth, int color) {
-        context.fill(x, y, x + width, y + lineWidth, color);
-        context.fill(x, y + height - lineWidth, x + width, y + height, color);
-        context.fill(x, y, x + lineWidth, y + height, color);
-        context.fill(x + width - lineWidth, y, x + width, y + height, color);
-    }
-
-    public static void drawImage(
-            Identifier texture,
-            int posX,
-            int posY,
-            int renderWidth,
-            int renderHeight,
-            int imageWidth,
-            int imageHeight,
-            DrawContext context
-    ) {
-        context.drawTexture(
-                RenderLayer::getGuiTextured,
-                texture,
-                posX, posY,
-                0, 0,
-                renderWidth, renderHeight,
-                imageWidth, imageHeight
-        );
-    }
-
-    public static void drawRoundedRect(DrawContext context, int x, int y, int width, int height, Vector4f radius) {
-        drawRoundedRect(context, x, y, width, height, radius, 0xFFFFFFFF);
-    }
-
-    public static void drawRoundedRectOutline(DrawContext context, float x, float y, float width, float height, float radius, float lineWidth) {
-        drawRoundedRectOutline(context, x, y, width, height, radius, lineWidth, 0xFFFFFFFF);
-    }
-
-    public static void drawGradientRoundedRect(DrawContext context, int x, int y, int width, int height, Vector4f radius, int colorLeft, int colorRight) {
-        for (int i = 0; i < width; i++) {
-            float factor = (float) i / width;
-            int interpolatedColor = ColorUtil.interpolateColor(colorLeft, colorRight, factor);
-
-            Vector4f columnRadius = new Vector4f(0, 0, 0, 0);
-
-            if (i == 0) {
-                columnRadius.x = radius.x;
-                columnRadius.w = radius.w;
-            }
-            if (i == width - 1) {
-                columnRadius.y = radius.y;
-                columnRadius.z = radius.z;
-            }
-
-            drawRoundedRect(context, x + i, y, 1, height, columnRadius, interpolatedColor);
-        }
-    }
-
-    public static void drawRect(DrawContext context, float x, float y, float width, float height, int color) {
-        context.fill((int) x, (int) y, (int) (x + width), (int) (y + height), color);
-    }
-
-    private enum CornerType {
-        TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
     }
 
 }
