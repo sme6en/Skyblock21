@@ -23,7 +23,7 @@ public class HuntingTrackerElement extends TrackerHudElement {
         setTitle("§9§lHunting", 0xFFFFFF, 1.2f, true);
 
 
-        createGroup("stats", "Stats", 2, false);
+        createGroup("stats", "Stats", 3, false);
         addLine("hunting_exp", literal("§9Hunting XP: §f0 §8(0/hr)"), "stats");
         addLine("active_time", literal("§dActive Time: §f0s"), "stats");
         addModeDisplayLine();
@@ -33,7 +33,7 @@ public class HuntingTrackerElement extends TrackerHudElement {
 
         addSpacer("shard_spacer", 1);
 
-        createGroup("shards", "Shards", 1, true);
+        createGroup("shards", "Shards", 2, true);
         setGroupSorting("shards", SortType.AMOUNT, false);
 
         addDummyAmountLine("dummy_salt", "§dSalt", 5, "shards");
@@ -46,6 +46,8 @@ public class HuntingTrackerElement extends TrackerHudElement {
 
         addDisplayModeToggle();
         addResetButtons();
+
+        recalculateDimensions();
     }
 
     @Override

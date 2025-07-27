@@ -6,6 +6,8 @@ import com.skyblock21.gui.ThemeManager;
 import com.skyblock21.gui.components.*;
 import com.skyblock21.util.ItemUtils;
 import com.skyblock21.util.TextUtils;
+import com.skyblock21.util.TickSchedulerHelper;
+import com.skyblock21.util.Utils;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.ItemComponent;
@@ -64,6 +66,8 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
             {"&r", "Reset", "Reset formatting"}
     };
 
+    private static Animation animation;
+
     public ItemCustomizationScreen(ItemStack itemStack) {
         this.itemStack = itemStack;
         this.itemUuid = ItemUtils.getItemUUID(itemStack);
@@ -91,6 +95,12 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
+    public void init() {
+        super.init();
+        animation.forwards();
+    }
+
+    @Override
     protected void build(FlowLayout rootComponent) {
         ItemStack previewStack = createPreviewStack();
         Theme theme = ThemeManager.getCurrentTheme();
@@ -105,8 +115,10 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
 
         rootComponent.horizontalAlignment(HorizontalAlignment.CENTER).verticalAlignment(VerticalAlignment.CENTER);
 
-        FlowLayout container = (FlowLayout) Containers.horizontalFlow(Sizing.fill(), Sizing.fill())
+        FlowLayout container = (FlowLayout) Containers.horizontalFlow(Sizing.fixed(0), Sizing.fill())
                                                       .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
+        animation = container.horizontalSizing().animate(500, Easing.CUBIC, Sizing.fill());
+
         rootComponent.child(container);
 
         FlowLayout buttonsContainer = Containers.horizontalFlow(Sizing.content(), Sizing.content()).gap(6);
@@ -218,7 +230,14 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     private void reset() {
-        this.itemNameComponent.setText(itemStack.getCustomName() != null ? itemStack.getCustomName().getString() : "");
+        this.itemNameComponent.setText(itemStack.getCustomName() != null ? TextUtils.translateColorCodes(TextUtils.toLegacy(itemStack.getCustomName()), true) : "");
         this.itemIdComponent.setText(Registries.ITEM.getId(this.itemStack.getItem()).getPath());
     }
+
+    @Override
+    public void close() {
+        animation.backwards();
+        TickSchedulerHelper.runAfter(super::close, 10);
+    }
+
 }

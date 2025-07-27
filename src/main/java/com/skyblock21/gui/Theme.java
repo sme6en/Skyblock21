@@ -41,6 +41,7 @@ public enum Theme {
     private final Color secondaryBackground;
     @Getter
     private final Color border;
+    @Getter
     public final Color text;
     @Getter
     private final String font;

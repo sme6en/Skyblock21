@@ -61,7 +61,7 @@ public class RunicMobsHighlight {
             MatrixStack matrices = worldRenderContext.matrixStack();
 
 
-            Render3DUtil.renderEntityFilledBox(worldRenderContext, matrices, e.getValue(), cameraPos, ColorUtil.getIntFromColor(new Color(155, 0, 255, 255)), 0.3f);
+            Render3DUtil.renderEntityFilledBox(worldRenderContext, matrices, e.getValue(), cameraPos, ColorUtil.getIntFromColor(new Color(155, 0, 255, 255)), 0.7f, 0.3f);
         }
     }
 

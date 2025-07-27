@@ -84,8 +84,8 @@ public class HudManager {
         if (button != 0) return false;
 
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen) {
+        if (client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2) {
             return false;
         }
 
@@ -110,8 +110,8 @@ public class HudManager {
      */
     public static void handleMouseMove(double mouseX, double mouseY) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen) {
+        if (client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2) {
             return;
         }
 
@@ -157,20 +157,21 @@ public class HudManager {
      * Renders HUD elements (shared between normal and container rendering)
      */
     private static void renderHudElements(DrawContext drawContext) {
+        if (!Utils.isOnSkyblock()) return;
 
         Location location = Utils.getLocation();
         MatrixStack matrices = drawContext.getMatrices();
         float combinedScale = getCombinedScale();
 
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2;
 
         for (HudElement element : hudElements) {
             if (!element.isEnabled()) continue;
             if (!inEditMode) {
                 if (!element.isAllowedInLocation(location)) continue;
-                if (!Utils.isOnSkyblock()) return;
+                if (!element.shouldRender() && !(client.currentScreen instanceof HandledScreen<?>)) continue;
 
                 matrices.push();
                 float scaledX = element.getX() * combinedScale;
@@ -219,8 +220,8 @@ public class HudManager {
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Don't render if in edit screens
-        if (client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen) return;
+        if (client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2) return;
 
         // Skip if container is open (handled by container renderer)
         if (client.currentScreen instanceof HandledScreen<?>) return;

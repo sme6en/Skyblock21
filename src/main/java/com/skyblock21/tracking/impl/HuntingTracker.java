@@ -142,7 +142,7 @@ public class HuntingTracker extends BaseTracker {
 
         @Override
         public boolean shouldRender(BaseTracker tracker) {
-            return Skyblock21ConfigManager.get().hunting.huntingTracker;
+            return tracker.hasDataInCurrentMode();
         }
     }
 }

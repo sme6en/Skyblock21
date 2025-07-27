@@ -152,8 +152,8 @@ public abstract class MultiLineHudElement extends HudElement {
         line.setVisibilityProvider(() -> {
             MinecraftClient client = MinecraftClient.getInstance();
             return client.currentScreen instanceof HandledScreen<?> ||
-                    client.currentScreen instanceof EditGuiScreen ||
-                    client.currentScreen instanceof EditHudElementScreen;
+                    client.currentScreen instanceof EditGuiScreenV2 ||
+                    client.currentScreen instanceof EditHudElementScreenV2;
         });
         lines.add(line);
         recalculateDimensions();
@@ -306,7 +306,6 @@ public abstract class MultiLineHudElement extends HudElement {
     public List<HudLine> getVisibleLines() {
         boolean isDummyMode = shouldRenderDummy();
 
-        // Group lines by their group ID and filter by dummy status
         Map<String, List<HudLine>> groupedLines = lines.stream()
                                                        .filter(line -> isLineVisible(line, isDummyMode))
                                                        .collect(Collectors.groupingBy(
@@ -361,8 +360,8 @@ public abstract class MultiLineHudElement extends HudElement {
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2;
         boolean inContainerScreen = client.currentScreen instanceof HandledScreen<?>;
 
         if (line.isClickable() && (inEditMode || !inContainerScreen)) {
@@ -511,11 +510,10 @@ public abstract class MultiLineHudElement extends HudElement {
     @Override
     public boolean shouldRenderDummy() {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2;
 
-        return alwaysRenderDummy ||
-                (inEditMode && (!isEnabled() || !isAllowedInLocation(Utils.getLocation())));
+        return alwaysRenderDummy || inEditMode && isEnabled();
     }
 
     @Override

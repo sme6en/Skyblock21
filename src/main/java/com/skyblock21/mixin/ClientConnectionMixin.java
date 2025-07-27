@@ -47,6 +47,6 @@ public class ClientConnectionMixin {
     @Unique
     private void saveAllTrackers() {
         TrackerManager.getAllTrackers().forEach(BaseTracker::saveAndClose);
-
+        TrackerManager.getAllTrackers().forEach(BaseTracker::pauseTracker);
     }
 }

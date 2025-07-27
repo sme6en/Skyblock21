@@ -4,6 +4,7 @@ import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.gui.Theme;
 import com.skyblock21.gui.ThemeManager;
 import com.skyblock21.util.ColorUtil;
+import com.skyblock21.util.TickSchedulerHelper;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -31,6 +32,7 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
     private FlowLayout entriesContainer;
     private ShortcutEntry listeningEntry = null;
 
+    private static Animation animation;
 
     public KeyShortcutsScreen() {
         ThemeManager.setTheme(Theme.WHITE);
@@ -63,7 +65,11 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
                      .surface(Surface.blur(3, 10));
 
         // Main container
-        FlowLayout mainContainer = (FlowLayout) Containers.verticalFlow(Sizing.fill(85), Sizing.fill(90)).horizontalAlignment(HorizontalAlignment.CENTER);
+        FlowLayout mainContainer = (FlowLayout) Containers.verticalFlow(Sizing.fill(85), Sizing.fixed(0)).horizontalAlignment(HorizontalAlignment.CENTER);
+
+        animation = mainContainer.verticalSizing().animate(500, Easing.CUBIC, Sizing.fill(90));
+
+
         mainContainer.gap(10);
         rootComponent.child(mainContainer);
 
@@ -103,6 +109,12 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
         mainContainer.child(buttonsContainer);
 
         rebuildEntries();
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        animation.forwards();
     }
 
     private void rebuildEntries() {
@@ -288,7 +300,8 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
     public void close() {
-        saveAndClose();
+        animation.backwards();
+        TickSchedulerHelper.runAfter(this::saveAndClose, 10);
     }
 
     private static class ShortcutEntry {

@@ -18,9 +18,10 @@ import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
-import com.skyblock21.hud.EditGuiScreen;
+import com.skyblock21.hud.EditGuiScreenV2;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
+import com.skyblock21.tracking.BaseTracker;
 import com.skyblock21.tracking.TrackerManager;
 import com.skyblock21.util.*;
 import com.skyblock21.util.dev.AutoUpdater;
@@ -74,7 +75,7 @@ public class Skyblock21 implements ClientModInitializer {
                 .then(literal("gui").executes((ctx) -> {
                     client
                                    .send(() -> client
-                                                              .setScreen(new EditGuiScreen(client.currentScreen)));
+                                                              .setScreen(new EditGuiScreenV2(client.currentScreen)));
                     return 1;
                 }))
                 .then(literal("keys").executes((ctx) -> {
@@ -113,12 +114,7 @@ public class Skyblock21 implements ClientModInitializer {
                                            .setScreen(new ItemCustomizationScreen(heldItem)));
 
                     return 1;
-                })).then(literal("resetcustomizations")).executes((ctx) -> {
-                    PersistentData.get().itemCustomizations.clear();
-                    PersistentData.save();
-                    TextUtils.addMessage("§aAll item customizations reset", true, false);
-                    return 1;
-                });
+                }));
     }
 
     public void tick(MinecraftClient client) {
@@ -190,6 +186,7 @@ public class Skyblock21 implements ClientModInitializer {
 
         SkyblockEvents.LOCATION_CHANGE.register((location -> {
             PersistentData.save();
+            TrackerManager.getAllTrackers().forEach(BaseTracker::pauseTracker);
         }));
 
         SkyblockEvents.LEAVE.register(TrackerManager::saveAllTrackers);

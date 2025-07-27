@@ -76,5 +76,4 @@ public class Button extends ButtonComponent {
         this.icon = icon;
         return this;
     }
-
 }

@@ -28,7 +28,7 @@ public class TreeProgress {
     private static final Pattern TREE_PROGRESS_PATTERN = Pattern.compile("^(?:FIG|MANGROVE) TREE (\\d+)%");
 
     private static List<Entity> entityList = new ArrayList<>();
-    private static Entity currentEntity = null;
+    public static Entity currentEntity = null;
     private static boolean isMangrove = false;
 
     public static void init() {
@@ -96,4 +96,5 @@ public class TreeProgress {
         context.drawItem(new ItemStack(isMangrove ? Items.MANGROVE_WOOD : Items.STRIPPED_SPRUCE_LOG), x, y);
         context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, str[2], x + 16 + 2, y + 5, Color.GREEN.getRGB());
     }
+
 }

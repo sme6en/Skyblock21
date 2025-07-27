@@ -1,6 +1,7 @@
 package com.skyblock21.hud;
 
 import com.skyblock21.util.Location;
+import com.skyblock21.util.Render2DUtil;
 import com.skyblock21.util.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,8 +14,8 @@ import java.util.Set;
 
 public abstract class HudElement {
 
-    protected int HORIZONTAL_SPACING = 2;
-    protected int VERTICAL_SPACING = 2;
+    protected int HORIZONTAL_SPACING = 4;
+    protected int VERTICAL_SPACING = 4;
     @Getter
     private final String name;
     public boolean alwaysRenderDummy = false;
@@ -113,7 +114,7 @@ public abstract class HudElement {
     public void render(DrawContext context, int mouseX, int mouseY) {
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (client.currentScreen instanceof EditGuiScreen || client.currentScreen instanceof EditHudElementScreen) {
+        if (client.currentScreen instanceof EditGuiScreenV2 || client.currentScreen instanceof EditHudElementScreenV2) {
             renderBackground(context);
             renderElement(context);
         } else if (isAllowedInLocation(Utils.getLocation()) && isEnabled()) {
@@ -124,7 +125,8 @@ public abstract class HudElement {
 
     public void renderBackground(DrawContext context) {
         if (isBackgroundEnabled() && isEnabled()) {
-            context.fill(0, 0, getWidth(), getHeight(), new Color(0, 0, 0, ((int) (255 * backgroundOpacity) / 100)).getRGB());
+            Render2DUtil.drawRoundedBox(context, 0, 0, getWidth(), getHeight(), 2f, new Color(0, 0, 0, ((int) (255 * backgroundOpacity) / 100)));
+//            context.fill(0, 0, getWidth(), getHeight(), new Color(0, 0, 0, ((int) (255 * backgroundOpacity) / 100)).getRGB());
         }
     }
 
@@ -211,4 +213,7 @@ public abstract class HudElement {
 
     public abstract int getHeight();
 
+    public boolean shouldRender() {
+        return true;
+    }
 }

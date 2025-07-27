@@ -2,6 +2,7 @@ package com.skyblock21.gui.components;
 
 import com.skyblock21.gui.ThemeManager;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -57,6 +58,11 @@ public class Label extends LabelComponent {
         });
 
         matrices.pop();
+    }
+
+    public Label color(Color color) {
+        this.color.set(color);
+        return this;
     }
 
 }

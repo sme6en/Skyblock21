@@ -1,371 +1,286 @@
 package com.skyblock21.features.commandaliases;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.skyblock21.config.persistent.PersistentData;
-import com.skyblock21.mixin.CommandDispatcherMixin;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
+import com.skyblock21.gui.Theme;
+import com.skyblock21.gui.ThemeManager;
+import com.skyblock21.gui.components.*;
+import com.skyblock21.util.ColorUtil;
+import com.skyblock21.util.TickSchedulerHelper;
+import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
-import org.lwjgl.glfw.GLFW;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import static net.minecraft.text.Text.literal;
 
-public class CommandAliasesScreen extends Screen {
+public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private final List<AliasEntry> entries = new ArrayList<>();
-    private int scrollOffset = 0;
-    private final int entryHeight = 35;
-    private int maxVisibleEntries;
-    private final int listStartY = 100;
-    private int listEndY;
-    private int scrollbarX;
-    private final int scrollbarWidth = 8;
-    private boolean isDraggingScrollbar = false;
-    private int dragStartY = 0;
-    private int dragStartOffset = 0;
+    private FlowLayout entriesContainer;
+    private ScrollContainer<FlowLayout> scrollContainer;
+    private static Animation animation;
 
     public CommandAliasesScreen(Screen parent) {
-        super(literal("Command Aliases"));
         this.parent = parent;
+        ThemeManager.setTheme(Theme.WHITE);
+        loadAliases();
     }
 
     @Override
-    protected void init() {
-        int paddingX = this.width / 10;
-        int paddingY = this.height / 10;
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
+    }
 
-        this.listEndY = this.height - paddingY - 80;
-        this.scrollbarX = this.width - paddingX - scrollbarWidth - 10;
+    @Override
+    public void init() {
+        super.init();
+        animation.forwards();
+    }
 
-        int availableHeight = listEndY - listStartY;
-        this.maxVisibleEntries = Math.max(5, availableHeight / entryHeight);
+    @Override
+    protected void build(FlowLayout rootComponent) {
+        Theme theme = ThemeManager.getCurrentTheme();
 
+        rootComponent
+                .surface(Surface.blur(3, 10))
+                .horizontalAlignment(HorizontalAlignment.CENTER)
+                .verticalAlignment(VerticalAlignment.CENTER);
+
+        // Main container with animation
+        FlowLayout mainContainer = (FlowLayout) Containers.verticalFlow(Sizing.fill(85), Sizing.fixed(0))
+                                                          .horizontalAlignment(HorizontalAlignment.CENTER);
+
+        animation = mainContainer.verticalSizing().animate(500, Easing.CUBIC, Sizing.fill(90));
+        mainContainer.gap(10);
+        rootComponent.child(mainContainer);
+
+        // Title
+        mainContainer.child(new Label(literal("Command Aliases"))
+                .shadow(true)
+                .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.getPrimary()))));
+
+        // Header row with column titles
+        FlowLayout headerRow = (FlowLayout) Containers.horizontalFlow(Sizing.fill(), Sizing.content())
+                                                      .padding(Insets.both(5, 5));
+        headerRow.gap(10);
+        headerRow.child(new Label(literal("Enabled"))
+                         .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
+                         .horizontalSizing(Sizing.fixed(50)))
+                 .child(new Label(literal("Alias Command"))
+                         .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
+                         .horizontalSizing(Sizing.fill(30)))
+                 .child(new Label(literal("Target Command"))
+                         .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
+                         .horizontalSizing(Sizing.fill(50)))
+                 .child(new Label(literal("Actions"))
+                         .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
+                         .horizontalSizing(Sizing.fixed(90)));
+
+        mainContainer.child(new RoundedContainer(
+                Sizing.content(),
+                Sizing.content(),
+                theme.getRounding(),
+                theme.getSecondaryBackground(),
+                FlowLayout.Algorithm.HORIZONTAL)
+                .child(headerRow)
+                .padding(Insets.both(10, 5)));
+
+        // Entries container with scrolling (main body)
+        entriesContainer = Containers.verticalFlow(Sizing.fill(), Sizing.content());
+        entriesContainer.gap(5);
+
+        scrollContainer = Containers.verticalScroll(Sizing.fill(), Sizing.fill(80), entriesContainer);
+        scrollContainer.scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(ColorUtil.getIntFromColor(theme.getPrimary()))));
+
+        mainContainer.child(new RoundedContainer(
+                Sizing.content(),
+                Sizing.content(),
+                theme.getRounding(),
+                theme.getBackground(),
+                FlowLayout.Algorithm.VERTICAL)
+                .child(scrollContainer)
+                .surface(Surface.VANILLA_TRANSLUCENT)
+                .padding(Insets.both(10, 10)));
+
+        // Bottom buttons
+        FlowLayout buttonsContainer = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+        buttonsContainer.gap(10);
+        buttonsContainer.child(new Button(literal("Add New Alias"), theme.getPrimary(), theme.getBackground(), button -> {
+                            addNewEntry();
+                        }).textShadow(false)
+                          .horizontalSizing(Sizing.content(10)))
+                        .child(new Button(literal("Done"), theme.getPrimary(), theme.getBackground(), button -> {
+                            save();
+                            close();
+                        }).textShadow(false)
+                          .horizontalSizing(Sizing.content(6)))
+                        .child(new Button(literal("Cancel"), theme.getSecondaryBackground(), theme.text, button -> {
+                            close();
+                        }).textShadow(false)
+                          .horizontalSizing(Sizing.content(6)));
+
+        mainContainer.child(buttonsContainer);
+
+        buildEntryWidgets();
+    }
+
+    private void loadAliases() {
         entries.clear();
-
         for (Alias alias : PersistentData.get().aliases) {
             entries.add(new AliasEntry(alias));
         }
-
+        // Always add an empty entry at the end
         if (entries.isEmpty() || !entries.get(entries.size() - 1).isEmpty()) {
             entries.add(new AliasEntry(new Alias()));
         }
-
-        initializeWidgets();
-
-        int buttonY = this.height - paddingY - 25;
-        int buttonWidth = 100;
-        int buttonSpacing = 20;
-        int totalButtonWidth = (buttonWidth * 2) + buttonSpacing;
-        int buttonStartX = (this.width - totalButtonWidth) / 2;
-
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> {
-            saveAndClose();
-        }).dimensions(buttonStartX, buttonY, buttonWidth, 25).build());
-
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Add New"), button -> {
-            // Save current entries before adding new one
-            updateEntriesFromFields();
-            entries.add(new AliasEntry(new Alias()));
-            initializeWidgets();
-        }).dimensions(buttonStartX + buttonWidth + buttonSpacing, buttonY, buttonWidth, 25).build());
     }
 
-    private void initializeWidgets() {
-        clearChildren();
+    private void buildEntryWidgets() {
+        if (entriesContainer == null) return;
 
-        int paddingX = this.width / 10;
-        int entryWidth = this.width - (paddingX * 2) - scrollbarWidth - 20;
+        saveFormState();
+        entriesContainer.clearChildren();
 
         for (int i = 0; i < entries.size(); i++) {
-            if (i < scrollOffset || i >= scrollOffset + maxVisibleEntries) continue;
-
+            final int index = i;
             AliasEntry entry = entries.get(i);
-            int y = listStartY + (i - scrollOffset) * entryHeight;
 
-            int checkboxX = paddingX;
-            int aliasX = checkboxX + 30;
-            int aliasWidth = (int)(entryWidth * 0.2);
-            int targetX = aliasX + aliasWidth + 10;
-            int targetWidth = (int)(entryWidth * 0.55);
-            int removeX = targetX + targetWidth + 10;
-            int removeWidth = 80;
+            // Create entry row
+            FlowLayout entryRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            entryRow.gap(10);
+            entryRow.margins(Insets.vertical(2));
+            entryRow.verticalAlignment(VerticalAlignment.CENTER);
 
-            entry.enabledBox = CheckboxWidget.builder(Text.literal(""), this.textRenderer)
-                                             .pos(checkboxX, y + 8)
-                                             .checked(entry.alias.enabled)
-                                             .build();
-            addDrawableChild(entry.enabledBox);
+            // Enabled checkbox
+            entry.enabledCheckbox = (Checkbox) new Checkbox(literal(""))
+                    .checked(entry.alias.enabled);
+            entry.enabledCheckbox.margins(Insets.right(20).withLeft(5));
+            entryRow.child(entry.enabledCheckbox.sizing(Sizing.fixed(16)));
 
-            entry.aliasField = new TextFieldWidget(this.textRenderer, aliasX, y, aliasWidth, 25, Text.literal("Alias"));
+            // Alias command field
+            entry.aliasField = new TextBox(Sizing.fill(30), literal("Alias"));
             entry.aliasField.setText(entry.alias.aliasCommand);
             entry.aliasField.setMaxLength(64);
-            addDrawableChild(entry.aliasField);
+            entryRow.child(entry.aliasField);
 
-            entry.targetField = new TextFieldWidget(this.textRenderer, targetX, y, targetWidth, 25, Text.literal("Target Command"));
+            // Target command field
+            entry.targetField = new TextBox(Sizing.fill(50), literal("Target"));
             entry.targetField.setText(entry.alias.targetCommand);
             entry.targetField.setMaxLength(512);
-            addDrawableChild(entry.targetField);
+            entryRow.child(entry.targetField);
 
-            final int index = i;
-            ButtonWidget removeButton = ButtonWidget.builder(Text.literal("Remove"), button -> {
-                updateEntriesFromFields();
-                entries.remove(index);
-                int maxOffset = Math.max(0, entries.size() - maxVisibleEntries);
-                scrollOffset = Math.min(scrollOffset, maxOffset);
-                initializeWidgets();
-            }).dimensions(removeX, y, removeWidth, 25).build();
-            addDrawableChild(removeButton);
+            // Remove button
+            Button removeButton = (Button) new Button(literal("Remove"),
+                    ThemeManager.getCurrentTheme().getSecondaryBackground(),
+                    ThemeManager.getCurrentTheme().text,
+                    button -> {
+                        removeEntry(index);
+                    })
+                    .textShadow(false)
+                    .horizontalSizing(Sizing.fixed(90));
+            entryRow.child(removeButton);
+
+            Theme theme = ThemeManager.getCurrentTheme();
+            FlowLayout entryContainer = (FlowLayout) new RoundedContainer(
+                    Sizing.content(),
+                    Sizing.content(),
+                    theme.getRounding(),
+                    theme.getBackground(),
+                    FlowLayout.Algorithm.HORIZONTAL)
+                    .child(entryRow)
+                    .padding(Insets.both(8, 5));
+
+            entriesContainer.child(entryContainer);
         }
 
-        int paddingY = this.height / 10;
-        int buttonY = this.height - paddingY - 25;
-        int buttonWidth = 100;
-        int buttonSpacing = 20;
-        int totalButtonWidth = (buttonWidth * 2) + buttonSpacing;
-        int buttonStartX = (this.width - totalButtonWidth) / 2;
+        // Show entry count
+        Label countLabel = (Label) new Label(literal(String.format("Aliases: %d", Math.max(0, entries.size() - 1))))
+                .color(Color.ofArgb(ColorUtil.getIntFromColor(ThemeManager.getCurrentTheme().getTextSecondary())));
+        entriesContainer.child(countLabel);
+    }
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> {
-            saveAndClose();
-        }).dimensions(buttonStartX, buttonY, buttonWidth, 25).build());
+    private void addNewEntry() {
+        saveFormState();
+        entries.add(new AliasEntry(new Alias()));
+        buildEntryWidgets();
+    }
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Add New"), button -> {
-            updateEntriesFromFields();
-            entries.add(new AliasEntry(new Alias()));
-            initializeWidgets();
-        }).dimensions(buttonStartX + buttonWidth + buttonSpacing, buttonY, buttonWidth, 25).build());
+    private void removeEntry(int index) {
+        updateEntriesFromFields();
+        if (index < entries.size()) {
+            entries.remove(index);
+            buildEntryWidgets();
+        }
+    }
+
+    private void saveFormState() {
+        for (AliasEntry entry : entries) {
+            if (entry.aliasField != null) {
+                entry.alias.aliasCommand = entry.aliasField.getText();
+            }
+            if (entry.targetField != null) {
+                entry.alias.targetCommand = entry.targetField.getText();
+            }
+            if (entry.enabledCheckbox != null) {
+                entry.alias.enabled = entry.enabledCheckbox.isChecked();
+            }
+        }
     }
 
     private void updateEntriesFromFields() {
-        for (AliasEntry entry : entries) {
-            if (entry.aliasField != null) {
-                entry.alias.aliasCommand = entry.aliasField.getText().trim();
-            }
-            if (entry.targetField != null) {
-                entry.alias.targetCommand = entry.targetField.getText().trim();
-            }
-            if (entry.enabledBox != null) {
-                entry.alias.enabled = entry.enabledBox.isChecked();
+        saveFormState();
+
+        if (!entries.isEmpty()) {
+            AliasEntry lastEntry = entries.get(entries.size() - 1);
+            if (!lastEntry.isEmpty() && (!lastEntry.alias.aliasCommand.trim().isEmpty() || !lastEntry.alias.targetCommand.trim().isEmpty())) {
+                entries.add(new AliasEntry(new Alias()));
+                buildEntryWidgets();
             }
         }
     }
 
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
-        int paddingX = this.width / 10;
-        int paddingY = this.height / 10;
-
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, paddingY / 2, 0xFFFFFF);
-
-        context.drawCenteredTextWithShadow(this.textRenderer,
-                Text.literal("Create simple command aliases like: sb → skyblock").formatted(Formatting.GRAY),
-                this.width / 2, paddingY / 2 + 15, 0xCCCCCC);
-
-        int checkboxX = paddingX;
-        int aliasX = checkboxX + 60;
-        int targetX = aliasX + (int)((this.width - (paddingX * 2) - scrollbarWidth - 20) * 0.2) + 10;
-
-        context.drawTextWithShadow(this.textRenderer, "Enabled", checkboxX, listStartY - 20, 0xFFFFFF);
-        context.drawTextWithShadow(this.textRenderer, "Alias Command", aliasX, listStartY - 20, 0xFFFFFF);
-        context.drawTextWithShadow(this.textRenderer, "Target Command", targetX, listStartY - 20, 0xFFFFFF);
-
-        context.fill(paddingX - 5, listStartY - 5, scrollbarX + scrollbarWidth + 5, listEndY + 5, 0x80000000);
-
-        if (entries.size() > maxVisibleEntries) {
-            renderScrollbar(context, mouseX, mouseY);
-        }
-
-        String countText = String.format("Aliases: %d | Showing: %d-%d",
-                entries.size(),
-                entries.size() > 0 ? scrollOffset + 1 : 0,
-                Math.min(scrollOffset + maxVisibleEntries, entries.size()));
-        context.drawTextWithShadow(this.textRenderer, countText, paddingX, this.height - paddingY - 65, 0xCCCCCC);
-
-        context.drawTextWithShadow(this.textRenderer,
-                Text.literal("Examples: sb → skyblock | h → home | warp → warp hub").formatted(Formatting.DARK_GRAY),
-                paddingX, this.height - paddingY - 50, 0x888888);
-    }
-
-    private void renderScrollbar(DrawContext context, int mouseX, int mouseY) {
-        int totalEntries = entries.size();
-        int scrollbarHeight = listEndY - listStartY;
-
-        context.fill(scrollbarX, listStartY, scrollbarX + scrollbarWidth, listEndY, 0x40FFFFFF);
-
-        float thumbRatio = (float) maxVisibleEntries / totalEntries;
-        int thumbHeight = Math.max(10, (int) (scrollbarHeight * thumbRatio));
-
-        float scrollRatio = (float) scrollOffset / (totalEntries - maxVisibleEntries);
-        int thumbY = listStartY + (int) ((scrollbarHeight - thumbHeight) * scrollRatio);
-
-        // Thumb
-        boolean isHovered = mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
-                mouseY >= thumbY && mouseY <= thumbY + thumbHeight;
-        int thumbColor = isDraggingScrollbar ? 0xFFFFFFFF : (isHovered ? 0xC0FFFFFF : 0x80FFFFFF);
-        context.fill(scrollbarX, thumbY, scrollbarX + scrollbarWidth, thumbY + thumbHeight, thumbColor);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // Handle scrolling with arrow keys
-        if (keyCode == GLFW.GLFW_KEY_UP) {
-            scroll(-1);
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_DOWN) {
-            scroll(1);
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
-            scroll(-5);
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-            scroll(5);
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_HOME) {
-            scrollOffset = 0;
-            initializeWidgets();
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_END) {
-            scrollOffset = Math.max(0, entries.size() - maxVisibleEntries);
-            initializeWidgets();
-            return true;
-        }
-
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (entries.size() > maxVisibleEntries) {
-            scroll(-(int) verticalAmount * 3);
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && entries.size() > maxVisibleEntries) {
-            if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
-                    mouseY >= listStartY && mouseY <= listEndY) {
-
-                int totalEntries = entries.size();
-                int scrollbarHeight = listEndY - listStartY;
-
-                float thumbRatio = (float) maxVisibleEntries / totalEntries;
-                int thumbHeight = Math.max(10, (int) (scrollbarHeight * thumbRatio));
-
-                float scrollRatio = (float) scrollOffset / (totalEntries - maxVisibleEntries);
-                int thumbY = listStartY + (int) ((scrollbarHeight - thumbHeight) * scrollRatio);
-
-                if (mouseY >= thumbY && mouseY <= thumbY + thumbHeight) {
-                    isDraggingScrollbar = true;
-                    dragStartY = (int) mouseY;
-                    dragStartOffset = scrollOffset;
-                    return true;
-                } else {
-                    // Jump to position
-                    updateEntriesFromFields(); // Save before jumping
-                    float clickRatio = (float) (mouseY - listStartY) / scrollbarHeight;
-                    int newOffset = (int) (clickRatio * (totalEntries - maxVisibleEntries));
-                    scrollOffset = MathHelper.clamp(newOffset, 0, totalEntries - maxVisibleEntries);
-                    initializeWidgets();
-                    return true;
-                }
-            }
-        }
-
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            isDraggingScrollbar = false;
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (isDraggingScrollbar && entries.size() > maxVisibleEntries) {
-            updateEntriesFromFields();
-
-            int dragDistance = (int) mouseY - dragStartY;
-            int scrollbarHeight = listEndY - listStartY;
-            int totalEntries = entries.size();
-
-            float thumbRatio = (float) maxVisibleEntries / totalEntries;
-            int thumbHeight = Math.max(10, (int) (scrollbarHeight * thumbRatio));
-
-            float dragRatio = (float) dragDistance / (scrollbarHeight - thumbHeight);
-            int newOffset = dragStartOffset + (int) (dragRatio * (totalEntries - maxVisibleEntries));
-
-            int oldOffset = scrollOffset;
-            scrollOffset = MathHelper.clamp(newOffset, 0, totalEntries - maxVisibleEntries);
-
-            if (oldOffset != scrollOffset) {
-                initializeWidgets();
-            }
-            return true;
-        }
-
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    private void scroll(int amount) {
-        if (entries.size() <= maxVisibleEntries) return;
-
+    private void save() {
         updateEntriesFromFields();
 
-        int oldOffset = scrollOffset;
-        scrollOffset = MathHelper.clamp(scrollOffset + amount, 0, entries.size() - maxVisibleEntries);
-
-        if (oldOffset != scrollOffset) {
-            initializeWidgets();
-        }
-    }
-
-    private void saveAndClose() {
         PersistentData.get().aliases.clear();
 
         for (AliasEntry entry : entries) {
-            if (entry.aliasField != null) {
-                entry.alias.aliasCommand = entry.aliasField.getText().trim();
-            }
-            if (entry.targetField != null) {
-                entry.alias.targetCommand = entry.targetField.getText().trim();
-            }
-            if (entry.enabledBox != null) {
-                entry.alias.enabled = entry.enabledBox.isChecked();
-            }
-
-            if (!entry.alias.aliasCommand.trim().isEmpty() && !entry.alias.targetCommand.trim().isEmpty()) {
-
-                if (entry.alias.aliasCommand.startsWith("/")) {
-                    entry.alias.aliasCommand = entry.alias.aliasCommand.substring(1).trim();
-                }
-
-                if (entry.alias.targetCommand.startsWith("/")) {
-                    entry.alias.targetCommand = entry.alias.targetCommand.substring(1).trim();
-                }
-
-                PersistentData.get().aliases.add(entry.alias);
+            // Skip empty entries
+            if (entry.alias.aliasCommand.trim().isEmpty() || entry.alias.targetCommand.trim().isEmpty()) {
+                continue;
             }
 
 
+            String aliasCommand = entry.alias.aliasCommand.trim();
+            String targetCommand = entry.alias.targetCommand.trim();
+
+            if (aliasCommand == targetCommand) {
+                continue;
+            }
+
+            if (aliasCommand.startsWith("/")) {
+                aliasCommand = aliasCommand.substring(1).trim();
+            }
+            if (targetCommand.startsWith("/")) {
+                targetCommand = targetCommand.substring(1).trim();
+            }
+
+            // Create cleaned alias
+            Alias cleanedAlias = new Alias();
+            cleanedAlias.aliasCommand = aliasCommand;
+            cleanedAlias.targetCommand = targetCommand;
+            cleanedAlias.enabled = entry.alias.enabled;
+
+            PersistentData.get().aliases.add(cleanedAlias);
         }
 
+        // Remove circular references (alias pointing to another alias)
         PersistentData.get().aliases.removeIf(alias -> {
             for (Alias other : PersistentData.get().aliases) {
                 if (!alias.equals(other) && alias.targetCommand.equals(other.aliasCommand)) {
@@ -375,19 +290,20 @@ public class CommandAliasesScreen extends Screen {
             return false;
         });
 
-        this.client.setScreen(parent);
+        PersistentData.save();
     }
 
     @Override
     public void close() {
-        saveAndClose();
+        animation.backwards();
+        TickSchedulerHelper.runAfter(super::close, 10);
     }
 
     private static class AliasEntry {
         public final Alias alias;
-        public TextFieldWidget aliasField;
-        public TextFieldWidget targetField;
-        public CheckboxWidget enabledBox;
+        public TextBox aliasField;
+        public TextBox targetField;
+        public Checkbox enabledCheckbox;
 
         public AliasEntry(Alias alias) {
             this.alias = alias;

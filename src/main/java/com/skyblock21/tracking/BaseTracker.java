@@ -33,6 +33,7 @@ public abstract class BaseTracker {
     protected long sessionStartTime = -1;
     protected long lastActionTime = -1;
     protected long totalActiveTime = 0;
+    protected long lastTotalActiveTime = 0;
     protected long lastActiveTime = -1;
     @Getter
     protected boolean isPaused = true;
@@ -266,33 +267,25 @@ public abstract class BaseTracker {
         }
     }
 
-    protected void savePersistentActiveTime() {
-        if (!settings.persistData) return;
-
-        TrackerData persistentData = PersistentData.get().getOrCreateTrackerData(trackerId);
-        persistentData.totalActiveTime += getCurrentActiveTime();
-        PersistentData.save();
-    }
 
     protected void startSession() {
         long currentTime = System.currentTimeMillis();
         sessionStartTime = currentTime;
         lastActiveTime = currentTime;
-        lastActionTime = currentTime;
         lastMovementTime = currentTime;
         totalActiveTime = 0;
         isPaused = false;
         isAfk = false;
     }
 
-    protected void pauseTracker() {
+    public void pauseTracker() {
         if (!isPaused && sessionStartTime != -1) {
             totalActiveTime += System.currentTimeMillis() - lastActiveTime;
             isPaused = true;
         }
     }
 
-    protected void resumeTracker() {
+    public void resumeTracker() {
         if (isPaused && conditions.shouldTrack(this)) {
             lastActiveTime = System.currentTimeMillis();
             isPaused = false;
@@ -362,8 +355,9 @@ public abstract class BaseTracker {
             long currentSessionActiveTime = getCurrentActiveTime();
             if (currentSessionActiveTime > 0) {
                 TrackerData persistentData = PersistentData.get().getOrCreateTrackerData(trackerId);
-                persistentData.setTotalActiveTime(getTotalActiveTime());
+                persistentData.setTotalActiveTime(getTotalActiveTime() - lastTotalActiveTime);
                 PersistentData.save();
+                lastTotalActiveTime = getTotalActiveTime();
             }
         }
     }

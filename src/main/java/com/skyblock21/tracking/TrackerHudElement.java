@@ -1,7 +1,7 @@
 package com.skyblock21.tracking;
 
-import com.skyblock21.hud.EditGuiScreen;
-import com.skyblock21.hud.EditHudElementScreen;
+import com.skyblock21.hud.EditGuiScreenV2;
+import com.skyblock21.hud.EditHudElementScreenV2;
 import com.skyblock21.hud.MultiLineHudElement;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
@@ -39,14 +39,6 @@ public abstract class TrackerHudElement extends MultiLineHudElement {
     }
 
     protected abstract void updateHudLines();
-
-    @Override
-    protected void renderElement(DrawContext context) {
-        MinecraftClient client = MinecraftClient.getInstance();
-
-
-        super.renderElement(context);
-    }
 
     /**
      * Helper method to create dummy trackable values for display
@@ -163,11 +155,16 @@ public abstract class TrackerHudElement extends MultiLineHudElement {
     @Override
     public boolean shouldRenderDummy() {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
-                client.currentScreen instanceof EditHudElementScreen;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
+                client.currentScreen instanceof EditHudElementScreenV2;
 
 
         return inEditMode && !tracker.hasDataInCurrentMode();
+    }
+
+    @Override
+    public boolean shouldRender() {
+        return tracker.getConditions().shouldRender(tracker);
     }
 //
 //    @Override

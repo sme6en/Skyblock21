@@ -3,7 +3,7 @@ package com.skyblock21.config;
 import com.skyblock21.Skyblock21;
 import com.skyblock21.features.commandaliases.CommandAliasesScreen;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
-import com.skyblock21.hud.EditGuiScreen;
+import com.skyblock21.hud.EditGuiScreenV2;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -65,7 +65,7 @@ public class Skyblock21Screen extends Screen {
     }
 
     private void openGuiEditor() {
-        this.client.setScreen(new EditGuiScreen(this.client.currentScreen));
+        this.client.setScreen(new EditGuiScreenV2(this.client.currentScreen));
     }
 
     private void openKeybinds() {

@@ -5,26 +5,17 @@ import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.events.*;
 import com.skyblock21.features.waypoints.Waypoint;
 import com.skyblock21.features.waypoints.WaypointManager;
-import com.skyblock21.features.waypoints.WaypointRenderer;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -32,7 +23,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.util.*;
 import java.util.List;
@@ -193,7 +183,7 @@ public class TreeWaypoints {
             updateTreeStateMachine(tree);
         }
         BlockPos playerPos = client.player.getBlockPos();
-        nearestTree = findSecondNearestSmallTree(playerPos);
+        nearestTree = findNearestSmallTree(playerPos);
         updateAllWaypoints();
 
         if (ticks == 20) ticks = 0;
@@ -413,7 +403,7 @@ public class TreeWaypoints {
 
     }
 
-    private static Tree findSecondNearestSmallTree(BlockPos playerPos) {
+    private static Tree findNearestSmallTree(BlockPos playerPos) {
         List<Tree> sortedTrees = new ArrayList<>();
 
         for (Tree tree : trees.values()) {
@@ -429,7 +419,7 @@ public class TreeWaypoints {
             return Double.compare(dist1, dist2);
         });
 
-        return sortedTrees.size() >= 2 ? sortedTrees.get(1) : null;
+        return !sortedTrees.isEmpty() ? sortedTrees.getFirst() : null;
     }
 
 }

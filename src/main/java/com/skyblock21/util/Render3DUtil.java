@@ -8,8 +8,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexRendering;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.CodEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -175,16 +173,18 @@ public class Render3DUtil {
         renderVertex(matrix, vertices, x4, y4, z4, u1, v2);
     }
 
-    public static void renderEntityFilledBox(WorldRenderContext context, MatrixStack matrices,
-                                             Entity entity, Vec3d cameraPos,
-                                             int color, float alpha) {
+    public static void renderEntityFilledBox(WorldRenderContext context, MatrixStack matrices, Entity entity, Vec3d cameraPos, int color, float alpha) {
+        renderEntityFilledBox(context, matrices, entity, cameraPos, color, alpha, 0);
+    }
+
+    public static void renderEntityFilledBox(WorldRenderContext context, MatrixStack matrices, Entity entity, Vec3d cameraPos, int color, float alpha, float expand) {
         if (entity == null || entity.isRemoved()) return;
 
         float r = ((color >> 16) & 0xFF) / 255.0f;
         float g = ((color >> 8) & 0xFF) / 255.0f;
         float b = (color & 0xFF) / 255.0f;
 
-        Box boundingBox = entity.getBoundingBox();
+        Box boundingBox = entity.getBoundingBox().expand(expand);
 
         matrices.push();
 
