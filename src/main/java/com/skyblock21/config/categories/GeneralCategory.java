@@ -134,6 +134,15 @@ public class GeneralCategory {
                                                                                                  .controller((opt) -> BooleanControllerBuilder.create(opt)
                                                                                                                                               .yesNoFormatter()
                                                                                                                                               .coloured(true))
-                                                                                                 .build()).build();
+                                                                                                 .build()).option(Option.<Boolean>createBuilder()
+                        .name(literal("Runic mobs highlight"))
+                        .description(OptionDescription.of(literal("Draws a box around runic mobs")))
+                        .binding(defaults.general.runicMobHighlight,
+                                () -> config.general.runicMobHighlight,
+                                newValue -> config.general.runicMobHighlight = newValue)
+                        .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                .yesNoFormatter()
+                                .coloured(true))
+                        .build()).build();
     }
 }

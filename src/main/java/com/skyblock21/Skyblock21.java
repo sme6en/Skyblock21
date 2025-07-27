@@ -22,11 +22,8 @@ import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
 import com.skyblock21.tracking.TrackerManager;
-import com.skyblock21.util.TextUtils;
-import com.skyblock21.util.TickScheduler;
-import com.skyblock21.util.TickSchedulerHelper;
+import com.skyblock21.util.*;
 import com.skyblock21.util.dev.AutoUpdater;
-import com.skyblock21.util.Utils;
 import com.skyblock21.util.tab.TabUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -105,7 +102,7 @@ public class Skyblock21 implements ClientModInitializer {
                         return 0;
                     }
 
-                    String itemUuid = Utils.getItemUUID(heldItem);
+                    String itemUuid = ItemUtils.getItemUUID(heldItem);
                     if (itemUuid.isEmpty()) {
                         TextUtils.addMessage("§cThis item cannot be customized!", true, false);
                         return 0;
@@ -140,7 +137,7 @@ public class Skyblock21 implements ClientModInitializer {
         PersistentData.init();
         Utils.init();
         TabUtils.init();
-//        Debug.init();
+        Debug.init();
 
         // Misc
         CookieGodPotReminder.init();
@@ -148,6 +145,7 @@ public class Skyblock21 implements ClientModInitializer {
         MouseLock.init();
         HideAroundNPC.init();
         KeyShortcuts.init();
+        RunicMobsHighlight.init();
 
         // Mining
         Scathas.init();

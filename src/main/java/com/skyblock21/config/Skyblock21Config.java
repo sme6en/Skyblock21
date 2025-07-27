@@ -57,6 +57,9 @@ public class Skyblock21Config {
 
         @SerialEntry
         public boolean leftHandedMode = false;
+
+        @SerialEntry
+        public boolean runicMobHighlight = true;
     }
 
     public static class Mining {

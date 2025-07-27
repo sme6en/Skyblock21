@@ -1,16 +1,14 @@
 package com.skyblock21.features;
 
 import com.skyblock21.config.Skyblock21ConfigManager;
-import com.skyblock21.events.ChatEvents;
 import com.skyblock21.features.waypoints.WaypointRenderer;
-import com.skyblock21.util.RenderUtil;
+import com.skyblock21.util.Render3DUtil;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,7 +21,6 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +47,7 @@ public class SpinHelper {
             Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
             MatrixStack matrices = worldRenderContext.matrixStack();
 
-            renderCodFilledBox(worldRenderContext, matrices, entry.spinFish, cameraPos, entry.canSpin(pullAmount) ? 0x00FF00 : 0xFF5555, 0.5f);
+            Render3DUtil.renderEntityFilledBox(worldRenderContext, matrices, entry.spinFish, cameraPos, entry.canSpin(pullAmount) ? 0x00FF00 : 0xFF5555, 0.5f);
         }
     }
 
@@ -171,41 +168,6 @@ public class SpinHelper {
 
     private static void cleanupInvalidEntries() {
         spinEntries.removeIf(entry -> !entry.isValid());
-    }
-
-    public static void renderCodFilledBox(WorldRenderContext context, MatrixStack matrices,
-                                          CodEntity cod, Vec3d cameraPos,
-                                          int color, float alpha) {
-        if (cod == null || cod.isRemoved()) return;
-
-        float r = ((color >> 16) & 0xFF) / 255.0f;
-        float g = ((color >> 8) & 0xFF) / 255.0f;
-        float b = (color & 0xFF) / 255.0f;
-
-        // Get the cod's bounding box
-        Box boundingBox = cod.getBoundingBox();
-
-        matrices.push();
-
-        // Position relative to camera
-        matrices.translate(
-                boundingBox.minX - cameraPos.x,
-                boundingBox.minY - cameraPos.y,
-                boundingBox.minZ - cameraPos.z
-        );
-
-        VertexConsumerProvider.Immediate consumers = (VertexConsumerProvider.Immediate) context.consumers();
-        VertexConsumer vertexConsumer = consumers.getBuffer(WaypointRenderer.FILLED_BOX);
-
-        RenderUtil.drawFilledBox(matrices, vertexConsumer,
-                0, 0, 0,
-                (float) (boundingBox.maxX - boundingBox.minX),
-                (float) (boundingBox.maxY - boundingBox.minY),
-                (float) (boundingBox.maxZ - boundingBox.minZ),
-                r, g, b, alpha);
-
-        consumers.draw();
-        matrices.pop();
     }
 
     private static class SpinEntry {

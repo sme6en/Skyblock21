@@ -7,13 +7,14 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexRendering;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.CodEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
-public class RenderUtil {
+public class Render3DUtil {
 
     /**
      * Renders a filled box using VertexRendering.drawFilledBox method
@@ -172,5 +173,39 @@ public class RenderUtil {
         renderVertex(matrix, vertices, x2, y2, z2, u2, v1);
         renderVertex(matrix, vertices, x3, y3, z3, u2, v2);
         renderVertex(matrix, vertices, x4, y4, z4, u1, v2);
+    }
+
+    public static void renderEntityFilledBox(WorldRenderContext context, MatrixStack matrices,
+                                             Entity entity, Vec3d cameraPos,
+                                             int color, float alpha) {
+        if (entity == null || entity.isRemoved()) return;
+
+        float r = ((color >> 16) & 0xFF) / 255.0f;
+        float g = ((color >> 8) & 0xFF) / 255.0f;
+        float b = (color & 0xFF) / 255.0f;
+
+        Box boundingBox = entity.getBoundingBox();
+
+        matrices.push();
+
+        matrices.translate(
+                boundingBox.minX - cameraPos.x,
+                boundingBox.minY - cameraPos.y,
+                boundingBox.minZ - cameraPos.z
+        );
+
+        VertexConsumerProvider.Immediate consumers = (VertexConsumerProvider.Immediate) context.consumers();
+        if (consumers == null) return;
+        VertexConsumer vertexConsumer = consumers.getBuffer(WaypointRenderer.FILLED_BOX);
+
+        drawFilledBox(matrices, vertexConsumer,
+                0, 0, 0,
+                (float) (boundingBox.maxX - boundingBox.minX),
+                (float) (boundingBox.maxY - boundingBox.minY),
+                (float) (boundingBox.maxZ - boundingBox.minZ),
+                r, g, b, alpha);
+
+        consumers.draw();
+        matrices.pop();
     }
 }

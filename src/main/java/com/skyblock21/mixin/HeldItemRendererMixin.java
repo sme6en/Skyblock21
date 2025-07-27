@@ -2,7 +2,7 @@ package com.skyblock21.mixin;
 
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.features.itemcustomization.ItemCustomization;
-import com.skyblock21.util.Utils;
+import com.skyblock21.util.ItemUtils;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +19,7 @@ public class HeldItemRendererMixin {
             return itemStack;
         }
 
-        String uuid = Utils.getItemUUID(itemStack);
+        String uuid = ItemUtils.getItemUUID(itemStack);
         if (uuid.isEmpty()) {
             return itemStack;
         }

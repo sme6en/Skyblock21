@@ -1,21 +1,18 @@
 package com.skyblock21.mixin;
 
 import com.skyblock21.config.persistent.PersistentData;
-import com.skyblock21.events.PlayerEvents;
 import com.skyblock21.events.WindowEvents;
 import com.skyblock21.features.itemcustomization.ItemCustomization;
 import com.skyblock21.hud.HudManager;
-import com.skyblock21.util.Utils;
+import com.skyblock21.util.ItemUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -71,7 +68,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             return itemStack;
         }
 
-        String uuid = Utils.getItemUUID(itemStack);
+        String uuid = ItemUtils.getItemUUID(itemStack);
         if (uuid.isEmpty()) {
             return itemStack;
         }
@@ -94,7 +91,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             return itemStack;
         }
 
-        String uuid = Utils.getItemUUID(itemStack);
+        String uuid = ItemUtils.getItemUUID(itemStack);
         if (uuid.isEmpty()) {
             return itemStack;
         }

@@ -3,8 +3,8 @@ package com.skyblock21.mixin;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.features.itemcustomization.ItemCustomization;
 import com.skyblock21.features.items.CompactStars;
+import com.skyblock21.util.ItemUtils;
 import com.skyblock21.util.TextUtils;
-import com.skyblock21.util.Utils;
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -34,7 +34,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
         }
 
         ItemStack self = (ItemStack) (Object) this;
-        String uuid = Utils.getItemUUID(self);
+        String uuid = ItemUtils.getItemUUID(self);
         Text finalName = name;
 
         if (!uuid.isEmpty()) {
@@ -57,7 +57,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
         if (this.isEmpty()) return;
 
         ItemStack self = (ItemStack) (Object) this;
-        String uuid = Utils.getItemUUID(self);
+        String uuid = ItemUtils.getItemUUID(self);
 
         if (!uuid.isEmpty()) {
             ItemCustomization customization = PersistentData.get().itemCustomizations.get(uuid);

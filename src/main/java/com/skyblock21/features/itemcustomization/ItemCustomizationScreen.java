@@ -4,8 +4,8 @@ import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.gui.Theme;
 import com.skyblock21.gui.ThemeManager;
 import com.skyblock21.gui.components.*;
+import com.skyblock21.util.ItemUtils;
 import com.skyblock21.util.TextUtils;
-import com.skyblock21.util.Utils;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.ItemComponent;
@@ -66,7 +66,7 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
 
     public ItemCustomizationScreen(ItemStack itemStack) {
         this.itemStack = itemStack;
-        this.itemUuid = Utils.getItemUUID(itemStack);
+        this.itemUuid = ItemUtils.getItemUUID(itemStack);
 
         this.customization = PersistentData.get().itemCustomizations.getOrDefault(
                 itemUuid,
