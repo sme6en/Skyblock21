@@ -39,7 +39,7 @@ public class CrashReportCollector {
         String id = encodeUsername(username, key);
         String crashLog = crashReport.asString(ReportType.MINECRAFT_CRASH_REPORT);
 
-//        sendToWebhook(id, key, crashLog);
+        sendToWebhook(id, key, crashLog);
     }
 
     public static String encodeUsername(String username, Long key) {

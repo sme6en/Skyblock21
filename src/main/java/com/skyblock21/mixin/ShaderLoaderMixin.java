@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ShaderLoaderMixin {
 
     @Inject(method = "apply(Lnet/minecraft/client/gl/ShaderLoader$Definitions;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V", at = @At("TAIL"))
-    private void reloadPipelines(CallbackInfo info) {
+    private void sb21$reloadPipelines(CallbackInfo info) {
         Skyblock21RenderPipelines.precompile();
     }
 }

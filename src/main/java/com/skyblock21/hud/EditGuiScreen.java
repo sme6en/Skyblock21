@@ -6,7 +6,6 @@ import com.skyblock21.gui.components.*;
 import com.skyblock21.util.ColorUtil;
 import com.skyblock21.util.Render2DUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
@@ -15,24 +14,21 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import static net.minecraft.text.Text.literal;
 
-public class EditGuiScreenV2 extends BaseOwoScreen<FlowLayout> {
+public class EditGuiScreen extends BaseOwoScreen<FlowLayout> {
     private static final int GEAR_ICON_SIZE = 24;
     private static final Identifier GEAR_ICON = Identifier.of("skyblock21", "gui/gear.png");
     public static HudElement selectedElement = null;
     protected final Screen parent;
 
-    public EditGuiScreenV2(Screen parent) {
+    public EditGuiScreen(Screen parent) {
         this.parent = parent;
-        ThemeManager.setTheme(Theme.WHITE);
 
-        // Recalculate dimensions for all multi-line elements
         for (HudElement element : HudManager.getElements()) {
             if (element instanceof MultiLineHudElement multiLineHudElement) {
                 multiLineHudElement.recalculateDimensions();
@@ -189,7 +185,7 @@ public class EditGuiScreenV2 extends BaseOwoScreen<FlowLayout> {
                             mouseY >= gearY && mouseY <= gearY + gearIconSize;
 
                     if (isOverGearIcon && selectedElement == element) {
-                        client.setScreen(new EditHudElementScreenV2(this, element));
+                        client.setScreen(new EditHudElementScreen(this, element));
                         return true;
                     }
 

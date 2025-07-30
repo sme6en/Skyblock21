@@ -21,7 +21,7 @@ public class PlayerEntityMixin {
     @Inject(method = "dropItem",
             at = @At("HEAD"),
             cancellable = true)
-    private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
+    private void sb21$onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
         if (!Utils.isOnSkyblock()) return;
         if (MinecraftClient.getInstance().player == null) {
             return;
@@ -41,7 +41,7 @@ public class PlayerEntityMixin {
             method = "getMainArm",
             at = @At("HEAD"),
             cancellable = true)
-    private void onGetMainArm(CallbackInfoReturnable<Arm> cir) {
+    private void sb21$onGetMainArm(CallbackInfoReturnable<Arm> cir) {
         if (Skyblock21ConfigManager.get().general.leftHandedMode) {
             cir.setReturnValue(Arm.LEFT);
         }

@@ -19,7 +19,7 @@ import static com.skyblock21.features.foraging.HideFloatingBlocks.shouldHideFloa
 public class EntityRendererMixin {
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
-    private void shouldRender(Entity entity, net.minecraft.client.render.Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+    private void sb21$shouldRender(Entity entity, net.minecraft.client.render.Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (Utils.isOnSkyblock()) {

@@ -11,6 +11,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.text.Text;
@@ -32,10 +33,12 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
     private FlowLayout entriesContainer;
     private ShortcutEntry listeningEntry = null;
 
-    private static Animation animation;
+    private Animation animation;
 
-    public KeyShortcutsScreen() {
-        ThemeManager.setTheme(Theme.WHITE);
+    private Screen parent;
+
+    public KeyShortcutsScreen(Screen parent) {
+        this.parent = parent;
         loadEntries();
     }
 
@@ -79,10 +82,10 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
         // Header row
         FlowLayout headerRow = (FlowLayout) Containers.horizontalFlow(Sizing.fill(), Sizing.content()).padding(Insets.both(5, 5));
         headerRow.gap(10);
-        headerRow.child(new Label(literal("Enabled")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fixed(60)))
-                 .child(new Label(literal("Command")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(60)))
-                 .child(new Label(literal("Keybind")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(25)))
-                 .child(new Label(literal("Actions")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fixed(60)));
+        headerRow.child(new Label(literal("Enabled")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(6)))
+                 .child(new Label(literal("Command")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(45)))
+                 .child(new Label(literal("Keybind")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(20)))
+                 .child(new Label(literal("Actions")).color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))).horizontalSizing(Sizing.fill(7)));
 
         mainContainer.child(new RoundedContainer(Sizing.content(), Sizing.content(), theme.getRounding(), theme.getSecondaryBackground(), FlowLayout.Algorithm.HORIZONTAL)
                 .child(headerRow)
@@ -133,11 +136,11 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
             // Enabled checkbox
             entry.enabledBox = (Checkbox) new Checkbox(literal(""))
                     .checked(entry.shortcut.enabled);
-            entry.enabledBox.margins(Insets.right(20).withLeft(5));
+//            entry.enabledBox.margins(Insets.right(18).withLeft(5));
             entryRow.child(entry.enabledBox.sizing(Sizing.fixed(16)));
 
             // Command field
-            entry.commandField = new TextBox(Sizing.fill(60), literal("Command"));
+            entry.commandField = new TextBox(Sizing.fill(50), literal("Command"));
             entry.commandField.setText(entry.shortcut.command);
             entry.commandField.setMaxLength(500);
 
@@ -151,8 +154,8 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
                     rebuildEntries();
                 }
             });
-            entry.keybindButton.margins(Insets.right(130));
-            entryRow.child(entry.keybindButton.horizontalSizing(Sizing.fixed(120)));
+//            entry.keybindButton.margins(Insets.right(130));
+            entryRow.child(entry.keybindButton.horizontalSizing(Sizing.fill(20)));
 
             // Remove button
             Button removeButton = (Button) new Button(literal("Remove"),
@@ -164,7 +167,7 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
                         rebuildEntries();
                     })
                     .textShadow(false)
-                    .horizontalSizing(Sizing.fixed(80));
+                    .horizontalSizing(Sizing.fill(20));
             entryRow.child(removeButton);
 
             // Check for keybind conflicts
@@ -295,7 +298,9 @@ public class KeyShortcutsScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         PersistentData.save();
-        super.close();
+        if (client != null) {
+            client.setScreen(parent);
+        }
     }
 
     @Override

@@ -14,7 +14,7 @@ public class ItemRendererMixin {
 
     @ModifyArg(method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;IILnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/world/World;I)V",
     at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/ItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/world/World;III)V", ordinal = 0))
-    public ItemStack customizeItemStack(ItemStack itemStack) {
+    public ItemStack sb21$customizeItemStack(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return itemStack;
         }

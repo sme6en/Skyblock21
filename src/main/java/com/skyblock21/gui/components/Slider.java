@@ -15,20 +15,15 @@ import net.minecraft.util.math.MathHelper;
 
 public class Slider extends DiscreteSliderComponent {
 
-
     public Slider(Sizing horizontalSizing, double min, double max) {
         super(horizontalSizing, min, max);
     }
 
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
         Theme theme = ThemeManager.getCurrentTheme();
-//        context.drawGuiTexture(RenderLayer::getGuiTextured, this.getTexture(), this.getX(), this.getY(), this.getWidth(), this.getHeight(), ColorHelper.getWhite(this.alpha));
-//        context.drawGuiTexture(RenderLayer::getGuiTextured, this.getHandleTexture(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight(), ColorHelper.getWhite(this.alpha));
 
         int valueBarWidth = (int) (this.getWidth() * this.value);
-
         Render2DUtil.drawRoundedBox(context, this.getX(), this.getY(), this.getWidth(), this.getHeight(), theme.getRounding(), theme.getSecondaryBackground());
         if (valueBarWidth > 0) {
             Render2DUtil.drawRoundedBox(context, this.getX(), this.getY(), valueBarWidth, this.getHeight(), theme.getRounding(), theme.getPrimary());

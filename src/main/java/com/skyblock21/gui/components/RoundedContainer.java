@@ -5,7 +5,6 @@ import com.skyblock21.util.Render2DUtil;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
-import me.x150.renderer.render.ExtendedDrawContext;
 import org.joml.Vector4f;
 
 import java.awt.*;
@@ -26,6 +25,5 @@ public class RoundedContainer extends FlowLayout {
         Render2DUtil.drawRoundedBox(context, x, y, width, height, rounding, color);
         this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.children);
     }
-
 
 }

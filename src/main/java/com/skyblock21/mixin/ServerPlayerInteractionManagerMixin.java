@@ -24,7 +24,7 @@ public class ServerPlayerInteractionManagerMixin {
     @Shadow protected ServerWorld world;
 
     @Inject(method = "tryBreakBlock", at = @At("HEAD"))
-    private void onBlockBreak(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void sb21$onBlockBreak(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState state = world.getBlockState(pos);
 
         BlockEvents.BLOCK_BROKEN.invoker().onBlockBroken(world, pos, state);

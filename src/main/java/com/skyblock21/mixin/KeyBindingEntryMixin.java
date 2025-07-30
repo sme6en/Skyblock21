@@ -22,8 +22,7 @@ public class KeyBindingEntryMixin {
     private boolean duplicate;
 
     @Inject(method = "update", at = @At("TAIL"))
-    private void checkCustomShortcutConflicts(CallbackInfo ci) {
-        // Check if this keybinding conflicts with our custom shortcuts
+    private void sb21$checkCustomShortcutConflicts(CallbackInfo ci) {
         if (hasCustomShortcutConflict()) {
             this.duplicate = true;
         }
@@ -32,10 +31,8 @@ public class KeyBindingEntryMixin {
     private boolean hasCustomShortcutConflict() {
         int keyCode = binding.getDefaultKey().getCode();
 
-        // Check if any of our enabled shortcuts use this key
         for (Shortcut shortcut : PersistentData.get().shortcuts) {
             if (shortcut.enabled && shortcut.keyCode != 0) {
-                // For keyboard keys, direct comparison
                 if (keyCode == shortcut.keyCode) {
                     return true;
                 }

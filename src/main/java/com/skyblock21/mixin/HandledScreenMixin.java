@@ -32,12 +32,12 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V"))
-    protected void beforeDrawItem(DrawContext context, Slot slot, CallbackInfo ci) {
+    protected void sb21$beforeDrawItem(DrawContext context, Slot slot, CallbackInfo ci) {
         WindowEvents.DRAW_BEFORE_ITEM.invoker().onDrawSlot(getTitle(), context, slot);
     }
 
     @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;close()V", shift = At.Shift.BEFORE), cancellable = true)
-    protected void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    protected void sb21$onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         boolean result = WindowEvents.CLOSE_WINDOW.invoker().onCloseWindow((HandledScreen<?>) (Object) this, this.handler);
 
         if (!result) {
@@ -46,14 +46,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+    private void sb21$onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         if (HudManager.handleMouseClick(mouseX, mouseY, button)) {
             cir.setReturnValue(true);
         }
     }
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickSlot(IIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/entity/player/PlayerEntity;)V"), cancellable = true)
-    protected void onSlotClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+    protected void sb21$onSlotClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
 
         boolean result = WindowEvents.SLOT_CLICK.invoker().onSlotClick((HandledScreen<?>) (Object) this, this.handler, slot);
 
@@ -63,7 +63,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawItem(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", ordinal = 0))
-    private ItemStack customizeHeldItem(ItemStack itemStack) {
+    private ItemStack sb21$customizeHeldItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return itemStack;
         }
@@ -86,7 +86,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @ModifyArg(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V", ordinal = 0))
-    private ItemStack customizeDrawnItem(ItemStack itemStack) {
+    private ItemStack sb21$customizeDrawnItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return itemStack;
         }

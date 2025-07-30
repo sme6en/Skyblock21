@@ -5,6 +5,7 @@ import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.features.waypoints.Waypoint;
 import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.features.waypoints.WaypointRenderer;
+import com.skyblock21.util.TickSchedulerHelper;
 import com.skyblock21.util.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -27,25 +28,18 @@ public class SupplyWaypoints {
     private static final Pattern buildRegex = Pattern.compile("Building Progress (\\d+)% \\((\\d+) Players Helping\\)");
 
     public static void init() {
-        WorldRenderEvents.LAST.register((context) -> {
-            if (!Skyblock21ConfigManager.get().nether.kuudraSupplyHelper) return;
-            WaypointRenderer.renderWaypoints(
-                    context,
-                    context.camera(),
-                    context.tickCounter().getDynamicDeltaTicks()
-            );
-        });
-        ClientTickEvents.END_CLIENT_TICK.register(SupplyWaypoints::onTick);
+        TickSchedulerHelper.repeat(SupplyWaypoints::onTick, 5);
     }
 
-    public static void onTick(MinecraftClient client) {
+    public static void onTick() {
         if (!Utils.isInKuudra()) return;
         if (!Skyblock21ConfigManager.get().nether.kuudraSupplyHelper) return;
+        MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
 
         List<ArmorStandEntity> supplyEntitiesCache = new ArrayList<>(SupplyWaypoints.supplyEntities);
         for (ArmorStandEntity entity : supplyEntitiesCache) {
-            if (entity.isRemoved()) {
+            if (entity.isRemoved() || !entity.isAlive()) {
                 supplyEntities.remove(entity);
                 WaypointManager.removeWaypointsIfMatch(entity.getUuid());
             } else {

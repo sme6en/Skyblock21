@@ -9,7 +9,6 @@ import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.SkyblockEvents;
 import com.skyblock21.features.*;
 import com.skyblock21.features.commandaliases.CommandAliasesScreen;
-import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.HOTFOverlay;
 import com.skyblock21.features.foraging.TreeProgress;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
@@ -18,7 +17,10 @@ import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
-import com.skyblock21.hud.EditGuiScreenV2;
+import com.skyblock21.features.waypoints.WaypointRenderer;
+import com.skyblock21.gui.Theme;
+import com.skyblock21.gui.ThemeManager;
+import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
 import com.skyblock21.hud.elements.*;
 import com.skyblock21.tracking.BaseTracker;
@@ -31,6 +33,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -45,7 +48,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Skyblock21 implements ClientModInitializer {
     public static final String MOD_ID = "skyblock21";
-    public static final String MOD_VERSION = "1.3.1";
+    public static final String MOD_VERSION = "1.4.0";
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -75,13 +78,13 @@ public class Skyblock21 implements ClientModInitializer {
                 .then(literal("gui").executes((ctx) -> {
                     client
                                    .send(() -> client
-                                                              .setScreen(new EditGuiScreenV2(client.currentScreen)));
+                                                              .setScreen(new EditGuiScreen(client.currentScreen)));
                     return 1;
                 }))
                 .then(literal("keys").executes((ctx) -> {
                     client
                                    .send(() -> client
-                                                              .setScreen(new KeyShortcutsScreen()));
+                                                              .setScreen(new KeyShortcutsScreen(client.currentScreen)));
                     return 1;
                 }))
                 .then(literal("aliases").executes((ctx) -> {
@@ -128,12 +131,11 @@ public class Skyblock21 implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         TickScheduler.getInstance();
 
-        // General
         Skyblock21ConfigManager.load();
         PersistentData.init();
         Utils.init();
         TabUtils.init();
-        Debug.init();
+//        Debug.init();
 
         // Misc
         CookieGodPotReminder.init();
@@ -149,7 +151,6 @@ public class Skyblock21 implements ClientModInitializer {
         // Galatea
         TreeProgress.init();
         HOTFOverlay.init();
-        GalateaTracker.init();
         TreeWaypoints.init();
 
         // Hunting
@@ -170,7 +171,18 @@ public class Skyblock21 implements ClientModInitializer {
         HudManager.init();
         registerCommands();
 
+        ThemeManager.setTheme(PersistentData.get().theme);
+
+        WorldRenderEvents.LAST.register(context -> {
+            WaypointRenderer.renderWaypoints(
+                    context,
+                    context.camera(),
+                    context.tickCounter().getDynamicDeltaTicks()
+            );
+        });
+
         SkyblockEvents.JOIN.register(() -> {
+            TrackerManager.getAllTrackers().forEach(BaseTracker::pauseTracker);
             TickSchedulerHelper.runAfterSeconds(() -> {
                 if (client.player == null || client.world == null) return;
                 Text message = Text.literal(TextUtils.PREFIX + " §fThis mod is actively looking to ")

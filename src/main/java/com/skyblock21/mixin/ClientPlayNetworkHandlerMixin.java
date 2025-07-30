@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "sendChatCommand", at = @At("HEAD"), cancellable = true)
-    private void processCommandAliases(String command, CallbackInfo ci) {
+    private void sb21$processCommandAliases(String command, CallbackInfo ci) {
         String processedCommand = CommandAliases.processCommand(command);
 
         if (processedCommand != null) {
@@ -29,7 +29,7 @@ public class ClientPlayNetworkHandlerMixin {
     }
 
     @Inject(method = "onParticle", at = @At("RETURN"))
-    private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
+    private void sb21$onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
         ParticleEvents.SPAWN.invoker().onParticleSpawn(packet);
     }
 }

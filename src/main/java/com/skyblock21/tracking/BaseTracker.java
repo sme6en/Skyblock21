@@ -60,6 +60,7 @@ public abstract class BaseTracker {
         if (settings.persistData) {
             loadPersistentData();
         }
+        lastTotalActiveTime = getTotalActiveTime();
     }
 
     /**
@@ -90,8 +91,8 @@ public abstract class BaseTracker {
     /**
      * Track a value increment
      */
-    protected <T extends Number> void trackValue(String key, T increment) {
-        if (!conditions.shouldTrack(this) || isPaused) return;
+    public <T extends Number> void trackValue(String key, T increment) {
+        if (!conditions.shouldTrack(this)) return;
 
         TrackableValue<T> value = getOrCreateValue(key, increment);
         value.add(increment);
@@ -106,6 +107,7 @@ public abstract class BaseTracker {
 
         lastActionTime = System.currentTimeMillis();
         if (isAfk) exitAfk();
+        if (isPaused) resumeTracker();
 
         updateRates();
 
@@ -168,8 +170,9 @@ public abstract class BaseTracker {
             long currentSessionActiveTime = getCurrentActiveTime();
             if (currentSessionActiveTime > 0) {
                 TrackerData persistentData = PersistentData.get().getOrCreateTrackerData(trackerId);
-                persistentData.setTotalActiveTime(getTotalActiveTime());
+                persistentData.addTotalActiveTime(getTotalActiveTime() - lastTotalActiveTime);
                 PersistentData.save();
+                lastTotalActiveTime = getTotalActiveTime();
             }
         }
 
@@ -194,6 +197,7 @@ public abstract class BaseTracker {
         if (settings.persistData) {
             PersistentData.get().clearTrackerData(trackerId);
             PersistentData.save();
+            lastTotalActiveTime = 0;
         }
 
         onAllDataReset();
@@ -355,7 +359,7 @@ public abstract class BaseTracker {
             long currentSessionActiveTime = getCurrentActiveTime();
             if (currentSessionActiveTime > 0) {
                 TrackerData persistentData = PersistentData.get().getOrCreateTrackerData(trackerId);
-                persistentData.setTotalActiveTime(getTotalActiveTime() - lastTotalActiveTime);
+                persistentData.addTotalActiveTime(getTotalActiveTime() - lastTotalActiveTime);
                 PersistentData.save();
                 lastTotalActiveTime = getTotalActiveTime();
             }

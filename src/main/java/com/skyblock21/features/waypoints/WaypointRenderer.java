@@ -1,10 +1,12 @@
 package com.skyblock21.features.waypoints;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.block.entity.BeaconBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
@@ -46,7 +48,7 @@ public class WaypointRenderer {
                 renderCircleOnBlock(context, matrices, waypoint.getPosition(), cameraPos, waypoint.getColor(), 0.7f, 256);
             }
             if (waypoint.isBeaconBeam()) {
-                renderWaypointBeacon(context, matrices, waypoint, camera, cameraPos, distance);
+                renderWaypointBeacon(context, matrices, waypoint, cameraPos, distance);
         }
             if (!waypoint.getName().isEmpty()) renderWaypointText(context, waypoint, distance, tickDelta);
 
@@ -112,7 +114,7 @@ public class WaypointRenderer {
         matrices.pop();
     }
 
-    private static void renderWaypointBeacon(WorldRenderContext context, MatrixStack matrices, Waypoint waypoint, Camera camera, Vec3d cameraPos, double distance) {
+    private static void renderWaypointBeacon(WorldRenderContext context, MatrixStack matrices, Waypoint waypoint, Vec3d cameraPos, double distance) {
         BlockPos pos = waypoint.getPosition();
         Vec3d waypointPos = Vec3d.of(pos).add(0.5, 0.0, 0.5);
 
@@ -122,61 +124,13 @@ public class WaypointRenderer {
                 waypointPos.y - cameraPos.y,
                 waypointPos.z - cameraPos.z
         );
-
-        // Render beacon beam
-        renderBeaconBeam(context, matrices, waypoint.getColor(), distance);
+        BeaconBlockEntityRenderer.renderBeam(matrices, context.consumers(), context.tickCounter().getTickProgress(true), 1f, context.world().getTime(), 0, (int) BEACON_HEIGHT, waypoint.getColor());
 
         matrices.pop();
     }
 
-    private static void renderBeaconBeam(WorldRenderContext context, MatrixStack matrices, int color, double distance) {
-        float alpha = Math.max(0.1f, 1.0f - (float)(distance / MAX_RENDER_DISTANCE));
-
-        float r = ((color >> 16) & 0xFF) / 255.0f;
-        float g = ((color >> 8) & 0xFF) / 255.0f;
-        float b = (color & 0xFF) / 255.0f;
-
-        Matrix4f matrix = matrices.peek().getPositionMatrix();
-        // Get vertex consumer for translucent rendering
-        VertexConsumerProvider.Immediate consumers = (VertexConsumerProvider.Immediate) context.consumers();
-        VertexConsumer vertexConsumer = consumers.getBuffer(FILLED_BOX);
-
-        // Render vertical beam strips
-        float width = 0.2f;
-        for (int y = 0; y < BEACON_HEIGHT; y += 4) {
-            float yPos = y;
-            float nextY = Math.min(y + 4, BEACON_HEIGHT);
-
-            // Front face
-            vertexConsumer.vertex(matrix, -width, yPos, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, yPos, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, nextY, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, nextY, -width).color(r, g, b, alpha);
-
-            // Back face
-            vertexConsumer.vertex(matrix, width, yPos, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, yPos, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, nextY, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, nextY, width).color(r, g, b, alpha);
-
-            // Left face
-            vertexConsumer.vertex(matrix, -width, yPos, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, yPos, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, nextY, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, -width, nextY, width).color(r, g, b, alpha);
-
-            // Right face
-            vertexConsumer.vertex(matrix, width, yPos, -width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, yPos, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, nextY, width).color(r, g, b, alpha);
-            vertexConsumer.vertex(matrix, width, nextY, -width).color(r, g, b, alpha);
-        }
-
-        consumers.draw();
-    }
-
     private static void renderWaypointText(WorldRenderContext context, Waypoint waypoint, double distance, float tickDelta) {
-        if (distance > 250.0) return; // Don't render text for distant waypoints
+        if (distance > 250.0) return;
         Matrix4f positionMatrix = new Matrix4f();
 
         BlockPos pos = waypoint.getPosition();

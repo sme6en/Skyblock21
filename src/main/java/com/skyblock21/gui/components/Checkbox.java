@@ -13,28 +13,72 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
+import java.util.function.BiConsumer;
+
 public class Checkbox extends CheckboxComponent {
+
+    private BiConsumer<Checkbox, Boolean> onToggle;
 
     public Checkbox(Text message) {
         super(message);
     }
 
-    @Override
+    public Checkbox(Text message, BiConsumer<Checkbox, Boolean> onToggle) {
+        super(message);
+        this.onToggle = onToggle;
+    }
+
+        @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         Theme theme = ThemeManager.getCurrentTheme();
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         TextRenderer textRenderer = minecraftClient.textRenderer;
 
-        int i = getCheckboxSize(textRenderer);
+        int checkboxSize = getCheckboxSize(textRenderer);
+
         if (this.isChecked()) {
-            Render2DUtil.drawRoundedBox(context, this.getX(), this.getY() + 2, getWidth() - theme.getTextRenderer().getWidth(getMessage()) - (getMessage().getString().isEmpty() ? 0 : 8), getHeight(), 2,  theme.primary);
+            Render2DUtil.drawRoundedBox(context, this.getX(), this.getY() + 2, checkboxSize, checkboxSize, 2, theme.primary);
         } else {
-            Render2DUtil.drawOutlinedRoundedBox(context, this.getX(), this.getY() + 2, getWidth() - theme.getTextRenderer().getWidth(getMessage()) - (getMessage().getString().isEmpty() ? 0 : 8), getHeight(), 2, theme.primary, theme.getSecondaryBackground());
+            Render2DUtil.drawOutlinedRoundedBox(context, this.getX(), this.getY() + 2, checkboxSize, checkboxSize, 2, theme.primary, theme.getSecondaryBackground());
         }
-        int j = 1 + this.getX() + i + 4;
-        int k = this.getY() + i / 2 - theme.getTextRenderer().fontHeight / 2;
-//        this.textWidget.setPosition(j, k);
-        context.drawText(theme.getTextRenderer(), getMessage(), j, k+ 2, ColorUtil.getIntFromColor(theme.text), false);
-//        this.textWidget.renderWidget(context, mouseX, mouseY, deltaTicks);
+
+        if (!getMessage().getString().isEmpty()) {
+            int textX = this.getX() + checkboxSize + 4;
+            int textY = this.getY() + checkboxSize / 2 - theme.getTextRenderer().fontHeight / 2 + 2;
+
+            context.drawText(theme.getTextRenderer(), getMessage(), textX, textY, ColorUtil.getIntFromColor(theme.text), false);
+        }
+    }
+
+    @Override
+    public Checkbox checked(boolean checked) {
+        boolean wasChecked = this.isChecked();
+        super.checked(checked);
+
+        if (wasChecked != checked && onToggle != null) {
+            onToggle.accept(this, checked);
+        }
+
+        return this;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!this.active || !this.visible) {
+            return false;
+        }
+
+        if (button == 0) {
+            boolean wasChecked = this.isChecked();
+            boolean result = super.mouseClicked(mouseX, mouseY, button);
+
+            if (result && wasChecked != this.isChecked() && onToggle != null) {
+                onToggle.accept(this, this.isChecked());
+            }
+
+            return result;
+        }
+
+        return false;
     }
 }

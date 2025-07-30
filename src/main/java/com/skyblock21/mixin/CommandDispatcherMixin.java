@@ -33,7 +33,7 @@ public class CommandDispatcherMixin<S> {
             at = @At("RETURN"),
             remap = false
     )
-    private void refreshAliases(CallbackInfoReturnable<?> cir) {
+    private void sb21$refreshAliases(CallbackInfoReturnable<?> cir) {
         refreshAllAliases();
     }
 
@@ -44,25 +44,20 @@ public class CommandDispatcherMixin<S> {
             return;
         }
 
-        // Create a new literal command node for the alias
         LiteralArgumentBuilder<S> aliasBuilder = LiteralArgumentBuilder.<S>literal(aliasName);
 
-        // Copy the command execution from the original
         if (originalCommand.getCommand() != null) {
             aliasBuilder.executes(originalCommand.getCommand());
         }
 
-        // Set redirect to the original command to inherit all children/arguments
         aliasBuilder.redirect(originalCommand);
 
-        // Build and add the alias command
         LiteralCommandNode<S> aliasCommand = aliasBuilder.build();
         root.addChild(aliasCommand);
     }
 
     @Unique
     public void refreshAllAliases() {
-        // Remove old aliases that are no longer enabled
         Collection<CommandNode<S>> children = root.getChildren();
         children.removeIf(node -> {
             if (node instanceof LiteralCommandNode<S> literalNode) {
@@ -74,7 +69,6 @@ public class CommandDispatcherMixin<S> {
             return false;
         });
 
-        // Add new aliases
         for (Alias alias : PersistentData.get().aliases) {
             if (alias.enabled) {
                 CommandNode<S> targetCommand = root.getChild(alias.targetCommand);

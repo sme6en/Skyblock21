@@ -16,17 +16,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientWorldMixin {
 
     @Inject(method = "addEntity", at = @At("TAIL"))
-    private void onAddEntity(Entity entity, CallbackInfo ci) {
+    private void sb21$onAddEntity(Entity entity, CallbackInfo ci) {
         EntityEvents.SPAWN.invoker().onEntitySpawn(entity, entity.getId());
     }
 
     @Inject(method = "removeEntity", at = @At("HEAD"))
-    private void onRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci) {
+    private void sb21$onRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci) {
         EntityEvents.REMOVE.invoker().onEntityRemove(entityId);
     }
 
     @Inject(method = "handleBlockUpdate", at = @At("HEAD"))
-    private void onBlockUpdate(BlockPos pos, BlockState state, int flags, CallbackInfo ci) {
+    private void sb21$onBlockUpdate(BlockPos pos, BlockState state, int flags, CallbackInfo ci) {
         World world = (World) (Object) this;
         BlockState oldState = world.getBlockState(pos);
 

@@ -1,14 +1,11 @@
 package com.skyblock21.hud;
 
-import com.skyblock21.gui.Theme;
 import com.skyblock21.gui.ThemeManager;
 import com.skyblock21.gui.components.*;
 import com.skyblock21.util.ColorUtil;
 import com.skyblock21.util.Render2DUtil;
 import com.skyblock21.util.TickSchedulerHelper;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.DiscreteSliderComponent;
-import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
@@ -20,7 +17,8 @@ import org.lwjgl.glfw.GLFW;
 
 import static net.minecraft.text.Text.literal;
 
-public class EditHudElementScreenV2 extends BaseOwoScreen<FlowLayout> {
+public class EditHudElementScreen extends BaseOwoScreen<FlowLayout> {
+
     public static HudElement element = null;
     private final Screen parent;
     Animation animation;
@@ -32,10 +30,9 @@ public class EditHudElementScreenV2 extends BaseOwoScreen<FlowLayout> {
     private double dragOffsetY = 0;
     private boolean rightLastTime = false;
 
-    protected EditHudElementScreenV2(Screen parent, HudElement _element) {
+    protected EditHudElementScreen(Screen parent, HudElement _element) {
         this.parent = parent;
         element = _element;
-        ThemeManager.setTheme(Theme.WHITE);
         HudManager.saveConfig();
     }
 
@@ -89,20 +86,20 @@ public class EditHudElementScreenV2 extends BaseOwoScreen<FlowLayout> {
         settingsContainer.child(new Label(literal(element.getName() + " Settings"))
                                  .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.primary)))
                                  .horizontalTextAlignment(HorizontalAlignment.LEFT));
-        // Appearance section
+
         settingsContainer.child(new Label(literal("Appearance:"))
                 .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text))));
 
-        // Background checkbox
-        backgroundCheckbox = (Checkbox) new Checkbox(literal("Background"))
+        backgroundCheckbox = new Checkbox(literal("Background"), (checkbox, checked) -> {
+            element.setBackgroundEnabled(checked);
+        })
                 .checked(element.isBackgroundEnabled());
+
         settingsContainer.child(backgroundCheckbox);
 
-        // Background opacity slider
-
         backgroundOpacitySlider = (Slider) new Slider(Sizing.fill(100), 0, 100)
-.value(element.getBackgroundOpacity())
-.message(s -> literal("Background Opacity: " + element.getBackgroundOpacity() + "%"));
+            .value(element.getBackgroundOpacity())
+            .message(s -> literal("Background Opacity: " + element.getBackgroundOpacity() + "%"));
 
         backgroundOpacitySlider.onChanged().subscribe(value -> {
             element.setBackgroundOpacity((int) value);
@@ -111,16 +108,12 @@ public class EditHudElementScreenV2 extends BaseOwoScreen<FlowLayout> {
 
         settingsContainer.child(backgroundOpacitySlider);
         double scaleValue = (element.getScale() - 0.5) / 3.5 * 100;
-        System.out.println(scaleValue + " scale");
         // Scale slider
-        scaleSlider = (Slider) new Slider(Sizing.fill(100), 0, 100)
-.value(scaleValue)
-.message(s -> literal("Scale: " + (s) + "%"));
+        scaleSlider = (Slider) new Slider(Sizing.fill(100), 0, 100).value(scaleValue)
+                                                                   .message(s -> literal("Scale: " + (s) + "%"));
 
         scaleSlider.onChanged().subscribe(value -> {
-            System.out.println(value);
             double scale = 0.5 + (value / 100.0 * 3.5);
-            System.out.println(scale);
             element.setScale((float) scale);
             scaleSlider.setMessage(literal("Scale: " + (int) (value) + "%"));
         });
@@ -188,7 +181,7 @@ public class EditHudElementScreenV2 extends BaseOwoScreen<FlowLayout> {
         if (scaleSlider != null) {
             double scaleValue = (element.getScale() - 0.5) / 3.5 * 100;
             scaleSlider.value((int) scaleValue);
-            scaleSlider.setMessage(literal("Scale: " + (int) (element.getScale() * 100) + "%"));
+            scaleSlider.setMessage(literal("Scale: " + (int) (scaleValue) + "%"));
         }
 
         updateBackgroundOpacityState();

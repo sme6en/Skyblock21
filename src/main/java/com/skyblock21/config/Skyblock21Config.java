@@ -1,5 +1,6 @@
 package com.skyblock21.config;
 
+import com.skyblock21.gui.Theme;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 
 public class Skyblock21Config {

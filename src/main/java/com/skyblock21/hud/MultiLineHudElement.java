@@ -2,8 +2,6 @@ package com.skyblock21.hud;
 
 import com.google.gson.*;
 import com.skyblock21.util.Location;
-import com.skyblock21.util.Render2DUtil;
-import com.skyblock21.util.Utils;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -11,9 +9,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -152,8 +148,8 @@ public abstract class MultiLineHudElement extends HudElement {
         line.setVisibilityProvider(() -> {
             MinecraftClient client = MinecraftClient.getInstance();
             return client.currentScreen instanceof HandledScreen<?> ||
-                    client.currentScreen instanceof EditGuiScreenV2 ||
-                    client.currentScreen instanceof EditHudElementScreenV2;
+                    client.currentScreen instanceof EditGuiScreen ||
+                    client.currentScreen instanceof EditHudElementScreen;
         });
         lines.add(line);
         recalculateDimensions();
@@ -360,8 +356,8 @@ public abstract class MultiLineHudElement extends HudElement {
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen;
         boolean inContainerScreen = client.currentScreen instanceof HandledScreen<?>;
 
         if (line.isClickable() && (inEditMode || !inContainerScreen)) {
@@ -510,8 +506,8 @@ public abstract class MultiLineHudElement extends HudElement {
     @Override
     public boolean shouldRenderDummy() {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen;
 
         return alwaysRenderDummy || inEditMode && isEnabled();
     }

@@ -1,6 +1,7 @@
 package com.skyblock21.features.itemcustomization;
 
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import lombok.Getter;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -16,12 +17,19 @@ public class ItemCustomization {
     @SerialEntry
     public boolean hasGlint = false;
 
+    @Getter
+    private Item customItem = null;
+
     public ItemCustomization() {}
 
     public ItemCustomization(String customName, String customItemId, boolean hasGlint) {
         this.customName = customName;
         this.customItemId = customItemId;
         this.hasGlint = hasGlint;
+
+        if (isValidItemId() && hasCustomItemId()) {
+            this.customItem = Registries.ITEM.get(Identifier.tryParse(customItemId));
+        }
     }
 
     public boolean hasCustomName() {
@@ -44,10 +52,5 @@ public class ItemCustomization {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public Item getCustomItem() {
-        if (!hasCustomItemId() || !isValidItemId()) return null;
-        return Registries.ITEM.get(Identifier.tryParse(customItemId));
     }
 }

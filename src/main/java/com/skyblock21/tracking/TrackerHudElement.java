@@ -1,12 +1,11 @@
 package com.skyblock21.tracking;
 
-import com.skyblock21.hud.EditGuiScreenV2;
-import com.skyblock21.hud.EditHudElementScreenV2;
+import com.skyblock21.hud.EditGuiScreen;
+import com.skyblock21.hud.EditHudElementScreen;
 import com.skyblock21.hud.MultiLineHudElement;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 import java.text.NumberFormat;
@@ -155,8 +154,8 @@ public abstract class TrackerHudElement extends MultiLineHudElement {
     @Override
     public boolean shouldRenderDummy() {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen;
 
 
         return inEditMode && !tracker.hasDataInCurrentMode();

@@ -19,7 +19,7 @@ public class ClientPlayerEntityMixin {
     @Inject(method = "dropSelectedItem",
             at = @At("HEAD"),
             cancellable = true)
-    private void onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
+    private void sb21$onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
         if (!Utils.isOnSkyblock()) {
             return;
         }
@@ -32,11 +32,9 @@ public class ClientPlayerEntityMixin {
 
         ItemStack currentStack = player.getMainHandStack();
 
-        // Fire the custom event
         ActionResult result = PlayerEvents.DROP_ITEM.invoker()
                                                 .interact(player, currentStack);
 
-        // If the event returns FAIL, cancel the drop
         if (result == ActionResult.FAIL) {
             cir.setReturnValue(null);
         }

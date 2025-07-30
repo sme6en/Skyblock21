@@ -24,10 +24,10 @@ public class ClientChunkManagerMixin {
 
     @Shadow
     @Final
-    private ClientWorld world;
+    ClientWorld world;
 
     @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
-    private void onChunkLoad(int x, int z, PacketByteBuf buf, Map<Heightmap.Type, long[]> heightmaps, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
+    private void sb21$onChunkLoad(int x, int z, PacketByteBuf buf, Map<Heightmap.Type, long[]> heightmaps, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
         WorldChunk chunk = cir.getReturnValue();
         if (chunk != null) {
             ChunkEvents.CHUNK_SPAWNED.invoker().onChunkSpawned(this.world, chunk);
@@ -35,7 +35,7 @@ public class ClientChunkManagerMixin {
     }
 
     @Inject(method = "unload", at = @At("HEAD"))
-    private void onChunkUnload(ChunkPos pos, CallbackInfo ci) {
+    private void sb21$onChunkUnload(ChunkPos pos, CallbackInfo ci) {
         WorldChunk chunk = this.world.getChunk(pos.x, pos.z);
         if (chunk != null) {
             ChunkEvents.CHUNK_REMOVED.invoker().onChunkRemoved(this.world, chunk);

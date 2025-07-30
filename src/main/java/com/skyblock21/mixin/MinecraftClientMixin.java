@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MinecraftClientMixin {
 
     @Inject(method = "stop", at = @At("HEAD"))
-    private void onClientStop(CallbackInfo ci) {
+    private void sb21$onClientStop(CallbackInfo ci) {
         saveAllTrackers();
     }
 

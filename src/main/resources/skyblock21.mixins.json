@@ -14,7 +14,7 @@
 		"HeldItemRendererMixin",
 		"CrashReportMixin",
 		"ChatHudMixin",
-		"YggdrasilServicesKeyInfoMixin",
+		"ChatInputSuggestorMixin",
 		"accessors.ChatHudAccessor",
 		"accessors.MessageHandlerAccessor",
 		"accessors.PlayerListHudAccessor",

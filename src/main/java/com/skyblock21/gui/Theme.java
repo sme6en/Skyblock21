@@ -2,15 +2,13 @@ package com.skyblock21.gui;
 
 import com.skyblock21.util.ColorUtil;
 import lombok.Getter;
-import me.x150.renderer.fontng.FTLibrary;
-import me.x150.renderer.fontng.Font;
-import me.x150.renderer.fontng.FontScalingRegistry;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 
 import java.awt.*;
 
 public enum Theme {
-    WHITE(
+    LIGHT(
             new Color(20, 83, 188, 255), // primary
             new Color(91, 167, 248, 255), // secondary
             new Color(255,255,255,255), // background
@@ -27,6 +25,16 @@ public enum Theme {
             new Color(23, 25,30, 255), // secondaryBackground
             new Color(100, 116, 139, 255),
             new Color(255,255,255,255), // text
+            "roboto",
+            12f
+    ),
+    CANDY(
+            new Color(255, 20, 147, 255),
+            new Color(255, 105, 180, 255),
+            new Color(255, 248, 220, 255),
+            new Color(255, 228, 225, 255),
+            new Color(255, 182, 193, 255),
+            new Color(139, 69, 19, 255),
             "roboto",
             12f
     );
@@ -49,8 +57,7 @@ public enum Theme {
     @Getter
     private final float rounding;
 
-    @Getter
-    private final TextRenderer textRenderer;
+    private TextRenderer textRenderer;
 
     Theme(Color primary, Color secondary, Color background, Color secondaryBackground, Color border, Color text, String themeFont, float rounding) {
         this.primary = primary;
@@ -96,4 +103,11 @@ public enum Theme {
         return ColorUtil.lighten(getBorder(), 0.2f);
     }
 
+    public TextRenderer getTextRenderer() {
+        if (textRenderer == null ||  textRenderer == MinecraftClient.getInstance().textRenderer) {
+            textRenderer = FontManager.getFont(font, 9);
+        }
+
+        return textRenderer;
+    }
 }

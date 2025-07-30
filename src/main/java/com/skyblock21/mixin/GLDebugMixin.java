@@ -15,7 +15,7 @@ public class GLDebugMixin {
     private static boolean hasPosted1282 = false;
 
     @Inject(method = "onDebugMessage", at = @At("HEAD"), cancellable = true)
-    private static void suppressMessage(int source, int type, int id, int severity, int length, long message, long l, CallbackInfo ci) {
+    private static void sb21$suppressMessage(int source, int type, int id, int severity, int length, long message, long l, CallbackInfo ci) {
         if (ci == null) return;
 
         if (id == 1280) {

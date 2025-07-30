@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientConnectionMixin {
 
     @Inject(method = "handlePacket", at = @At(value = "HEAD"), cancellable = true)
-    private static void handlePacket(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
+    private static void sb21$handlePacket(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
         boolean result = PacketEvents.RECEIVED.invoker().onPacketReceived(packet);
 
         if (!result) {
@@ -30,7 +30,7 @@ public class ClientConnectionMixin {
     }
 
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;Z)V", at = @At(value = "HEAD"), cancellable = true)
-    private void sendPacketNew(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
+    private void sb21$sendPacketNew(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
         boolean result = PacketEvents.SENT.invoker().onPacketSent(packet);
 
         if (!result) {
@@ -39,8 +39,7 @@ public class ClientConnectionMixin {
     }
 
     @Inject(method = "disconnect(Lnet/minecraft/text/Text;)V", at = @At("HEAD"))
-    private void onDisconnect(Text disconnectReason, CallbackInfo ci) {
-        // Save all tracker data when disconnecting from server
+    private void sb21$onDisconnect(Text disconnectReason, CallbackInfo ci) {
         saveAllTrackers();
     }
 

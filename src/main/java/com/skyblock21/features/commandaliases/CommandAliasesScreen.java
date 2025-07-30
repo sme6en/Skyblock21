@@ -28,7 +28,6 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
 
     public CommandAliasesScreen(Screen parent) {
         this.parent = parent;
-        ThemeManager.setTheme(Theme.WHITE);
         loadAliases();
     }
 
@@ -71,7 +70,7 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
         headerRow.gap(10);
         headerRow.child(new Label(literal("Enabled"))
                          .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
-                         .horizontalSizing(Sizing.fixed(50)))
+                         .horizontalSizing(Sizing.fill(7)))
                  .child(new Label(literal("Alias Command"))
                          .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
                          .horizontalSizing(Sizing.fill(30)))
@@ -80,7 +79,7 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
                          .horizontalSizing(Sizing.fill(50)))
                  .child(new Label(literal("Actions"))
                          .color(Color.ofArgb(ColorUtil.getIntFromColor(theme.text)))
-                         .horizontalSizing(Sizing.fixed(90)));
+                         .horizontalSizing(Sizing.fill(20)));
 
         mainContainer.child(new RoundedContainer(
                 Sizing.content(),
@@ -160,7 +159,7 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
             // Enabled checkbox
             entry.enabledCheckbox = (Checkbox) new Checkbox(literal(""))
                     .checked(entry.alias.enabled);
-            entry.enabledCheckbox.margins(Insets.right(20).withLeft(5));
+//            entry.enabledCheckbox.margins(Insets.right(20).withLeft(5));
             entryRow.child(entry.enabledCheckbox.sizing(Sizing.fixed(16)));
 
             // Alias command field
@@ -183,7 +182,7 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
                         removeEntry(index);
                     })
                     .textShadow(false)
-                    .horizontalSizing(Sizing.fixed(90));
+                    .horizontalSizing(Sizing.fill(7));
             entryRow.child(removeButton);
 
             Theme theme = ThemeManager.getCurrentTheme();
@@ -296,7 +295,11 @@ public class CommandAliasesScreen extends BaseOwoScreen<FlowLayout> {
     @Override
     public void close() {
         animation.backwards();
-        TickSchedulerHelper.runAfter(super::close, 10);
+        TickSchedulerHelper.runAfter(() -> {
+            if (client != null) {
+                client.setScreen(parent);
+            }
+        }, 10);
     }
 
     private static class AliasEntry {

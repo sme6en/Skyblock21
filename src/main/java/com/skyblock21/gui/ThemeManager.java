@@ -4,7 +4,7 @@ import lombok.Getter;
 
 public class ThemeManager {
     @Getter
-    private static Theme currentTheme = Theme.WHITE;
+    private static Theme currentTheme = Theme.LIGHT;
 
     public static void setTheme(Theme theme) {
         currentTheme = theme;

@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class CrashReportMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(String message, Throwable cause, CallbackInfo ci) {
+    private void sb21$onInit(String message, Throwable cause, CallbackInfo ci) {
         CrashReportCollector.handleCrash((CrashReport) (Object) this);
     }
 
     @Inject(method = "asString(Lnet/minecraft/util/crash/ReportType;)Ljava/lang/String;", at = @At("TAIL"), cancellable = true)
-    private void onAsString(ReportType type, CallbackInfoReturnable<String> cir) {
+    private void sb21$onAsString(ReportType type, CallbackInfoReturnable<String> cir) {
         if (!CrashReportCollector.isSkyblock21Crash((CrashReport) (Object) this)) return;
 
         StringBuilder sb = new StringBuilder(cir.getReturnValue());

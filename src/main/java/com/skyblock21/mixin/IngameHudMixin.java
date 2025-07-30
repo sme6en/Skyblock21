@@ -15,7 +15,7 @@ public class IngameHudMixin {
     @ModifyArg(
             method = "renderHotbarItem",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;III)V", ordinal = 0))
-    private ItemStack customizeHotbarItem(ItemStack itemStack) {
+    private ItemStack sb21$customizeHotbarItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return itemStack;
         }
@@ -38,7 +38,7 @@ public class IngameHudMixin {
     }
 
     @ModifyArg(method = "renderHotbarItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawStackOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;II)V", ordinal = 0))
-    private ItemStack customizeHotbarItemOverlay(ItemStack itemStack) {
+    private ItemStack sb21$customizeHotbarItemOverlay(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
             return itemStack;
         }

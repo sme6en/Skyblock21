@@ -4,6 +4,7 @@ import com.skyblock21.features.itemcustomization.ItemCustomization;
 import com.skyblock21.features.Scathas.ScathasData;
 import com.skyblock21.features.commandaliases.Alias;
 import com.skyblock21.features.keyshortcuts.Shortcut;
+import com.skyblock21.gui.Theme;
 import com.skyblock21.tracking.TrackerData;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 
@@ -31,6 +32,9 @@ public class Data {
 
     @SerialEntry
     public Map<String, TrackerData> trackerData = new HashMap<>();
+
+    @SerialEntry
+    public Theme theme = Theme.LIGHT;
 
     public TrackerData getTrackerData(String trackerId) {
         return trackerData.get(trackerId);

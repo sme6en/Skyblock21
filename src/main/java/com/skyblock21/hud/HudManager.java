@@ -84,8 +84,8 @@ public class HudManager {
         if (button != 0) return false;
 
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2) {
+        if (client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen) {
             return false;
         }
 
@@ -110,8 +110,8 @@ public class HudManager {
      */
     public static void handleMouseMove(double mouseX, double mouseY) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2) {
+        if (client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen) {
             return;
         }
 
@@ -164,8 +164,8 @@ public class HudManager {
         float combinedScale = getCombinedScale();
 
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean inEditMode = client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2;
+        boolean inEditMode = client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen;
 
         for (HudElement element : hudElements) {
             if (!element.isEnabled()) continue;
@@ -220,8 +220,8 @@ public class HudManager {
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Don't render if in edit screens
-        if (client.currentScreen instanceof EditGuiScreenV2 ||
-                client.currentScreen instanceof EditHudElementScreenV2) return;
+        if (client.currentScreen instanceof EditGuiScreen ||
+                client.currentScreen instanceof EditHudElementScreen) return;
 
         // Skip if container is open (handled by container renderer)
         if (client.currentScreen instanceof HandledScreen<?>) return;
@@ -330,12 +330,13 @@ public class HudManager {
                         element.setBackgroundOpacity(40);
                     }
 
-                    if (element instanceof MultiLineHudElement multiLineElement) {
-                        if (obj.has("lineStates")) {
-                            JsonObject lineStates = obj.getAsJsonObject("lineStates");
-                            multiLineElement.loadLineStates(lineStates);
-                        }
-                    }
+                    // Will be used in the future
+//                    if (element instanceof MultiLineHudElement multiLineElement) {
+//                        if (obj.has("lineStates")) {
+//                            JsonObject lineStates = obj.getAsJsonObject("lineStates");
+//                            multiLineElement.loadLineStates(lineStates);
+//                        }
+//                    }
                 }
             }
 

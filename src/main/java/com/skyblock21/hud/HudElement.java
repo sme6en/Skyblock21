@@ -114,7 +114,7 @@ public abstract class HudElement {
     public void render(DrawContext context, int mouseX, int mouseY) {
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (client.currentScreen instanceof EditGuiScreenV2 || client.currentScreen instanceof EditHudElementScreenV2) {
+        if (client.currentScreen instanceof EditGuiScreen || client.currentScreen instanceof EditHudElementScreen) {
             renderBackground(context);
             renderElement(context);
         } else if (isAllowedInLocation(Utils.getLocation()) && isEnabled()) {

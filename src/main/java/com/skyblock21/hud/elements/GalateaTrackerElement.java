@@ -19,7 +19,7 @@ public class GalateaTrackerElement extends TrackerHudElement {
 
         // Main stats group
         createGroup("stats", "Stats", 0, false);
-        addLine("forest_essence", Text.literal("§8Forest Essence: §f0"), "stats");
+        addLine("forest_essence", Text.literal("§8Forest Essence: §f0 §8(0/hr)"), "stats");
         addLine("foraging_exp", Text.literal("§3Foraging Exp: §f0 §8(0/hr)"), "stats");
         addLine("hotf_exp", Text.literal("§aHOTF Exp: §f0 §8(0/hr)"), "stats");
         addLine("whispers", Text.literal("§2Whispers: §f0 §8(0/hr)"), "stats");

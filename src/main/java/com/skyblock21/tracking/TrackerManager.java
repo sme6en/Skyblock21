@@ -17,6 +17,12 @@ public class TrackerManager {
         return new HashSet<>(trackers);
     }
 
+    public static Optional<BaseTracker> getTrackerById(String id) {
+        return trackers.stream()
+                .filter(tracker -> tracker.getTrackerId().equals(id))
+                .findFirst();
+    }
+
     public static void saveAllTrackers() {
         trackers.forEach(BaseTracker::saveAndClose);
     }

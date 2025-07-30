@@ -36,7 +36,7 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
     private TextBox itemNameComponent;
     private Checkbox glintComponent;
     private TextBox itemIdComponent;
-
+    private ItemComponent preview;
 
     private static final String[][] COLOR_CODES = {
             {"&0", "Black", "0x000000"},
@@ -85,8 +85,18 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
         glintComponent = (Checkbox) new Checkbox(literal("Glint")).checked(customization.hasGlint);
         itemIdComponent = new TextBox(Sizing.fixed(150), literal("ID"));
         itemIdComponent.setText(customization.customItemId.isEmpty() ? Registries.ITEM.getId(itemStack.getItem()).getPath() : customization.customItemId);
-
-        ThemeManager.setTheme(Theme.WHITE);
+        itemIdComponent.onChanged().subscribe((s) -> {
+            ItemStack newPreviewStack = createPreviewStack();
+            preview.stack(newPreviewStack);
+        });
+        itemNameComponent.onChanged().subscribe((s) -> {
+            ItemStack newPreviewStack = createPreviewStack();
+            preview.stack(newPreviewStack);
+        });
+        glintComponent.onChanged((s) -> {
+            ItemStack newPreviewStack = createPreviewStack();
+            preview.stack(newPreviewStack);
+        });
     }
 
     @Override
@@ -105,7 +115,7 @@ public class ItemCustomizationScreen extends BaseOwoScreen<FlowLayout> {
         ItemStack previewStack = createPreviewStack();
         Theme theme = ThemeManager.getCurrentTheme();
 
-        ItemComponent preview = Components.item(previewStack);
+        preview = Components.item(previewStack);
         preview.sizing(Sizing.fixed(80));
         preview.setTooltipFromStack(true);
         preview.margins(Insets.both(10, 10));

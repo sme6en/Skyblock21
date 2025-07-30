@@ -5,10 +5,7 @@ import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.events.ChatEvents;
 import com.skyblock21.events.SkyblockEvents;
-import com.skyblock21.tracking.BaseTracker;
-import com.skyblock21.tracking.TrackerConditions;
-import com.skyblock21.tracking.TrackerSettings;
-import com.skyblock21.tracking.TrackableValue;
+import com.skyblock21.tracking.*;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.TextUtils;
 import com.skyblock21.util.Utils;
@@ -16,6 +13,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+
+import java.util.Optional;
 
 public class GalateaTracker extends BaseTracker {
 
@@ -119,12 +118,8 @@ public class GalateaTracker extends BaseTracker {
             }
         }
 
-        // Track bonus gift
-        trackValue("bonus_" + itemName, 1);
-
-        // Update persistent data for bonus gifts tracker
-        int newAmount = PersistentData.get().bonusDrops.compute(itemName, (key, value) ->
-                value == null ? 1 : value + 1);
+        BaseTracker bonusGiftsTracker = TrackerManager.getTrackerById("bonus_gifts_tracker").get();
+        bonusGiftsTracker.trackValue("gift_" + itemName, 1);
     }
 
     private void parseExp(Text text) {

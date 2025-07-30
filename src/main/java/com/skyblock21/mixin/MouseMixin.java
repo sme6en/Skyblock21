@@ -17,7 +17,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 public abstract class MouseMixin {
 
     @WrapWithCondition(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;changeLookDirection(DD)V"))
-    private boolean sbt$allowMouseMove(ClientPlayerEntity instance, double v, double v2) {
+    private boolean sb21$allowMouseMove(ClientPlayerEntity instance, double v, double v2) {
         return !MouseLock.isMouseLocked;
     }
 }

@@ -28,7 +28,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
     public abstract boolean isEmpty();
 
     @ModifyVariable(method = "getName", at = @At("STORE"))
-    private Text modifyItemName(Text name) {
+    private Text sb21$modifyItemName(Text name) {
         if (name == null || name.getString().isEmpty()) {
             return name;
         }
@@ -53,7 +53,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
     }
 
     @Inject(method = "hasGlint", at = @At("RETURN"), cancellable = true)
-    private void hasCustomGlint(CallbackInfoReturnable<Boolean> cir) {
+    private void sb21$hasCustomGlint(CallbackInfoReturnable<Boolean> cir) {
         if (this.isEmpty()) return;
 
         ItemStack self = (ItemStack) (Object) this;

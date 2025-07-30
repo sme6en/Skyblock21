@@ -42,6 +42,7 @@
 - Timestamped chat messages
 - Auto Copy RNG Messages
 - Left handed mode
+- Runic mobs highlight
 
 *...and many more to come!*
 
@@ -53,7 +54,6 @@
 - `/skyblock21 keys` to edit your keybind shortcuts.
 - `/skyblock21 aliases` to edit your command aliases.
 - `/skyblock21 customize` to customize held item.
-- `/skyblock21 resetcustomizations` to reset all item customizations.
 
 ## 💡 Suggestions and Bugs
 If you have any suggestions, feature requests or bug reports please open an issue or join the [Discord Server](https://discord.gg/NMNSwQH6dr).

@@ -1,9 +1,9 @@
 package com.skyblock21.config.categories;
 
 import com.skyblock21.config.Skyblock21Config;
-import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
 import com.skyblock21.features.waypoints.WaypointManager;
+import com.skyblock21.tracking.impl.BonusGiftsTracker;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
 import dev.isxander.yacl3.api.*;
@@ -45,18 +45,6 @@ public class ForagingCategory {
                                 .controller((opt) -> IntegerSliderControllerBuilder.create(opt)
                                         .range(1, 300)
                                         .step(1))
-                                .build())
-                        .option(ButtonOption.createBuilder()
-                                .name(literal("Reset Tracker"))
-                                .description(OptionDescription.of(literal("Resets the galatea tracker data")))
-                                .text(literal("Reset"))
-                                .action((screen, opt) -> GalateaTracker.resetSession())
-                                .build())
-                        .option(ButtonOption.createBuilder()
-                                .name(literal("Reset Bonus Gift Tracker"))
-                                .description(OptionDescription.of(literal("Resets the bonus gifts tracker data")))
-                                .text(literal("Reset"))
-                                .action((screen, opt) -> GalateaTracker.resetBonusGifts())
                                 .build())
                         .build())
                 .group(OptionGroup.createBuilder()

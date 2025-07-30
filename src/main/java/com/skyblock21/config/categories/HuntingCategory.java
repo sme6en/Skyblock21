@@ -1,7 +1,6 @@
 package com.skyblock21.config.categories;
 
 import com.skyblock21.config.Skyblock21Config;
-import com.skyblock21.features.foraging.GalateaTracker;
 import com.skyblock21.features.foraging.treewaypoints.TreeWaypoints;
 import com.skyblock21.features.waypoints.WaypointManager;
 import com.skyblock21.util.Location;

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ChatHudMixin {
 
     @Inject(method = "clear", at = @At("HEAD"), cancellable = true)
-    private void onClear(boolean clearHistory, CallbackInfo ci) {
+    private void sb21$onClear(boolean clearHistory, CallbackInfo ci) {
         if (Skyblock21ConfigManager.get().general.infinityChatHistory) {
             ci.cancel();
         }
@@ -22,7 +22,7 @@ public class ChatHudMixin {
             method = {"addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", "addVisibleMessage"},
             at = @At(value = "CONSTANT", args = "intValue=100")
     )
-    private int moreMessages(int hundred) {
+    private int sb21$moreMessages(int hundred) {
         return 16_384;
     }
 }

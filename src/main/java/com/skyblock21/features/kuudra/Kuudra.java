@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.skyblock21.util.TextUtils.removeFormatting;
-
 public class Kuudra {
 
     public static int currentPhase = 0;
@@ -82,7 +80,6 @@ public class Kuudra {
             if (armorStand.getCustomName() == null) continue;
             if (!armorStand.getCustomName().getString().contains("✓ SUPPLIES RECEIVED ✓")) continue;
 
-            // get supplyLocations entry by armorStand position
             Vec3d pos = armorStand.getPos();
             UUID uuid = supplyLocations.get(new Vec3d((int)pos.x, 73, (int)pos.z));
             if (uuid == null) continue;

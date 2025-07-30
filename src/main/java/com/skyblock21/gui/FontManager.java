@@ -17,10 +17,16 @@ public class FontManager {
     private static final HashMap<String, TextRenderer> FONT_CACHE = new HashMap<>();
 
     private static final MinecraftClient MC = MinecraftClient.getInstance();
-    private static final ResourceManager RESOURCE_MANAGER = MC.getResourceManager();
-    private static final TextureManager TEXTURE_MANAGER = MC.getTextureManager();
+    private static ResourceManager RESOURCE_MANAGER = MC.getResourceManager();
+    private static TextureManager TEXTURE_MANAGER = MC.getTextureManager();
 
     public static TextRenderer getFont(final String fontName, final int size) {
+        if (RESOURCE_MANAGER == null || TEXTURE_MANAGER == null) {
+            RESOURCE_MANAGER = MC.getResourceManager();
+            TEXTURE_MANAGER = MC.getTextureManager();
+            return MC.textRenderer;
+        }
+
         final String key = (fontName + size).toLowerCase();
 
         if(FONT_CACHE.containsKey(key))

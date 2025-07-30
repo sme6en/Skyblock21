@@ -19,7 +19,8 @@ import java.util.Map;
 
 public class BonusGiftsTracker extends BaseTracker {
 
-    private Map<String, String> giftNameMapping = new HashMap<>();
+    private Map<String, Integer> gifts = new HashMap<>();
+
 
     public BonusGiftsTracker() {
         super(
@@ -40,44 +41,27 @@ public class BonusGiftsTracker extends BaseTracker {
 
     @Override
     protected void onValueTracked(String key, Number increment, TrackableValue<?> value) {
-        // Update legacy persistent data when tracking new gifts for compatibility
         if (key.startsWith("gift_")) {
-            String giftName = giftNameMapping.get(key);
-            if (giftName != null) {
-                // Update the legacy bonusDrops for compatibility with old system
-                PersistentData.get().bonusDrops.put(giftName, value.getTotal().intValue());
-                PersistentData.save();
-            }
+            String giftName = key.substring(5);
+            gifts.put(giftName, value.getTotal().intValue());
         }
     }
 
     @Override
     protected void onSessionReset() {
+        gifts.clear();
         TextUtils.addMessage("§aBonus gifts session reset!", true, false);
     }
 
     @Override
     protected void onAllDataReset() {
-        giftNameMapping.clear();
-        PersistentData.get().bonusDrops.clear();
-        PersistentData.save();
+        gifts.clear();
         TextUtils.addMessage("§aAll bonus gifts data reset!", true, false);
     }
 
     @Override
     protected void loadPersistentData() {
         super.loadPersistentData();
-
-        if (giftNameMapping == null) {
-            giftNameMapping = new HashMap<>();
-        }
-
-        // Load gift name mappings from persistent data
-        Map<String, Integer> bonusDrops = PersistentData.get().bonusDrops;
-        for (String giftName : bonusDrops.keySet()) {
-            String key = "gift_" + giftName;
-            giftNameMapping.put(key, giftName);
-        }
     }
 
     private void onChat(Text text) {
@@ -92,50 +76,6 @@ public class BonusGiftsTracker extends BaseTracker {
         if (!Utils.isOnSkyblock() || !Utils.isInGalatea()) {
             pauseTracker();
         }
-    }
-
-    public void trackGift(String giftName, int amount) {
-        String key = "gift_" + giftName;
-        giftNameMapping.put(key, giftName);
-        trackValue(key, amount);
-    }
-
-    public Map<String, Integer> getCurrentGiftCounts() {
-        Map<String, Integer> counts = new HashMap<>();
-        Map<String, TrackableValue<?>> values = getAllValues();
-
-        for (Map.Entry<String, TrackableValue<?>> entry : values.entrySet()) {
-            String key = entry.getKey();
-            if (key.startsWith("gift_")) {
-                String giftName = giftNameMapping.get(key);
-                if (giftName != null) {
-                    counts.put(giftName, entry.getValue().asInt());
-                }
-            }
-        }
-        return counts;
-    }
-
-    public Map<String, Integer> getSessionGiftCounts() {
-        Map<String, Integer> counts = new HashMap<>();
-
-        for (Map.Entry<String, TrackableValue<?>> entry : trackedValues.entrySet()) {
-            String key = entry.getKey();
-            if (key.startsWith("gift_")) {
-                String giftName = giftNameMapping.get(key);
-                if (giftName != null) {
-                    counts.put(giftName, entry.getValue().asInt());
-                }
-            }
-        }
-        return counts;
-    }
-
-    public void resetAllGifts() {
-        resetAll();
-        giftNameMapping.clear();
-        PersistentData.get().bonusDrops.clear();
-        PersistentData.save();
     }
 
     private static class BonusGiftsTrackerConditions implements TrackerConditions {

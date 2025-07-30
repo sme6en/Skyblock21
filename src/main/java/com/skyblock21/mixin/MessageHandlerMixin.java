@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 public class MessageHandlerMixin {
 
     @Inject(method = "onGameMessage", at = @At("HEAD"))
-    private void onGameMessage(Text text, boolean overlay, CallbackInfo ci) {
+    private void sb21$onGameMessage(Text text, boolean overlay, CallbackInfo ci) {
         if (overlay) {
             Skills.onActionBar(text);
             return;
@@ -30,7 +30,7 @@ public class MessageHandlerMixin {
 
 
     @ModifyArgs(method = "onGameMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;addMessage(Lnet/minecraft/text/Text;)V"))
-    private void modifyChatMessage(Args args) {
+    private void sb21$modifyChatMessage(Args args) {
         if (!Skyblock21ConfigManager.get().general.timestampBeforeMessages) return;
 
         Text text = args.get(0);
