@@ -157,6 +157,7 @@ public class EditHudElementScreen extends BaseOwoScreen<FlowLayout> {
         rootComponent.child(settingsContainer);
         rootComponent.child(instructionsContainer);
 
+        rootComponent.surface(Surface.blur(3, 10));
         updateBackgroundOpacityState();
     }
 

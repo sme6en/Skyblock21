@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class RunicMobsHighlight {
 
-    private static Map<Integer, Entity> runicEntities = new HashMap<Integer, Entity>();
+    private static ConcurrentMap<Integer, Entity> runicEntities = new ConcurrentHashMap<>();
 
     public static void init() {
 
@@ -53,9 +55,10 @@ public class RunicMobsHighlight {
         if (!Utils.isOnSkyblock()) return;
         if (!Skyblock21ConfigManager.get().general.runicMobHighlight) return;
 
-        for (Map.Entry<Integer, Entity> e : runicEntities.entrySet()) {
-            if (e.getValue() == null || !e.getValue().isAlive()) runicEntities.remove(e.getKey());
+        runicEntities.entrySet().removeIf(entry ->
+                entry.getValue() == null || entry.getValue().isRemoved() || !entry.getValue().isAlive());
 
+        for (Map.Entry<Integer, Entity> e : runicEntities.entrySet()) {
             MinecraftClient client = MinecraftClient.getInstance();
             Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
             MatrixStack matrices = worldRenderContext.matrixStack();

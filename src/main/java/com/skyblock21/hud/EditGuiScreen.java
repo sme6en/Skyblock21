@@ -81,6 +81,8 @@ public class EditGuiScreen extends BaseOwoScreen<FlowLayout> {
 
 
         rootComponent.child(instructionsContainer);
+        rootComponent.surface(Surface.blur(3, 10));
+
     }
 
     @Override
