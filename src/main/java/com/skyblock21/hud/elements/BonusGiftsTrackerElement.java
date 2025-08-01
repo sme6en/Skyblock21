@@ -1,5 +1,6 @@
 package com.skyblock21.hud.elements;
 
+import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.config.persistent.PersistentData;
 import com.skyblock21.hud.SortType;
 import com.skyblock21.tracking.TrackableValue;
@@ -101,5 +102,10 @@ public class BonusGiftsTrackerElement extends TrackerHudElement {
     @Override
     public boolean shouldRenderDummy() {
         return super.shouldRenderDummy();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Skyblock21ConfigManager.get().foraging.bonusGiftsTracker;
     }
 }

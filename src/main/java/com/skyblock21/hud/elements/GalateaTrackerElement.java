@@ -1,5 +1,6 @@
 package com.skyblock21.hud.elements;
 
+import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.tracking.TrackableValue;
 import com.skyblock21.tracking.TrackerDisplayMode;
 import com.skyblock21.tracking.TrackerHudElement;
@@ -83,5 +84,10 @@ public class GalateaTrackerElement extends TrackerHudElement {
         }
         return createValueLine("Forest Essence", "§8", value);
 //        return Text.literal(String.format("§8Forest Essence: §f%s", formatValue(value.getTotal())));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Skyblock21ConfigManager.get().foraging.galateaTracker;
     }
 }

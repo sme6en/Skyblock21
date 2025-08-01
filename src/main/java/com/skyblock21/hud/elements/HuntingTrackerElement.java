@@ -1,10 +1,13 @@
 package com.skyblock21.hud.elements;
 
+import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.hud.SortType;
 import com.skyblock21.tracking.TrackableValue;
 import com.skyblock21.tracking.TrackerDisplayMode;
 import com.skyblock21.tracking.TrackerHudElement;
 import com.skyblock21.tracking.impl.HuntingTracker;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Text;
 
 import java.util.*;
@@ -93,5 +96,10 @@ public class HuntingTrackerElement extends TrackerHudElement {
         }
 
         recalculateDimensions();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Skyblock21ConfigManager.get().hunting.huntingTracker;
     }
 }
