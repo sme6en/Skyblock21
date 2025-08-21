@@ -14,6 +14,9 @@ import java.awt.*;
 
 public class Render2DUtil {
 
+    public static final int DEFAULT_SKULL_SIZE = 16;
+
+
     /**
      * Draws a textured quad onto the screen.
      *

@@ -17,8 +17,8 @@ import com.skyblock21.features.items.StarredDropPrevention;
 import com.skyblock21.features.keyshortcuts.KeyShortcuts;
 import com.skyblock21.features.keyshortcuts.KeyShortcutsScreen;
 import com.skyblock21.features.kuudra.Kuudra;
+import com.skyblock21.features.misc.HideAroundNPC;
 import com.skyblock21.features.waypoints.WaypointRenderer;
-import com.skyblock21.gui.Theme;
 import com.skyblock21.gui.ThemeManager;
 import com.skyblock21.hud.EditGuiScreen;
 import com.skyblock21.hud.HudManager;
@@ -168,6 +168,7 @@ public class Skyblock21 implements ClientModInitializer {
         HudManager.register(new BonusGiftsTrackerElement(10, 40));
         HudManager.register(new ScathaTrackerElement(10, 60));
         HudManager.register(new HuntingTrackerElement(30, 20));
+        HudManager.register(new DarkAuctionTimerElement(90, 20));
         HudManager.init();
         registerCommands();
 

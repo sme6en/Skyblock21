@@ -1,7 +1,7 @@
 package com.skyblock21.mixin;
 
 import com.skyblock21.config.Skyblock21ConfigManager;
-import com.skyblock21.features.HideAroundNPC;
+import com.skyblock21.features.misc.HideAroundNPC;
 import com.skyblock21.util.Location;
 import com.skyblock21.util.Utils;
 import net.minecraft.client.render.entity.EntityRenderer;

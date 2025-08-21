@@ -143,6 +143,15 @@ public class GeneralCategory {
                         .controller((opt) -> BooleanControllerBuilder.create(opt)
                                 .yesNoFormatter()
                                 .coloured(true))
-                        .build()).build();
+                        .build()).option(Option.<Boolean>createBuilder()
+                                               .name(literal("Dark Auction Timer"))
+                                               .description(OptionDescription.of(literal("Renders a timer for the next Dark Auction")))
+                                               .binding(defaults.general.darkAuctionTimer,
+                                                       () -> config.general.darkAuctionTimer,
+                                                       newValue -> config.general.darkAuctionTimer = newValue)
+                                               .controller((opt) -> BooleanControllerBuilder.create(opt)
+                                                                                            .yesNoFormatter()
+                                                                                            .coloured(true))
+                                               .build()).build();
     }
 }

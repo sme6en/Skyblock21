@@ -1,4 +1,4 @@
-package com.skyblock21.features;
+package com.skyblock21.features.misc;
 
 import com.skyblock21.config.Skyblock21ConfigManager;
 import com.skyblock21.util.Utils;

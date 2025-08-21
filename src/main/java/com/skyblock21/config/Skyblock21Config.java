@@ -45,6 +45,9 @@ public class Skyblock21Config {
         public boolean godPotReminder = true;
 
         @SerialEntry
+        public boolean darkAuctionTimer = true;
+
+        @SerialEntry
         public boolean preventDroppingStarredItems = true;
 
         @SerialEntry
